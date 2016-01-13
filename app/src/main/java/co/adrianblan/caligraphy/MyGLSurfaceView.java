@@ -42,32 +42,46 @@ public class MyGLSurfaceView extends GLSurfaceView {
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
-    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-    private float mPreviousX;
-    private float mPreviousY;
-
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
 
-        float x = e.getX();
-        float y = e.getY();
 
         switch (e.getAction()) {
+
             case MotionEvent.ACTION_MOVE:
 
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
+                final float x = e.getX();
+                final float y = e.getY();
 
-                mRenderer.setXPosition(x);
-                mRenderer.setYPosition(y);
+                // Ensure we call switchMode() on the OpenGL thread.
+                // queueEvent() is a method of GLSurfaceView that will do this for us.
+                queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRenderer.addTriangle(x, y);
+                    }
+                });
+
                 requestRender();
-        }
+                break;
 
-        mPreviousX = x;
-        mPreviousY = y;
+            case MotionEvent.ACTION_UP:
+
+                queueEvent(new Runnable()
+                {
+                    @Override
+                    public void run() {
+                        mRenderer.clearTriangles();
+                    }
+                });
+
+                requestRender();
+                break;
+
+        }
         return true;
     }
 

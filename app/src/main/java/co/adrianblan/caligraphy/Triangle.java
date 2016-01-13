@@ -52,32 +52,37 @@ public class Triangle {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
+    private float mXCoord;
+    private float mYCoord;
+
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static final float initialTriangleCoords[] = {
+    static final float triangleCoords[] = {
             // in counterclockwise order:
             0.0f,  0.622008459f, 0.0f,   // top
            -0.5f, -0.311004243f, 0.0f,   // bottom left
             0.5f, -0.311004243f, 0.0f    // bottom right
     };
-    private final int vertexCount = initialTriangleCoords.length / COORDS_PER_VERTEX;
+
+    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
     public Triangle(float x, float y) {
 
+        mXCoord = x;
+        mYCoord = y;
+
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
-                initialTriangleCoords.length * 4);
+                triangleCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
-
-        float[] triangleCoords = initTriangleCoords(x, y);
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(triangleCoords);
@@ -146,19 +151,13 @@ public class Triangle {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    /** Translates the initial triangle coordinates in x or y axis */
-    private float[] initTriangleCoords(float x, float y)  {
-        float [] triangleCoords = initialTriangleCoords.clone();
-
-        triangleCoords[0] += x;
-        triangleCoords[0 + 3] += x;
-        triangleCoords[0 + 3 * 2] += x;
-
-        triangleCoords[1] += y;
-        triangleCoords[1 + 3] += y;
-        triangleCoords[1 + 3 * 2] += y;
-
-        return triangleCoords;
+    /** Returns the x coordinate of the triangle */
+    public float getXCoord() {
+        return mXCoord;
     }
 
+    /** Returns the y coordinate of the triangle */
+    public float getYCoord() {
+        return mYCoord;
+    }
 }
