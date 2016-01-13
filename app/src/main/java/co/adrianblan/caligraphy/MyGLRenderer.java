@@ -23,6 +23,8 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class
  * must override the OpenGL ES drawing lifecycle methods:
@@ -35,15 +37,22 @@ import android.util.Log;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer";
-    private Triangle mTriangle;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private final float[] mRotationMatrix = new float[16];
+    private final float[] mModelMatrix = new float[16];
 
-    private float mAngle;
+    private int mWidth;
+    private int mHeight;
+    private float mRatio;
+
+    private float mXPosition;
+    private float mYPosition;
+
+    private ArrayList<Triangle> triangleArrayList;
+    private static final int triangleArrayListSize = 15;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -51,16 +60,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        mTriangle = new Triangle();
+        triangleArrayList = new ArrayList<>();
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        float[] scratch = new float[16];
+        float[] matrixProduct = new float[16];
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        //GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
@@ -68,22 +76,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        // Create a rotation for the triangle
-
-        // Use the following code to generate constant rotation.
-        // Leave this code out when using TouchEvents.
-        // long time = SystemClock.uptimeMillis() % 4000L;
-        // float angle = 0.090f * ((int) time);
-
-        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
+        // Set the model matrix
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(matrixProduct, 0, mMVPMatrix, 0, mModelMatrix, 0);
 
         // Draw triangle
-        mTriangle.draw(scratch);
+
+        Triangle tri = new Triangle(mXPosition, mYPosition);
+        triangleArrayList.add(tri);
+
+        for(Triangle t : triangleArrayList) {
+            t.draw(matrixProduct);
+        }
     }
 
     @Override
@@ -92,11 +101,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
 
-        float ratio = (float) width / height;
+        mWidth = width;
+        mHeight = height;
+        mRatio = (float) width / height;
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, 3, 7);
 
     }
 
@@ -144,19 +155,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /**
-     * Returns the rotation angle of the triangle shape (mTriangle).
-     *
-     * @return - A float representing the rotation angle.
+     * Takes a viewport x coordinate, and transforms it to world coordinates and sets it.
      */
-    public float getAngle() {
-        return mAngle;
+    public void setXPosition(float x) {
+        // We multiply with mRatio since the screen treats 0,1 coordinates like a cube
+        mXPosition = -(2 * (x / mWidth) - 1) * mRatio;
     }
 
     /**
-     * Sets the rotation angle of the triangle shape (mTriangle).
+     * Takes a viewport y coordinate, and transforms it to world coordinates and sets it.
      */
-    public void setAngle(float angle) {
-        mAngle = angle;
+    public void setYPosition(float y) {
+        mYPosition = -(2 * (y / mHeight) - 1);
     }
-
 }
