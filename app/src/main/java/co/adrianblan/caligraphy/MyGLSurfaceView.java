@@ -58,15 +58,15 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 final float x = e.getX();
                 final float y = e.getY();
 
-                final ArrayList<Pair<Float, Float>> coordList = new ArrayList<>(e.getHistorySize() + 1);
+                final ArrayList<Vector2> coordList = new ArrayList<>(e.getHistorySize() + 1);
 
                 // Add previous touch coordinates
                 for(int i = 0; i < e.getHistorySize(); i++) {
-                    coordList.add(new Pair<>(e.getHistoricalX(i), e.getHistoricalY(i)));
+                    coordList.add(new Vector2(e.getHistoricalX(i), e.getHistoricalY(i)));
                 }
 
                 // Add current touch coordinates
-                coordList.add(new Pair<>(e.getX(), e.getY()));
+                coordList.add(new Vector2(e.getX(), e.getY()));
 
                 // Ensure we call switchMode() on the OpenGL thread.
                 // queueEvent() is a method of GLSurfaceView that will do this for us.

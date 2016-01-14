@@ -22,19 +22,17 @@ public class MainActivity extends AppCompatActivity {
         glSurfaceView = new MyGLSurfaceView(this);
         setContentView(glSurfaceView);
 
-        // Hide system UI
-        int uiVisibilityFlags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        hideSystemUi();
+    }
 
-        // Set immersive mode if >= Android 4.4
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            uiVisibilityFlags = uiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE;
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        // Hides system UI when focus is regained
+        if(hasFocus) {
+            hideSystemUi();
         }
-
-        getWindow().getDecorView().setSystemUiVisibility(uiVisibilityFlags);
     }
 
     @Override
@@ -47,5 +45,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         glSurfaceView.onResume();
+    }
+
+    /** Hides the system UI and enters immersive mode if available */
+    private void hideSystemUi() {
+
+        int uiVisibilityFlags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+        // Set immersive mode if >= Android 4.4
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            uiVisibilityFlags = uiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE;
+        }
+
+        getWindow().getDecorView().setSystemUiVisibility(uiVisibilityFlags);
     }
 }

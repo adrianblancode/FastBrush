@@ -151,16 +151,35 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    private void addInterpolatedTriangles(Vector2 coord) {
+
+        final float MIN_DISTANCE = 0.1f;
+
+        if(triangleArrayList.isEmpty()) {
+            addTriangle(coord);
+        } else {
+            Vector2 previousCoord = triangleArrayList.get(triangleArrayList.size() - 1).getCoord();
+
+            float distance = coord.distance(previousCoord);
+            int interpolations = (int) (distance / MIN_DISTANCE);
+
+            for(int i = 0; i < interpolations; i++) {
+
+            }
+        }
+    }
+
     /** Takes a list of coords and adds them to the renderer */
-    public void addTriangles(ArrayList<Pair<Float, Float>> coordList) {
-        for(Pair<Float, Float> coord : coordList) {
+    public void addTriangles(ArrayList<Vector2> coordList) {
+
+        for(Vector2 coord : coordList) {
             addTriangle(coord);
         }
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addTriangle(Pair<Float, Float> coord) {
-        addTriangle(coord.first, coord.second);
+    public void addTriangle(Vector2 coord) {
+        addTriangle(coord.getX(), coord.getY());
     }
 
     /** Takes a coord and adds it to the renderer */

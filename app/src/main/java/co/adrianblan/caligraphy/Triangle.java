@@ -20,7 +20,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
+import android.support.v4.util.Pair;
 
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
@@ -52,16 +52,18 @@ public class Triangle {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
+    private Vector2 mCoord;
+
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static final float initialTriangleCoords[] = {
+    static final float initialVertexCoords[] = {
             // in counterclockwise order:
             0.0f,  0.0622008459f, 0.0f,   // top
            -0.05f, -0.0311004243f, 0.0f,   // bottom left
             0.05f, -0.0311004243f, 0.0f    // bottom right
     };
 
-    private final int vertexCount = initialTriangleCoords.length / COORDS_PER_VERTEX;
+    private final int vertexCount = initialVertexCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
@@ -71,17 +73,18 @@ public class Triangle {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
-                initialTriangleCoords.length * 4);
+                initialVertexCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
 
-        float [] triangleCoords = getTranslatedCoords(x, y);
+        mCoord = new Vector2(x, y);
+        float [] vertexCoords = getTranslatedVertexCoords(x, y);
 
         // add the coordinates to the FloatBuffer
-        vertexBuffer.put(triangleCoords);
+        vertexBuffer.put(vertexCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
@@ -147,8 +150,8 @@ public class Triangle {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private float[] getTranslatedCoords(float x, float y) {
-        float [] coords = initialTriangleCoords.clone();
+    private float[] getTranslatedVertexCoords(float x, float y) {
+        float [] coords = initialVertexCoords.clone();
 
         coords[0] += x;
         coords[0 + COORDS_PER_VERTEX] += x;
@@ -159,5 +162,10 @@ public class Triangle {
         coords[1 + COORDS_PER_VERTEX * 2] += y;
 
         return coords;
+    }
+
+    /** Get the (x, y) position of the triangle */
+    public Vector2 getCoord() {
+        return mCoord;
     }
 }
