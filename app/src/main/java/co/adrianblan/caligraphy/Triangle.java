@@ -52,37 +52,33 @@ public class Triangle {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
-    private float mXCoord;
-    private float mYCoord;
-
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static final float triangleCoords[] = {
+    static final float initialTriangleCoords[] = {
             // in counterclockwise order:
-            0.0f,  0.622008459f, 0.0f,   // top
-           -0.5f, -0.311004243f, 0.0f,   // bottom left
-            0.5f, -0.311004243f, 0.0f    // bottom right
+            0.0f,  0.0622008459f, 0.0f,   // top
+           -0.05f, -0.0311004243f, 0.0f,   // bottom left
+            0.05f, -0.0311004243f, 0.0f    // bottom right
     };
 
-    private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
+    private final int vertexCount = initialTriangleCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
     public Triangle(float x, float y) {
 
-        mXCoord = x;
-        mYCoord = y;
-
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
-                triangleCoords.length * 4);
+                initialTriangleCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
+
+        float [] triangleCoords = getTranslatedCoords(x, y);
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(triangleCoords);
@@ -151,13 +147,17 @@ public class Triangle {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    /** Returns the x coordinate of the triangle */
-    public float getXCoord() {
-        return mXCoord;
-    }
+    private float[] getTranslatedCoords(float x, float y) {
+        float [] coords = initialTriangleCoords.clone();
 
-    /** Returns the y coordinate of the triangle */
-    public float getYCoord() {
-        return mYCoord;
+        coords[0] += x;
+        coords[0 + COORDS_PER_VERTEX] += x;
+        coords[0 + COORDS_PER_VERTEX * 2] += x;
+
+        coords[1] += y;
+        coords[1 + COORDS_PER_VERTEX] += y;
+        coords[1 + COORDS_PER_VERTEX * 2] += y;
+
+        return coords;
     }
 }

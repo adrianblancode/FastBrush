@@ -48,7 +48,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
 
-
         switch (e.getAction()) {
 
             case MotionEvent.ACTION_MOVE:

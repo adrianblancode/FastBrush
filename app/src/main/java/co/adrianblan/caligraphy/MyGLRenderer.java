@@ -21,6 +21,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.support.v4.util.Pair;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mModelMatrix = new float[16];
+    private final float[] matrixProduct = new float[16];
 
     private int mWidth;
     private int mHeight;
@@ -61,31 +63,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        float[] matrixProduct = new float[16];
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-        // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
         // Draw triangle
         for(Triangle t : triangleArrayList) {
-
-            // Set the model matrix
-            Matrix.setIdentityM(mModelMatrix, 0);
-            Matrix.translateM(mModelMatrix, 0, t.getXCoord(), t.getYCoord(), 0f);
-            Matrix.scaleM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
-
-            // Combine the rotation matrix with the projection and camera view
-            // Note that the mMVPMatrix factor *must be first* in order
-            // for the matrix multiplication product to be correct.
-            Matrix.multiplyMM(matrixProduct, 0, mMVPMatrix, 0, mModelMatrix, 0);
-
-            t.draw(matrixProduct);
+            t.draw(mMVPMatrix);
         }
     }
 
@@ -102,6 +86,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, 3, 7);
+
+        // Set the camera position (View matrix)
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+        // Calculate the projection and view transformation
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
     }
 
     /**
@@ -147,20 +137,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void addTriangles(ArrayList<Triangle> triangles) {
-        for(Triangle t : triangles) {
-            //addTriangle();
+    public void addTriangles(ArrayList<Pair<Float, Float>> coordList) {
+        for(Pair<Float, Float> coord : coordList) {
+            addTriangle(coord);
         }
     }
 
-    public void addTriangle(float screenX, float screenY) {
-        float worldX = -(2 * (screenX / mWidth) - 1) * mRatio;
-        float worldY = -(2 * (screenY / mHeight) - 1);
+    public void addTriangle(Pair<Float, Float> coord) {
+        addTriangle(coord.first, coord.second);
+    }
+
+    public void addTriangle(float x, float y) {
+        float worldX = -(2 * (x / mWidth) - 1) * mRatio;
+        float worldY = -(2 * (y / mHeight) - 1);
 
         Triangle tri = new Triangle(worldX, worldY);
         triangleArrayList.add(tri);
     }
-
+    
     /** Clears all the ArrayList of Triangle of all objects*/
     public void clearTriangles() {
         triangleArrayList.clear();
