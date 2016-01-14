@@ -18,6 +18,7 @@ package co.adrianblan.caligraphy;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -51,6 +52,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private float mRatio;
 
     private ArrayList<Triangle> triangleArrayList;
+    private ArrayList<Triangle> unrenderedTriangleArrayList;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -59,18 +61,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         triangleArrayList = new ArrayList<>();
+        unrenderedTriangleArrayList = new ArrayList<>();
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
 
-        // Draw background color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        if(triangleArrayList.isEmpty()) {
+            // Draw background color
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        } else {
+            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+        }
 
         // Draw triangle
-        for(Triangle t : triangleArrayList) {
+        for (Triangle t : unrenderedTriangleArrayList) {
             t.draw(mMVPMatrix);
         }
+
+        triangleArrayList.addAll(unrenderedTriangleArrayList);
+        unrenderedTriangleArrayList.clear();
     }
 
     @Override
@@ -78,6 +88,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Adjust the viewport based on geometry changes,
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
+
+        // TODO use render to texture?
+        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW),
+                EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
         mWidth = width;
         mHeight = height;
@@ -155,11 +169,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float worldY = -(2 * (y / mHeight) - 1);
 
         Triangle tri = new Triangle(worldX, worldY);
-        triangleArrayList.add(tri);
+        unrenderedTriangleArrayList.add(tri);
     }
 
     /** Clears all the ArrayList of Triangle of all objects*/
     public void clearTriangles() {
+        unrenderedTriangleArrayList.clear();
         triangleArrayList.clear();
     }
 
