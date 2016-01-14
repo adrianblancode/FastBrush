@@ -83,7 +83,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.setTouchEnded();
+                        mRenderer.setTouchInactive();
 
                     }
                 });

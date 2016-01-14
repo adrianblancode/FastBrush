@@ -22,7 +22,6 @@ import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.support.v4.util.Pair;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private ArrayList<Triangle> triangleArrayList;
     private ArrayList<Triangle> unrenderedTriangleArrayList;
 
-    private boolean hasTouchEnded = false;
+    private boolean isTouchActive = true;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -161,13 +160,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if(triangleArrayList.isEmpty() && unrenderedTriangleArrayList.isEmpty()) {
 
             addTriangle(coord);
+            isTouchActive = true;
 
         } else {
-
-            if(hasTouchEnded) {
-                hasTouchEnded = false;
-                return;
-            }
 
             Vector2 previousCoord;
 
@@ -179,18 +174,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             float distance = coord.distance(previousCoord);
 
-            int interpolations = (int) (distance / MIN_DISTANCE);
-            if (interpolations > 0) {
+            if(!isTouchActive) {
+                isTouchActive = true;
+            } else {
 
-                System.err.println(interpolations);
+                int interpolations = (int) (distance / MIN_DISTANCE);
+                if (interpolations > 0) {
 
-                // Interpolate so that there are no gaps larger than MIN_DISTANCE
-                for (int i = 0; i < interpolations; i++) {
+                    System.err.println(interpolations);
 
-                    float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
-                    float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
+                    // Interpolate so that there are no gaps larger than MIN_DISTANCE
+                    for (int i = 0; i < interpolations; i++) {
 
-                    addTriangle(x, y);
+                        float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
+                        float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
+
+                        addTriangle(x, y);
+                    }
                 }
             }
 
@@ -234,8 +234,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         triangleArrayList.clear();
     }
 
-    public void setTouchEnded() {
-        hasTouchEnded = true;
+    public void setTouchInactive() {
+        isTouchActive = false;
     }
 
 }
