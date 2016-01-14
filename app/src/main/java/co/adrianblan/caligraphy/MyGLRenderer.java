@@ -151,29 +151,52 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedTriangles(Vector2 coord) {
 
-        final float MIN_DISTANCE = 0.1f;
+        final float MIN_DISTANCE = 0.015f;
 
-        if(triangleArrayList.isEmpty()) {
+        if(triangleArrayList.isEmpty() && unrenderedTriangleArrayList.isEmpty()) {
             addTriangle(coord);
         } else {
-            Vector2 previousCoord = triangleArrayList.get(triangleArrayList.size() - 1).getCoord();
+
+            Vector2 previousCoord;
+
+            if(!unrenderedTriangleArrayList.isEmpty()) {
+                previousCoord = unrenderedTriangleArrayList.get(unrenderedTriangleArrayList.size() - 1).getCoord();
+            } else {
+                previousCoord = triangleArrayList.get(triangleArrayList.size() - 1).getCoord();
+            }
 
             float distance = coord.distance(previousCoord);
+
             int interpolations = (int) (distance / MIN_DISTANCE);
 
             for(int i = 0; i < interpolations; i++) {
 
+                float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
+                float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
+
+                addTriangle(x, y);
             }
+
+            addTriangle(coord);
         }
+    }
+
+    /** Translates a viewport vector to world vector */
+    public Vector2 viewportToWorld(Vector2 vec) {
+        float worldX = -(2 * (vec.getX() / mWidth) - 1) * mRatio;
+        float worldY = -(2 * (vec.getY() / mHeight) - 1);
+
+        return new Vector2(worldX, worldY);
     }
 
     /** Takes a list of coords and adds them to the renderer */
     public void addTriangles(ArrayList<Vector2> coordList) {
 
         for(Vector2 coord : coordList) {
-            addTriangle(coord);
+            addInterpolatedTriangles(viewportToWorld(coord));
         }
     }
 
@@ -184,10 +207,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Takes a coord and adds it to the renderer */
     public void addTriangle(float x, float y) {
-        float worldX = -(2 * (x / mWidth) - 1) * mRatio;
-        float worldY = -(2 * (y / mHeight) - 1);
-
-        Triangle tri = new Triangle(worldX, worldY);
+        Triangle tri = new Triangle(x, y);
         unrenderedTriangleArrayList.add(tri);
     }
 

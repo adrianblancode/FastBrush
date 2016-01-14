@@ -27,7 +27,7 @@ import android.support.v4.util.Pair;
  */
 public class Triangle {
 
-    private final String vertexShaderCode =
+    private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
@@ -39,7 +39,7 @@ public class Triangle {
             "  gl_Position = uMVPMatrix * vPosition;" +
             "}";
 
-    private final String fragmentShaderCode =
+    private static final String fragmentShaderCode =
             "precision mediump float;" +
             "uniform vec4 vColor;" +
             "void main() {" +
@@ -63,11 +63,14 @@ public class Triangle {
             0.05f, -0.0311004243f, 0.0f    // bottom right
     };
 
-    private final int vertexCount = initialVertexCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    private static final int vertexCount = initialVertexCoords.length / COORDS_PER_VERTEX;
+    private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    static float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
+    /**
+     * Sets up the drawing object data for use in an OpenGL ES context.
+     */
     public Triangle(float x, float y) {
 
         // initialize vertex byte buffer for shape coordinates
@@ -100,11 +103,12 @@ public class Triangle {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
-    /**
-     * Sets up the drawing object data for use in an OpenGL ES context.
-     */
     public Triangle() {
         this(0f, 0f);
+    }
+
+    public Triangle(Vector2 vec) {
+        this(vec.getX(), vec.getY());
     }
 
     /**
