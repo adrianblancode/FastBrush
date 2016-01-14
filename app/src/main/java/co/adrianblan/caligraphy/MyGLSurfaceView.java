@@ -55,9 +55,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
             case MotionEvent.ACTION_MOVE:
 
-                final float x = e.getX();
-                final float y = e.getY();
-
                 final ArrayList<Vector2> coordList = new ArrayList<>(e.getHistorySize() + 1);
 
                 // Add previous touch coordinates
@@ -83,19 +80,28 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
             case MotionEvent.ACTION_UP:
 
-                queueEvent(new Runnable()
-                {
+                queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.clearTriangles();
+                        mRenderer.setTouchEnded();
+
                     }
                 });
 
-                requestRender();
                 break;
-
         }
         return true;
     }
 
+    public void clearScreen() {
+        queueEvent(new Runnable()
+        {
+            @Override
+            public void run() {
+                mRenderer.clearTriangles();
+            }
+        });
+
+        requestRender();
+    }
 }

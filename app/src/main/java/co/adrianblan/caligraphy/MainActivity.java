@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,8 +20,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        /*
         glSurfaceView = new MyGLSurfaceView(this);
         setContentView(glSurfaceView);
+        */
+
+        setContentView(R.layout.activity_main);
+        FrameLayout frame = (FrameLayout) findViewById(R.id.frame);
+
+        glSurfaceView = new MyGLSurfaceView(this);
+        frame.addView(glSurfaceView, 0);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                glSurfaceView.clearScreen();
+            }
+        });
 
         hideSystemUi();
     }

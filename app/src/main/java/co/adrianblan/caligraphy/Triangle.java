@@ -66,7 +66,8 @@ public class Triangle {
     private static final int vertexCount = initialVertexCoords.length / COORDS_PER_VERTEX;
     private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    static float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    static float greenColor[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 0.0f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
@@ -137,7 +138,7 @@ public class Triangle {
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+        GLES20.glUniform4fv(mColorHandle, 1, blueColor, 0);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
