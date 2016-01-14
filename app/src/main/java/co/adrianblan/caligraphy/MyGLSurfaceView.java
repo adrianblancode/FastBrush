@@ -74,9 +74,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     @Override
                     public void run() {
                         mRenderer.addTriangles(coordList);
-                        requestRender();
+
                     }
                 });
+
+                requestRender();
                 break;
 
             case MotionEvent.ACTION_UP:
