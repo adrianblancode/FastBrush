@@ -17,7 +17,10 @@ package co.adrianblan.caligraphy;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.support.v4.util.Pair;
 import android.view.MotionEvent;
+
+import java.util.ArrayList;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
@@ -55,12 +58,22 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 final float x = e.getX();
                 final float y = e.getY();
 
+                final ArrayList<Pair<Float, Float>> coordList = new ArrayList<>(e.getHistorySize() + 1);
+
+                // Add previous touch coordinates
+                for(int i = 0; i < e.getHistorySize(); i++) {
+                    coordList.add(new Pair<>(e.getHistoricalX(i), e.getHistoricalY(i)));
+                }
+
+                // Add current touch coordinates
+                coordList.add(new Pair<>(e.getX(), e.getY()));
+
                 // Ensure we call switchMode() on the OpenGL thread.
                 // queueEvent() is a method of GLSurfaceView that will do this for us.
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.addTriangle(x, y);
+                        mRenderer.addTriangles(coordList);
                     }
                 });
 

@@ -137,16 +137,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    /** Takes a list of coords and adds them to the renderer */
     public void addTriangles(ArrayList<Pair<Float, Float>> coordList) {
         for(Pair<Float, Float> coord : coordList) {
             addTriangle(coord);
         }
     }
 
+    /** Takes a coord and adds it to the renderer */
     public void addTriangle(Pair<Float, Float> coord) {
         addTriangle(coord.first, coord.second);
     }
 
+    /** Takes a coord and adds it to the renderer */
     public void addTriangle(float x, float y) {
         float worldX = -(2 * (x / mWidth) - 1) * mRatio;
         float worldY = -(2 * (y / mHeight) - 1);
@@ -154,7 +157,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Triangle tri = new Triangle(worldX, worldY);
         triangleArrayList.add(tri);
     }
-    
+
     /** Clears all the ArrayList of Triangle of all objects*/
     public void clearTriangles() {
         triangleArrayList.clear();
