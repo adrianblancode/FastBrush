@@ -50,8 +50,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int mHeight;
     private float mRatio;
 
-    private ArrayList<Triangle> triangleArrayList;
-    private ArrayList<Triangle> unrenderedTriangleArrayList;
+    private ArrayList<Point> pointArrayList;
+    private ArrayList<Point> unrenderedPointArrayList;
 
     private boolean shouldFollowPreviousPoint = true;
 
@@ -61,27 +61,28 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        triangleArrayList = new ArrayList<>();
-        unrenderedTriangleArrayList = new ArrayList<>();
+        pointArrayList = new ArrayList<>();
+        unrenderedPointArrayList = new ArrayList<>();
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
 
-        if(triangleArrayList.isEmpty()) {
-            // Draw background color
+        if(pointArrayList.isEmpty()) {
+            // Clear everything if there are no rendered points
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         } else {
+            // Otherwise, just clear the color
             GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
         }
 
-        // Draw triangle
-        for (Triangle t : unrenderedTriangleArrayList) {
+        // Draw point
+        for (Point t : unrenderedPointArrayList) {
             t.draw(mMVPMatrix);
         }
 
-        triangleArrayList.addAll(unrenderedTriangleArrayList);
-        unrenderedTriangleArrayList.clear();
+        pointArrayList.addAll(unrenderedPointArrayList);
+        unrenderedPointArrayList.clear();
     }
 
     @Override
@@ -153,27 +154,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
-    private void addInterpolatedTriangles(Vector2 coord) {
+    private void addInterpolatedPoints(Vector2 coord) {
 
-        final float MIN_DISTANCE = 0.015f;
+        final float MIN_DISTANCE = 0.020f;
 
-        if(triangleArrayList.isEmpty() && unrenderedTriangleArrayList.isEmpty()) {
+        if(!hasPreviousPoint()) {
 
-            addTriangle(coord);
+            addPoint(coord);
             shouldFollowPreviousPoint = true;
 
         } else {
 
-            Vector2 previousCoord;
-
-            if (!unrenderedTriangleArrayList.isEmpty()) {
-                previousCoord = unrenderedTriangleArrayList.get(unrenderedTriangleArrayList.size() - 1).getCoord();
-            } else {
-                previousCoord = triangleArrayList.get(triangleArrayList.size() - 1).getCoord();
-            }
-
+            Vector2 previousCoord = getPreviousPointCoord();
             float distance = coord.distance(previousCoord);
 
+            // If it's a new line, don't interpolate
             if(!shouldFollowPreviousPoint) {
                 shouldFollowPreviousPoint = true;
             } else {
@@ -181,22 +176,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                 int interpolations = (int) (distance / MIN_DISTANCE);
                 if (interpolations > 0) {
 
-                    System.err.println(interpolations);
-
                     // Interpolate so that there are no gaps larger than MIN_DISTANCE
                     for (int i = 0; i < interpolations; i++) {
 
                         float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
                         float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
 
-                        addTriangle(x, y);
+                        addPoint(x, y);
                     }
                 }
             }
 
-            // Don't add if not enough distance
+            // Don't add point if not enough distance
             if (distance > MIN_DISTANCE) {
-                addTriangle(coord);
+                addPoint(coord);
             }
         }
     }
@@ -210,28 +203,48 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a list of coords and adds them to the renderer */
-    public void addTriangles(ArrayList<Vector2> coordList) {
+    public void addPoints(ArrayList<Vector2> coordList) {
 
         for(Vector2 coord : coordList) {
-            addInterpolatedTriangles(viewportToWorld(coord));
+            addInterpolatedPoints(viewportToWorld(coord));
         }
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addTriangle(Vector2 coord) {
-        addTriangle(coord.getX(), coord.getY());
+    public void addPoint(Vector2 coord) {
+        addPoint(coord.getX(), coord.getY());
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addTriangle(float x, float y) {
-        Triangle tri = new Triangle(x, y);
-        unrenderedTriangleArrayList.add(tri);
+    public void addPoint(float x, float y) {
+        Point tri = new Point(x, y);
+        unrenderedPointArrayList.add(tri);
     }
 
-    /** Clears all the ArrayList of Triangle of all objects*/
-    public void clearTriangles() {
-        unrenderedTriangleArrayList.clear();
-        triangleArrayList.clear();
+    /** Return whether there is a previous point to interpolate from */
+    private boolean hasPreviousPoint() {
+        return !pointArrayList.isEmpty() && !unrenderedPointArrayList.isEmpty();
+    }
+
+    /** Return the previous point to interpolate from */
+    private Vector2 getPreviousPointCoord() {
+
+        if(!hasPreviousPoint()) {
+            return null;
+        }
+
+        // The previous point should be undered, if there are no unrendered points get from rendered
+        if (!unrenderedPointArrayList.isEmpty()) {
+            return unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getCoord();
+        } else {
+            return pointArrayList.get(pointArrayList.size() - 1).getCoord();
+        }
+    }
+
+    /** Clears all the ArrayList of Point of all objects*/
+    public void clearPoints() {
+        unrenderedPointArrayList.clear();
+        pointArrayList.clear();
     }
 
     public void setTouchInactive() {

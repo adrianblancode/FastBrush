@@ -17,7 +17,6 @@ package co.adrianblan.caligraphy;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.support.v4.util.Pair;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -70,7 +69,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.addTriangles(coordList);
+                        mRenderer.addPoints(coordList);
 
                     }
                 });
@@ -98,7 +97,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         {
             @Override
             public void run() {
-                mRenderer.clearTriangles();
+                mRenderer.clearPoints();
             }
         });
 

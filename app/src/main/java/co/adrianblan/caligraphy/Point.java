@@ -21,12 +21,11 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
-import android.support.v4.util.Pair;
 
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class Triangle {
+public class Point {
 
     private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
@@ -75,7 +74,7 @@ public class Triangle {
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Triangle(float x, float y) {
+    public Point(float x, float y) {
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -116,11 +115,11 @@ public class Triangle {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
-    public Triangle() {
+    public Point() {
         this(0f, 0f);
     }
 
-    public Triangle(Vector2 vec) {
+    public Point(Vector2 vec) {
         this(vec.getX(), vec.getY());
     }
 
