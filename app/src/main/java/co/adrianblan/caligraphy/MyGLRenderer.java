@@ -53,7 +53,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private ArrayList<Triangle> triangleArrayList;
     private ArrayList<Triangle> unrenderedTriangleArrayList;
 
-    private boolean isTouchActive = true;
+    private boolean shouldFollowPreviousPoint = true;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -160,7 +160,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if(triangleArrayList.isEmpty() && unrenderedTriangleArrayList.isEmpty()) {
 
             addTriangle(coord);
-            isTouchActive = true;
+            shouldFollowPreviousPoint = true;
 
         } else {
 
@@ -174,8 +174,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             float distance = coord.distance(previousCoord);
 
-            if(!isTouchActive) {
-                isTouchActive = true;
+            if(!shouldFollowPreviousPoint) {
+                shouldFollowPreviousPoint = true;
             } else {
 
                 int interpolations = (int) (distance / MIN_DISTANCE);
@@ -235,7 +235,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void setTouchInactive() {
-        isTouchActive = false;
+        shouldFollowPreviousPoint = false;
     }
 
 }

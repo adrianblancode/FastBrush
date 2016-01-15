@@ -18,6 +18,7 @@ package co.adrianblan.caligraphy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
 import android.support.v4.util.Pair;
@@ -47,6 +48,7 @@ public class Triangle {
             "}";
 
     private final FloatBuffer vertexBuffer;
+    private final ShortBuffer drawListBuffer;
     private final int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
@@ -55,15 +57,16 @@ public class Triangle {
     private Vector2 mCoord;
 
     // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
-    static final float initialVertexCoords[] = {
-            // in counterclockwise order:
-            0.0f,  0.0622008459f, 0.0f,   // top
-           -0.05f, -0.0311004243f, 0.0f,   // bottom left
-            0.05f, -0.0311004243f, 0.0f    // bottom right
-    };
+    private static final int COORDS_PER_VERTEX = 3;
+    private static float squareCoords[] = {
+            -0.05f,  0.05f, 0.0f,   // top left
+            -0.05f, -0.05f, 0.0f,   // bottom left
+            0.05f, -0.05f, 0.0f,   // bottom right
+            0.05f,  0.05f, 0.0f }; // top right
 
-    private static final int vertexCount = initialVertexCoords.length / COORDS_PER_VERTEX;
+    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+
+    private static final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     static float greenColor[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
@@ -77,7 +80,7 @@ public class Triangle {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (number of coordinate values * 4 bytes per float)
-                initialVertexCoords.length * 4);
+                squareCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
 
@@ -91,6 +94,15 @@ public class Triangle {
         vertexBuffer.put(vertexCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
+
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 2 bytes per short)
+                drawOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
+        drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put(drawOrder);
+        drawListBuffer.position(0);
 
         // prepare shaders and OpenGL program
         int vertexShader = MyGLRenderer.loadShader(
@@ -148,23 +160,23 @@ public class Triangle {
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
         MyGLRenderer.checkGlError("glUniformMatrix4fv");
 
-        // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        // Draw the square
+        GLES20.glDrawElements(
+                GLES20.GL_TRIANGLES, drawOrder.length,
+                GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
+    /** Returns a matrix of vertex coords that has been translated in x and y axis */
     private float[] getTranslatedVertexCoords(float x, float y) {
-        float [] coords = initialVertexCoords.clone();
+        float [] coords = squareCoords.clone();
 
-        coords[0] += x;
-        coords[0 + COORDS_PER_VERTEX] += x;
-        coords[0 + COORDS_PER_VERTEX * 2] += x;
-
-        coords[1] += y;
-        coords[1 + COORDS_PER_VERTEX] += y;
-        coords[1 + COORDS_PER_VERTEX * 2] += y;
+        for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += COORDS_PER_VERTEX) {
+            coords[vertexOffset + 0] += x;
+            coords[vertexOffset + 1] += y;
+        }
 
         return coords;
     }
