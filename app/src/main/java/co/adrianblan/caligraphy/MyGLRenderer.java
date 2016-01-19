@@ -154,18 +154,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
-    private void addInterpolatedPoints(Vector2 coord) {
+    private void addInterpolatedPoints(Vector2 coord, float touchSize) {
 
-        final float MIN_DISTANCE = 0.020f;
+        final float MIN_DISTANCE = 0.005f;
 
         if(!hasPreviousPoint()) {
 
-            addPoint(coord);
+            addPoint(coord, touchSize);
             shouldFollowPreviousPoint = true;
 
         } else {
 
-            Vector2 previousCoord = getPreviousPointCoord();
+            Point previousPoint = getPreviousPoint();
+            Vector2 previousCoord = previousPoint.getCoord();
+            float previousTouchSize = previousPoint.getTouchSize();
             float distance = coord.distance(previousCoord);
 
             // If it's a new line, don't interpolate
@@ -182,14 +184,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                         float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
                         float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
 
-                        addPoint(x, y);
+                        float interpolatedTouchSize = Point.getInterpolatedTouchSize(previousTouchSize, touchSize);
+                        addPoint(x, y, interpolatedTouchSize);
+                        previousTouchSize = interpolatedTouchSize;
                     }
                 }
             }
 
             // Don't add point if not enough distance
             if (distance > MIN_DISTANCE) {
-                addPoint(coord);
+                float interpolatedTouchSize = Point.getInterpolatedTouchSize(previousTouchSize, touchSize);
+                addPoint(coord, interpolatedTouchSize);
             }
         }
     }
@@ -203,41 +208,41 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a list of coords and adds them to the renderer */
-    public void addPoints(ArrayList<Vector2> coordList) {
+    public void addPoints(ArrayList<Vector2> coordList, float touchSize) {
 
         for(Vector2 coord : coordList) {
-            addInterpolatedPoints(viewportToWorld(coord));
+            addInterpolatedPoints(viewportToWorld(coord), touchSize);
         }
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addPoint(Vector2 coord) {
-        addPoint(coord.getX(), coord.getY());
+    public void addPoint(Vector2 coord, float touchSize) {
+        addPoint(coord.getX(), coord.getY(), touchSize);
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addPoint(float x, float y) {
-        Point tri = new Point(x, y);
+    public void addPoint(float x, float y, float touchSize) {
+        Point tri = new Point(x, y, touchSize);
         unrenderedPointArrayList.add(tri);
     }
 
     /** Return whether there is a previous point to interpolate from */
     private boolean hasPreviousPoint() {
-        return !pointArrayList.isEmpty() && !unrenderedPointArrayList.isEmpty();
+        return !pointArrayList.isEmpty() || !unrenderedPointArrayList.isEmpty();
     }
 
     /** Return the previous point to interpolate from */
-    private Vector2 getPreviousPointCoord() {
+    private Point getPreviousPoint() {
 
         if(!hasPreviousPoint()) {
             return null;
         }
 
-        // The previous point should be undered, if there are no unrendered points get from rendered
+        // The previous point should be unrendered, if there are no unrendered points get from rendered
         if (!unrenderedPointArrayList.isEmpty()) {
-            return unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getCoord();
+            return unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
         } else {
-            return pointArrayList.get(pointArrayList.size() - 1).getCoord();
+            return pointArrayList.get(pointArrayList.size() - 1);
         }
     }
 

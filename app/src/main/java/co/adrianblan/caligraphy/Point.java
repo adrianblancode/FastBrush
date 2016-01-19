@@ -47,13 +47,17 @@ public class Point {
             "}";
 
     private final FloatBuffer vertexBuffer;
-    private final ShortBuffer drawListBuffer;
-    private final int mProgram;
+    private static ShortBuffer drawListBuffer;
+    private static int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
     private Vector2 mCoord;
+    private float mTouchSize;
+    private static boolean initialized = false;
+
+    public static final float vertexScale = 0.6f;
 
     // number of coordinates per vertex in this array
     private static final int COORDS_PER_VERTEX = 3;
@@ -74,7 +78,7 @@ public class Point {
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Point(float x, float y) {
+    public Point(float x, float y, float touchSize) {
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -87,40 +91,47 @@ public class Point {
         vertexBuffer = bb.asFloatBuffer();
 
         mCoord = new Vector2(x, y);
-        float [] vertexCoords = getTranslatedVertexCoords(x, y);
+        mTouchSize = touchSize;
+        float [] vertexCoords = getTranslatedVertexCoords(x, y, touchSize);
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        // initialize byte buffer for the draw list
-        ByteBuffer dlb = ByteBuffer.allocateDirect(
-                // (# of coordinate values * 2 bytes per short)
-                drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
+        // Ugly static hack to only initialize common variables once
+        if(!initialized) {
 
-        // prepare shaders and OpenGL program
-        int vertexShader = MyGLRenderer.loadShader(
-                GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = MyGLRenderer.loadShader(
-                GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+            // initialize byte buffer for the draw list
+            ByteBuffer dlb = ByteBuffer.allocateDirect(
+                    // (# of coordinate values * 2 bytes per short)
+                    drawOrder.length * 2);
+            dlb.order(ByteOrder.nativeOrder());
+            drawListBuffer = dlb.asShortBuffer();
+            drawListBuffer.put(drawOrder);
+            drawListBuffer.position(0);
 
-        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
-        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+            // prepare shaders and OpenGL program
+            int vertexShader = MyGLRenderer.loadShader(
+                    GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+            int fragmentShader = MyGLRenderer.loadShader(
+                    GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+
+            mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
+            GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
+            GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
+            GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+
+            initialized = true;
+        }
     }
 
     public Point() {
-        this(0f, 0f);
+        this(0f, 0f, 1.0f);
     }
 
     public Point(Vector2 vec) {
-        this(vec.getX(), vec.getY());
+        this(vec.getX(), vec.getY(), 1.0f);
     }
 
     /**
@@ -169,10 +180,16 @@ public class Point {
     }
 
     /** Returns a matrix of vertex coords that has been translated in x and y axis */
-    private float[] getTranslatedVertexCoords(float x, float y) {
+    private float[] getTranslatedVertexCoords(float x, float y, float touchSize) {
         float [] coords = squareCoords.clone();
 
+        float scale = 0.5f +  Utils.normalize(touchSize, 0.2f, 0.3f) * 1.5f * vertexScale;
+
         for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += COORDS_PER_VERTEX) {
+            coords[vertexOffset + 0] *= scale;
+            coords[vertexOffset + 1] *= scale;
+            coords[vertexOffset + 2] *= scale;
+
             coords[vertexOffset + 0] += x;
             coords[vertexOffset + 1] += y;
         }
@@ -180,8 +197,24 @@ public class Point {
         return coords;
     }
 
-    /** Get the (x, y) position of the triangle */
+    /** Get the (x, y) position of the point */
     public Vector2 getCoord() {
         return mCoord;
     }
+
+    /** Returns the touch size of the point */
+    public float getTouchSize () {
+        return mTouchSize;
+    }
+
+    public static float getInterpolatedTouchSize(float previousTouchSize, float targetTouchSize) {
+        final float MAX_DIFFERENCE = 0.001f;
+        float difference = targetTouchSize - previousTouchSize;
+
+        // Clamp so we can only increase touchsize by MAX_DIFFERENCE by each point
+        difference = Utils.clamp(difference, -MAX_DIFFERENCE, MAX_DIFFERENCE);
+
+        return previousTouchSize + difference;
+    }
+
 }
