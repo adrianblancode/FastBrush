@@ -55,6 +55,7 @@ public class Point {
 
     private Vector2 mCoord;
     private float mTouchSize;
+    private float mTouchPressure;
     private static boolean initialized = false;
 
     public static final float vertexScale = 0.6f;
@@ -72,13 +73,13 @@ public class Point {
     private static final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    static float greenColor[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
-    static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 0.0f };
+    static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 0.05f };
+    private float [] mColor;
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Point(float x, float y, float touchSize) {
+    public Point(float x, float y, float touchSize, float touchPressure) {
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -92,7 +93,11 @@ public class Point {
 
         mCoord = new Vector2(x, y);
         mTouchSize = touchSize;
-        float [] vertexCoords = getTranslatedVertexCoords(x, y, touchSize);
+        mTouchPressure = touchPressure;
+
+        mColor = blueColor.clone();
+        mColor[3] = 0.25f + Utils.clamp((0.8f - getNormalizedPressure()) * 2.0f, -0.15f, 0.15f);
+        float [] vertexCoords = getTranslatedVertexCoords(x, y, touchSize + touchSize * (0.8f - getNormalizedPressure()));
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
@@ -127,11 +132,11 @@ public class Point {
     }
 
     public Point() {
-        this(0f, 0f, 1.0f);
+        this(0f, 0f, 1.0f, 1.0f);
     }
 
     public Point(Vector2 vec) {
-        this(vec.getX(), vec.getY(), 1.0f);
+        this(vec.getX(), vec.getY(), 1.0f, 1.0f);
     }
 
     /**
@@ -160,7 +165,7 @@ public class Point {
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, blueColor, 0);
+        GLES20.glUniform4fv(mColorHandle, 1, mColor, 0);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -183,7 +188,7 @@ public class Point {
     private float[] getTranslatedVertexCoords(float x, float y, float touchSize) {
         float [] coords = squareCoords.clone();
 
-        float scale = 0.5f +  Utils.normalize(touchSize, 0.2f, 0.3f) * 1.5f * vertexScale;
+        float scale = 0.5f +  Utils.normalize(touchSize, 0.1f, 0.2f) * 1.5f * vertexScale;
 
         for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += COORDS_PER_VERTEX) {
             coords[vertexOffset + 0] *= scale;
@@ -207,14 +212,24 @@ public class Point {
         return mTouchSize;
     }
 
-    public static float getInterpolatedTouchSize(float previousTouchSize, float targetTouchSize) {
+    /** Returns the touch pressure of the point */
+    public float getTouchPressure () {
+        return mTouchPressure;
+    }
+
+    /** Gets the normalized pressure in proportion to screen size */
+    public float getNormalizedPressure() {
+        return mTouchPressure / (mTouchSize * 10f);
+    }
+
+    public static float getInterpolatedValue(float previousValue, float targetValue) {
         final float MAX_DIFFERENCE = 0.001f;
-        float difference = targetTouchSize - previousTouchSize;
+        float difference = targetValue - previousValue;
 
         // Clamp so we can only increase touchsize by MAX_DIFFERENCE by each point
         difference = Utils.clamp(difference, -MAX_DIFFERENCE, MAX_DIFFERENCE);
 
-        return previousTouchSize + difference;
+        return previousValue + difference;
     }
 
 }

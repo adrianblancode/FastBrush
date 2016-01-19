@@ -68,6 +68,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
 
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc (GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
         if(pointArrayList.isEmpty()) {
             // Clear everything if there are no rendered points
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -154,19 +157,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
-    private void addInterpolatedPoints(Vector2 coord, float touchSize) {
+    private void addInterpolatedPoints(Vector2 coord, float touchSize, float touchPressure) {
 
         final float MIN_DISTANCE = 0.005f;
 
         if(!hasPreviousPoint()) {
 
-            addPoint(coord, touchSize);
+            addPoint(coord, touchSize, touchPressure);
             shouldFollowPreviousPoint = true;
 
         } else {
 
             Point previousPoint = getPreviousPoint();
             Vector2 previousCoord = previousPoint.getCoord();
+            float previousTouchPressure = previousPoint.getTouchPressure();
             float previousTouchSize = previousPoint.getTouchSize();
             float distance = coord.distance(previousCoord);
 
@@ -184,17 +188,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                         float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
                         float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
 
-                        float interpolatedTouchSize = Point.getInterpolatedTouchSize(previousTouchSize, touchSize);
-                        addPoint(x, y, interpolatedTouchSize);
+                        float interpolatedTouchSize = Point.getInterpolatedValue(previousTouchSize, touchSize);
+                        float interpolatedTouchPressure = Point.getInterpolatedValue(previousTouchPressure, touchPressure);
+                        addPoint(x, y, interpolatedTouchSize, interpolatedTouchPressure);
+
                         previousTouchSize = interpolatedTouchSize;
+                        previousTouchPressure = interpolatedTouchPressure;
                     }
                 }
             }
 
             // Don't add point if not enough distance
             if (distance > MIN_DISTANCE) {
-                float interpolatedTouchSize = Point.getInterpolatedTouchSize(previousTouchSize, touchSize);
-                addPoint(coord, interpolatedTouchSize);
+                float interpolatedTouchSize = Point.getInterpolatedValue(previousTouchSize, touchSize);
+                float interpolatedTouchPressure = Point.getInterpolatedValue(previousTouchPressure, touchPressure);
+
+                addPoint(coord, interpolatedTouchSize, interpolatedTouchPressure);
             }
         }
     }
@@ -208,21 +217,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a list of coords and adds them to the renderer */
-    public void addPoints(ArrayList<Vector2> coordList, float touchSize) {
+    public void addPoints(ArrayList<Vector2> coordList, float touchSize, float touchPressure) {
 
         for(Vector2 coord : coordList) {
-            addInterpolatedPoints(viewportToWorld(coord), touchSize);
+            addInterpolatedPoints(viewportToWorld(coord), touchSize, touchPressure);
         }
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addPoint(Vector2 coord, float touchSize) {
-        addPoint(coord.getX(), coord.getY(), touchSize);
+    public void addPoint(Vector2 coord, float touchSize, float touchPressure) {
+        addPoint(coord.getX(), coord.getY(), touchSize, touchPressure);
     }
 
     /** Takes a coord and adds it to the renderer */
-    public void addPoint(float x, float y, float touchSize) {
-        Point tri = new Point(x, y, touchSize);
+    public void addPoint(float x, float y, float touchSize, float touchPressure) {
+        Point tri = new Point(x, y, touchSize, touchPressure);
         unrenderedPointArrayList.add(tri);
     }
 

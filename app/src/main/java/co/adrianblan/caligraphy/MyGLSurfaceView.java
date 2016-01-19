@@ -55,7 +55,10 @@ public class MyGLSurfaceView extends GLSurfaceView {
             case MotionEvent.ACTION_MOVE:
 
                 final ArrayList<Vector2> coordList = new ArrayList<>(e.getHistorySize() + 1);
+
+                // TODO more values?
                 final float touchSize = e.getSize();
+                final float touchPressure = e.getPressure();
 
                 // Add previous touch coordinates
                 for(int i = 0; i < e.getHistorySize(); i++) {
@@ -70,7 +73,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.addPoints(coordList, touchSize);
+                        mRenderer.addPoints(coordList, touchSize, touchPressure);
 
                     }
                 });
