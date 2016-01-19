@@ -188,8 +188,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                         float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
                         float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
 
-                        float interpolatedTouchSize = Point.getInterpolatedValue(previousTouchSize, touchSize);
-                        float interpolatedTouchPressure = Point.getInterpolatedValue(previousTouchPressure, touchPressure);
+                        float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
+                        float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
                         addPoint(x, y, interpolatedTouchSize, interpolatedTouchPressure);
 
                         previousTouchSize = interpolatedTouchSize;
@@ -200,8 +200,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             // Don't add point if not enough distance
             if (distance > MIN_DISTANCE) {
-                float interpolatedTouchSize = Point.getInterpolatedValue(previousTouchSize, touchSize);
-                float interpolatedTouchPressure = Point.getInterpolatedValue(previousTouchPressure, touchPressure);
+                float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
+                float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
 
                 addPoint(coord, interpolatedTouchSize, interpolatedTouchPressure);
             }
@@ -217,10 +217,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a list of coords and adds them to the renderer */
-    public void addPoints(ArrayList<Vector2> coordList, float touchSize, float touchPressure) {
+    public void addPoints(ArrayList<Vector2> coordList, ArrayList<Float> touchSizeList,
+                          ArrayList<Float> touchPressureList) {
 
-        for(Vector2 coord : coordList) {
-            addInterpolatedPoints(viewportToWorld(coord), touchSize, touchPressure);
+        for(int i = 0; i < coordList.size(); i++) {
+            addInterpolatedPoints(viewportToWorld(coordList.get(i)), touchSizeList.get(i),
+                    touchPressureList.get(i));
         }
     }
 

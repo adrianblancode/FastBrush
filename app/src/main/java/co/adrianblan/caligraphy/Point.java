@@ -73,7 +73,8 @@ public class Point {
     private static final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 0.05f };
+    static float blackColor[] = {0f, 0f, 0f, 1.0f};
+    static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 1f };
     private float [] mColor;
 
     /**
@@ -95,7 +96,7 @@ public class Point {
         mTouchSize = touchSize;
         mTouchPressure = touchPressure;
 
-        mColor = blueColor.clone();
+        mColor = blackColor.clone();
         mColor[3] = 0.25f + Utils.clamp((0.8f - getNormalizedPressure()) * 2.0f, -0.15f, 0.15f);
         float [] vertexCoords = getTranslatedVertexCoords(x, y, touchSize + touchSize * (0.8f - getNormalizedPressure()));
 
@@ -222,14 +223,12 @@ public class Point {
         return mTouchPressure / (mTouchSize * 10f);
     }
 
-    public static float getInterpolatedValue(float previousValue, float targetValue) {
-        final float MAX_DIFFERENCE = 0.001f;
+    /** Returns a throttled value that is a given percent from previousvalue towards targetValue*/
+    public static float getThrottledValue(float previousValue, float targetValue) {
+        final float VALUE_SCALE = 0.02f;
         float difference = targetValue - previousValue;
 
-        // Clamp so we can only increase touchsize by MAX_DIFFERENCE by each point
-        difference = Utils.clamp(difference, -MAX_DIFFERENCE, MAX_DIFFERENCE);
-
-        return previousValue + difference;
+        return previousValue + difference * VALUE_SCALE;
     }
 
 }
