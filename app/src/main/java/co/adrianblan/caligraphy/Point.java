@@ -58,8 +58,6 @@ public class Point {
     private float mTouchPressure;
     private static boolean initialized = false;
 
-    public static final float vertexScale = 0.6f;
-
     // number of coordinates per vertex in this array
     private static final int COORDS_PER_VERTEX = 3;
     private static float squareCoords[] = {
@@ -93,12 +91,19 @@ public class Point {
         vertexBuffer = bb.asFloatBuffer();
 
         mCoord = new Vector2(x, y);
-        mTouchSize = touchSize;
+
+        // The touch size is always 0.0 on an emulator
+        if(!Utils.floatsAreEquivalent(touchSize, 0f)) {
+            mTouchSize = touchSize;
+        } else {
+            mTouchSize = 1.0f;
+        }
+
         mTouchPressure = touchPressure;
 
         mColor = blackColor.clone();
-        mColor[3] = 0.25f + Utils.clamp((0.8f - getNormalizedPressure()) * 2.0f, -0.15f, 0.15f);
-        float [] vertexCoords = getTranslatedVertexCoords(x, y, touchSize + touchSize * (0.8f - getNormalizedPressure()));
+        mColor[3] = getAlpha(getNormalizedPressure());
+        float [] vertexCoords = getTranslatedVertexCoords(x, y, getNormalizedTouchSize(touchSize, getNormalizedPressure()));
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
@@ -186,15 +191,13 @@ public class Point {
     }
 
     /** Returns a matrix of vertex coords that has been translated in x and y axis */
-    private float[] getTranslatedVertexCoords(float x, float y, float touchSize) {
+    private float[] getTranslatedVertexCoords(float x, float y, float vertexScale) {
         float [] coords = squareCoords.clone();
 
-        float scale = 0.5f +  Utils.normalize(touchSize, 0.1f, 0.2f) * 1.5f * vertexScale;
-
         for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += COORDS_PER_VERTEX) {
-            coords[vertexOffset + 0] *= scale;
-            coords[vertexOffset + 1] *= scale;
-            coords[vertexOffset + 2] *= scale;
+            coords[vertexOffset + 0] *= vertexScale;
+            coords[vertexOffset + 1] *= vertexScale;
+            coords[vertexOffset + 2] *= vertexScale;
 
             coords[vertexOffset + 0] += x;
             coords[vertexOffset + 1] += y;
@@ -223,6 +226,20 @@ public class Point {
         return mTouchPressure / (mTouchSize * 10f);
     }
 
+    /** Takes a touch size and returns the resulting vertex scale */
+    public static float getNormalizedTouchSize(float touchSize, float normalizedPressure) {
+
+        float TOUCH_NORMALIZATION_TRESHOLD = 0.3f; // The amount of size which is counted as "zero"
+        float SCALE_BASE = 0.5f; // The base scale of the vertex
+        float TOUCH_SIZE_MIN = 0.2f; // The minimum touch size treshold
+        float TOUCH_SIZE_MAX = 0.4f; // The maximum touch size treshold
+        float NORMALIZED_TOUCH_SCALE = 0.7f; // The scale of the normalized touch size
+
+        touchSize = touchSize + touchSize * (1f - TOUCH_NORMALIZATION_TRESHOLD - normalizedPressure);
+        float normalizedTouchSize = Utils.normalize(touchSize, TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
+        return SCALE_BASE + normalizedTouchSize * NORMALIZED_TOUCH_SCALE;
+    }
+
     /** Returns a throttled value that is a given percent from previousvalue towards targetValue*/
     public static float getThrottledValue(float previousValue, float targetValue) {
         final float VALUE_SCALE = 0.02f;
@@ -231,4 +248,18 @@ public class Point {
         return previousValue + difference * VALUE_SCALE;
     }
 
+    /** Takes pressure, and returns the alpha for that pressure*/
+    public static float getAlpha(float pressure) {
+
+        float ALPHA_BASE = 0.15f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.15f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.15f; // The maximum positive change treshold in alpha
+        float PRESSURE_NORMALIZATION_TRESHOLD = 0.3f; // The amount of pressure which is counted as "zero"
+        float PRESSURE_SCALE = 1.0f; // The amount to scale the pressure by
+
+
+        float normalizedPressure = (1f - PRESSURE_NORMALIZATION_TRESHOLD - pressure) * PRESSURE_SCALE;
+        float alphaDelta = Utils.clamp(normalizedPressure, ALPHA_DELTA_MIN, ALPHA_DELTA_MAX);
+        return ALPHA_BASE + alphaDelta;
+    }
 }

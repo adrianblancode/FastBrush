@@ -17,4 +17,10 @@ public class Utils {
 
         return (clampedVal + offset) * scale;
     }
+
+    public static boolean floatsAreEquivalent(float val1, float val2) {
+        float epsilon = 0.0001f;
+
+        return Math.abs(val1 - val2) < epsilon;
+    }
 }
