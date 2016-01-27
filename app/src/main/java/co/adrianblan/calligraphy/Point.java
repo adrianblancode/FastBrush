@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.caligraphy;
+package co.adrianblan.calligraphy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -111,6 +111,7 @@ public class Point {
         vertexBuffer.position(0);
 
         // Ugly static hack to only initialize common variables once
+        // TODO proper initialization
         if(!initialized) {
 
             // initialize byte buffer for the draw list

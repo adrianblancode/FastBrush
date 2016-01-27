@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.caligraphy;
+package co.adrianblan.calligraphy;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;

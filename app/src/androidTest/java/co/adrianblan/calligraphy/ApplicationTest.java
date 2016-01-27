@@ -1,4 +1,4 @@
-package co.adrianblan.caligraphy;
+package co.adrianblan.calligraphy;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
