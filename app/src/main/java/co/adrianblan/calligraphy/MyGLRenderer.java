@@ -18,9 +18,14 @@ package co.adrianblan.calligraphy;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.Application;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -46,14 +51,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mModelMatrix = new float[16];
     private final float[] matrixProduct = new float[16];
 
+    private Context context;
+
     private int mWidth;
     private int mHeight;
     private float mRatio;
+
+    /** The texture pointer */
+    private int[] textures = new int[1];
 
     private ArrayList<Point> pointArrayList;
     private ArrayList<Point> unrenderedPointArrayList;
 
     private boolean shouldFollowPreviousPoint = true;
+
+    public MyGLRenderer(Context context) {
+        this.context = context;
+    }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -63,6 +77,30 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         pointArrayList = new ArrayList<>();
         unrenderedPointArrayList = new ArrayList<>();
+
+        loadGLTexture(unused, context);
+    }
+
+
+    public void loadGLTexture(GL10 gl, Context context) {
+        // loading texture
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.brush);
+
+        // generate one texture pointer
+        gl.glGenTextures(1, textures, 0);
+        // ...and bind it to our array
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+
+        // create nearest filtered texture
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+
+        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
+
+        // Clean up
+        bitmap.recycle();
     }
 
     @Override
@@ -77,8 +115,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         // Draw point
-        for (Point t : unrenderedPointArrayList) {
-            t.draw(mMVPMatrix);
+        for (Point p : unrenderedPointArrayList) {
+            p.draw(mMVPMatrix, textures[0]);
         }
 
         pointArrayList.addAll(unrenderedPointArrayList);

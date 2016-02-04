@@ -16,9 +16,12 @@
 package co.adrianblan.calligraphy;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -44,7 +47,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         setZOrderOnTop(true);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer();
+        mRenderer = new MyGLRenderer(context);
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data
