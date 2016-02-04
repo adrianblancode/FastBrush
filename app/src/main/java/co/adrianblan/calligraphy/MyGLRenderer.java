@@ -59,7 +59,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         pointArrayList = new ArrayList<>();
         unrenderedPointArrayList = new ArrayList<>();
@@ -74,9 +74,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if(pointArrayList.isEmpty()) {
             // Clear everything if there are no rendered points
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        } else {
-            // Otherwise, just clear the color
-            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
         }
 
         // Draw point
@@ -266,5 +263,4 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void setTouchInactive() {
         shouldFollowPreviousPoint = false;
     }
-
 }

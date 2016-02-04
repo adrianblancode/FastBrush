@@ -252,9 +252,9 @@ public class Point {
     /** Takes pressure, and returns the alpha for that pressure*/
     public static float getAlpha(float pressure) {
 
-        float ALPHA_BASE = 0.15f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.15f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.15f; // The maximum positive change treshold in alpha
+        float ALPHA_BASE = 0.4f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.3f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.3f; // The maximum positive change treshold in alpha
         float PRESSURE_NORMALIZATION_TRESHOLD = 0.3f; // The amount of pressure which is counted as "zero"
         float PRESSURE_SCALE = 1.0f; // The amount to scale the pressure by
 
