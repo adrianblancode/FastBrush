@@ -294,7 +294,7 @@ public class Point {
         float SCALE_BASE = 0.5f; // The base scale of the vertex
         float TOUCH_SIZE_MIN = 0.2f; // The minimum touch size treshold
         float TOUCH_SIZE_MAX = 0.4f; // The maximum touch size treshold
-        float NORMALIZED_TOUCH_SCALE = 0.7f; // The scale of the normalized touch size
+        float NORMALIZED_TOUCH_SCALE = 2.0f; // The scale of the normalized touch size
 
         touchSize = touchSize + touchSize * (1f - TOUCH_NORMALIZATION_TRESHOLD - normalizedPressure);
         float normalizedTouchSize = Utils.normalize(touchSize, TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);

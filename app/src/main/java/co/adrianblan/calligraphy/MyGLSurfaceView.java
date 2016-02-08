@@ -43,7 +43,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        setBackgroundResource(R.drawable.paper);
+        setBackgroundResource(R.drawable.paperbright);
         setZOrderOnTop(true);
 
         // Set the Renderer for drawing on the GLSurfaceView
