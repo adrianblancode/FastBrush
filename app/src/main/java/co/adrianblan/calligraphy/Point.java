@@ -313,9 +313,9 @@ public class Point {
     /** Takes pressure, and returns the alpha for that pressure */
     public static float getAlpha(float normalizedSize) {
 
-        float ALPHA_BASE = 0.12f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.1f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.1f; // The maximum positive change treshold in alpha
+        float ALPHA_BASE = 0.55f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.2f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.2f; // The maximum positive change treshold in alpha
 
         return Utils.clamp(ALPHA_BASE * (1f - normalizedSize) * 2.0f, ALPHA_BASE + ALPHA_DELTA_MIN,
                 ALPHA_BASE + ALPHA_DELTA_MAX);

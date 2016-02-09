@@ -103,8 +103,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
 
+        // WARNING: Totally unsupported hack to enable GL_MAX
+        int GL_MAX = 0x8008;
+
         GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
         // Draw point
         for (Point p : unrenderedPointArrayList) {
@@ -217,13 +223,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                 }
             }
 
-            // Don't add point if not enough distance
-            if (distance > MIN_DISTANCE) {
-                float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
-                float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
+            float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
+            float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
 
-                addPoint(coord, interpolatedTouchSize, interpolatedTouchPressure);
-            }
+            addPoint(coord, interpolatedTouchSize, interpolatedTouchPressure);
         }
     }
 
