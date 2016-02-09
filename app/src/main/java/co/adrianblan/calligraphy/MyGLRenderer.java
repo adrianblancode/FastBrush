@@ -59,7 +59,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** The texture pointer */
     private int[] textures = new int[1];
 
-    private ArrayList<Point> touchPointArrayList;
+    private Point lastTouchPoint;
     private ArrayList<Point> unrenderedPointArrayList;
 
     public MyGLRenderer(Context context) {
@@ -72,7 +72,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        touchPointArrayList = new ArrayList<>();
         unrenderedPointArrayList = new ArrayList<>();
 
         loadGLTexture(unused, context);
@@ -117,8 +116,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             p.draw(mMVPMatrix, textures[0]);
         }
 
-        touchPointArrayList.addAll(unrenderedPointArrayList);
-        unrenderedPointArrayList.clear();
+        if(!unrenderedPointArrayList.isEmpty()) {
+            lastTouchPoint = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
+            unrenderedPointArrayList.clear();
+        }
     }
 
     @Override
@@ -194,14 +195,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         final float MIN_DISTANCE = 0.01f;
 
-        if(!hasPreviousPoint()) {
+        if(lastTouchPoint == null) {
             addPoint(coord, touchSize, touchPressure);
         } else {
 
-            Point previousPoint = getPreviousPoint();
-            Vector2 previousCoord = previousPoint.getCoord();
-            float previousTouchPressure = previousPoint.getTouchPressure();
-            float previousTouchSize = previousPoint.getTouchSize();
+            Vector2 previousCoord = lastTouchPoint.getCoord();
+            float previousTouchPressure = lastTouchPoint.getTouchPressure();
+            float previousTouchSize = lastTouchPoint.getTouchSize();
             float distance = coord.distance(previousCoord);
 
             int interpolations = (int) (distance / MIN_DISTANCE);
@@ -255,34 +255,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Takes a coord and adds it to the renderer */
     public void addPoint(float x, float y, float touchSize, float touchPressure) {
-        Point tri = new Point(x, y, touchSize, touchPressure);
-        unrenderedPointArrayList.add(tri);
-    }
-
-    /** Return whether there is a previous point to interpolate from */
-    private boolean hasPreviousPoint() {
-        return !(touchPointArrayList.isEmpty() && unrenderedPointArrayList.isEmpty());
+        Point p = new Point(x, y, touchSize, touchPressure);
+        unrenderedPointArrayList.add(p);
+        lastTouchPoint = p;
     }
 
     /** Return the previous point to interpolate from */
     private Point getPreviousPoint() {
-
-        if(!hasPreviousPoint()) {
-            return null;
-        }
-
-        // The previous point should be unrendered, if there are no unrendered points get from rendered
-        if (!unrenderedPointArrayList.isEmpty()) {
-            return unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
-        } else {
-            return touchPointArrayList.get(touchPointArrayList.size() - 1);
-        }
+        return lastTouchPoint;
     }
 
     /** Clears all the ArrayList of Point of all objects*/
     public void clearPoints() {
         unrenderedPointArrayList.clear();
-        touchPointArrayList.clear();
+        lastTouchPoint = null;
     }
 
     public void clearScreen() {
