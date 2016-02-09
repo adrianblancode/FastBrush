@@ -54,7 +54,7 @@ public class Point {
             "varying vec2 v_TexCoordinate;" +
             "void main() {" +
             //"  gl_FragColor = vColor;" +
-            "  vec4 col = texture2D(u_Texture, v_TexCoordinate);" +
+            "  vec4 col = vColor * texture2D(u_Texture, v_TexCoordinate);" +
             //"  col.w = vColor.w;" +
             "  gl_FragColor = col;" +
             "}";
@@ -125,7 +125,8 @@ public class Point {
 
         mTouchPressure = touchPressure;
 
-        float [] vertexCoords = getTranslatedVertexCoords(x, y, getNormalizedTouchSize(touchSize, getNormalizedPressure()));
+        float [] vertexCoords = getTranslatedVertexCoords(x, y,
+                getNormalizedTouchSize(touchSize, getNormalizedPressure()) * 3.5f + 0.5f);
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
@@ -139,7 +140,7 @@ public class Point {
         textureBuffer.position(0);
 
         mColor = blackColor.clone();
-        mColor[3] = getAlpha(getNormalizedPressure());
+        mColor[3] = getAlpha(getNormalizedTouchSize(touchSize, getNormalizedPressure()));
 
 
         // Ugly static hack to only initialize common variables once
@@ -282,26 +283,26 @@ public class Point {
         return mTouchPressure;
     }
 
-    /** Gets the normalized pressure in proportion to screen size */
+    /** Gets the normalized pressure in proportion to screen size, 1f is roughly normal */
     public float getNormalizedPressure() {
-        return mTouchPressure / (mTouchSize * 10f);
+
+        if(Utils.floatsAreEquivalent(mTouchPressure, 1.0f)) {
+            return 1.0f;
+        } else {
+            return mTouchPressure / (mTouchSize * 10f);
+        }
     }
 
-    /** Takes a touch size and returns the resulting vertex scale */
+    /** Takes a touch size and returns the normalized size [0, 1] */
     public static float getNormalizedTouchSize(float touchSize, float normalizedPressure) {
 
-        float TOUCH_NORMALIZATION_TRESHOLD = 0.3f; // The amount of size which is counted as "zero"
-        float SCALE_BASE = 0.5f; // The base scale of the vertex
         float TOUCH_SIZE_MIN = 0.2f; // The minimum touch size treshold
         float TOUCH_SIZE_MAX = 0.4f; // The maximum touch size treshold
-        float NORMALIZED_TOUCH_SCALE = 2.0f; // The scale of the normalized touch size
 
-        touchSize = touchSize + touchSize * (1f - TOUCH_NORMALIZATION_TRESHOLD - normalizedPressure);
-        float normalizedTouchSize = Utils.normalize(touchSize, TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
-        return SCALE_BASE + normalizedTouchSize * NORMALIZED_TOUCH_SCALE;
+        return Utils.normalize(touchSize * normalizedPressure, TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
     }
 
-    /** Returns a throttled value that is a given percent from previousvalue towards targetValue*/
+    /** Returns a throttled value that is a given percent from previousvalue towards targetValue */
     public static float getThrottledValue(float previousValue, float targetValue) {
         final float VALUE_SCALE = 0.02f;
         float difference = targetValue - previousValue;
@@ -309,18 +310,14 @@ public class Point {
         return previousValue + difference * VALUE_SCALE;
     }
 
-    /** Takes pressure, and returns the alpha for that pressure*/
-    public static float getAlpha(float pressure) {
+    /** Takes pressure, and returns the alpha for that pressure */
+    public static float getAlpha(float normalizedSize) {
 
-        float ALPHA_BASE = 0.4f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.4f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.4f; // The maximum positive change treshold in alpha
-        float PRESSURE_NORMALIZATION_TRESHOLD = 0.3f; // The amount of pressure which is counted as "zero"
-        float PRESSURE_SCALE = 1.0f; // The amount to scale the pressure by
+        float ALPHA_BASE = 0.12f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.1f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.1f; // The maximum positive change treshold in alpha
 
-
-        float normalizedPressure = (1f - PRESSURE_NORMALIZATION_TRESHOLD - pressure) * PRESSURE_SCALE;
-        float alphaDelta = Utils.clamp(normalizedPressure, ALPHA_DELTA_MIN, ALPHA_DELTA_MAX);
-        return ALPHA_BASE + alphaDelta;
+        return Utils.clamp(ALPHA_BASE * (1f - normalizedSize) * 2.0f, ALPHA_BASE + ALPHA_DELTA_MIN,
+                ALPHA_BASE + ALPHA_DELTA_MAX);
     }
 }

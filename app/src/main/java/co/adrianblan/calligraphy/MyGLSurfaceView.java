@@ -98,7 +98,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.setTouchInactive();
+                        mRenderer.clearPoints();
 
                     }
                 });
@@ -109,11 +109,10 @@ public class MyGLSurfaceView extends GLSurfaceView {
     }
 
     public void clearScreen() {
-        queueEvent(new Runnable()
-        {
+        queueEvent(new Runnable() {
             @Override
             public void run() {
-                mRenderer.clearPoints();
+                mRenderer.clearScreen();
             }
         });
 

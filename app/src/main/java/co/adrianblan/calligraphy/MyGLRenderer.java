@@ -18,7 +18,6 @@ package co.adrianblan.calligraphy;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,10 +59,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** The texture pointer */
     private int[] textures = new int[1];
 
-    private ArrayList<Point> pointArrayList;
+    private ArrayList<Point> touchPointArrayList;
     private ArrayList<Point> unrenderedPointArrayList;
-
-    private boolean shouldFollowPreviousPoint = true;
 
     public MyGLRenderer(Context context) {
         this.context = context;
@@ -75,7 +72,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        pointArrayList = new ArrayList<>();
+        touchPointArrayList = new ArrayList<>();
         unrenderedPointArrayList = new ArrayList<>();
 
         loadGLTexture(unused, context);
@@ -85,7 +82,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void loadGLTexture(GL10 gl, Context context) {
         // loading texture
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.brush);
+                R.drawable.brush2);
 
         // generate one texture pointer
         gl.glGenTextures(1, textures, 0);
@@ -107,19 +104,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
 
         GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc (GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
-        if(pointArrayList.isEmpty()) {
-            // Clear everything if there are no rendered points
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        }
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         // Draw point
         for (Point p : unrenderedPointArrayList) {
             p.draw(mMVPMatrix, textures[0]);
         }
 
-        pointArrayList.addAll(unrenderedPointArrayList);
+        touchPointArrayList.addAll(unrenderedPointArrayList);
         unrenderedPointArrayList.clear();
     }
 
@@ -194,13 +186,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedPoints(Vector2 coord, float touchSize, float touchPressure) {
 
-        final float MIN_DISTANCE = 0.005f;
+        final float MIN_DISTANCE = 0.01f;
 
         if(!hasPreviousPoint()) {
-
             addPoint(coord, touchSize, touchPressure);
-            shouldFollowPreviousPoint = true;
-
         } else {
 
             Point previousPoint = getPreviousPoint();
@@ -209,27 +198,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float previousTouchSize = previousPoint.getTouchSize();
             float distance = coord.distance(previousCoord);
 
-            // If it's a new line, don't interpolate
-            if(!shouldFollowPreviousPoint) {
-                shouldFollowPreviousPoint = true;
-            } else {
+            int interpolations = (int) (distance / MIN_DISTANCE);
 
-                int interpolations = (int) (distance / MIN_DISTANCE);
-                if (interpolations > 0) {
+            if (interpolations > 0) {
 
-                    // Interpolate so that there are no gaps larger than MIN_DISTANCE
-                    for (int i = 0; i < interpolations; i++) {
+                // Interpolate so that there are no gaps larger than MIN_DISTANCE
+                for (int i = 0; i < interpolations; i++) {
 
-                        float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
-                        float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
+                    float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
+                    float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
 
-                        float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
-                        float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
-                        addPoint(x, y, interpolatedTouchSize, interpolatedTouchPressure);
+                    float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
+                    float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
+                    addPoint(x, y, interpolatedTouchSize, interpolatedTouchPressure);
 
-                        previousTouchSize = interpolatedTouchSize;
-                        previousTouchPressure = interpolatedTouchPressure;
-                    }
+                    previousTouchSize = interpolatedTouchSize;
+                    previousTouchPressure = interpolatedTouchPressure;
                 }
             }
 
@@ -274,7 +258,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Return whether there is a previous point to interpolate from */
     private boolean hasPreviousPoint() {
-        return !pointArrayList.isEmpty() || !unrenderedPointArrayList.isEmpty();
+        return !(touchPointArrayList.isEmpty() && unrenderedPointArrayList.isEmpty());
     }
 
     /** Return the previous point to interpolate from */
@@ -288,17 +272,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if (!unrenderedPointArrayList.isEmpty()) {
             return unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
         } else {
-            return pointArrayList.get(pointArrayList.size() - 1);
+            return touchPointArrayList.get(touchPointArrayList.size() - 1);
         }
     }
 
     /** Clears all the ArrayList of Point of all objects*/
     public void clearPoints() {
         unrenderedPointArrayList.clear();
-        pointArrayList.clear();
+        touchPointArrayList.clear();
     }
 
-    public void setTouchInactive() {
-        shouldFollowPreviousPoint = false;
+    public void clearScreen() {
+        clearPoints();
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 }
