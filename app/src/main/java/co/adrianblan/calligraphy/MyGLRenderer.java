@@ -81,7 +81,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void loadGLTexture(GL10 gl, Context context) {
         // loading texture
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.brush2);
+                R.drawable.brushdot2);
 
         // generate one texture pointer
         gl.glGenTextures(1, textures, 0);
@@ -193,7 +193,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedPoints(Vector2 coord, float touchSize, float touchPressure) {
 
-        final float MIN_DISTANCE = 0.01f;
+        final float MIN_DISTANCE = 0.005f;
 
         if(lastTouchPoint == null) {
             addPoint(coord, touchSize, touchPressure);
