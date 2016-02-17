@@ -23,4 +23,13 @@ public class Utils {
 
         return Math.abs(val1 - val2) < epsilon;
     }
+
+    /** Returns a throttled value that is a given percent from previousvalue towards targetValue */
+    public static float getThrottledValue(float previousValue, float targetValue) {
+        final float VALUE_SCALE = 0.02f;
+        float difference = targetValue - previousValue;
+
+        return previousValue + difference * VALUE_SCALE;
+    }
+
 }

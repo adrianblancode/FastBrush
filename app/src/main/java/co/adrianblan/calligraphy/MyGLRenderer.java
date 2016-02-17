@@ -59,7 +59,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** The texture pointer */
     private int[] textures = new int[1];
 
-    private Point lastTouchPoint;
+    private TouchData lastTouchData;
     private ArrayList<Point> unrenderedPointArrayList;
 
     public MyGLRenderer(Context context) {
@@ -107,9 +107,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glEnable(GLES20.GL_BLEND);
 
-        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        //GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
         // Draw point
         for (Point p : unrenderedPointArrayList) {
@@ -117,7 +117,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         if(!unrenderedPointArrayList.isEmpty()) {
-            lastTouchPoint = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
+            lastTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
             unrenderedPointArrayList.clear();
         }
     }
@@ -191,43 +191,68 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
-    private void addInterpolatedPoints(Vector2 coord, float touchSize, float touchPressure) {
+    private void addInterpolatedTouchData(TouchData touchData){
 
         final float MIN_DISTANCE = 0.005f;
 
-        if(lastTouchPoint == null) {
-            addPoint(coord, touchSize, touchPressure);
-        } else {
+        if(lastTouchData != null) {
 
-            Vector2 previousCoord = lastTouchPoint.getCoord();
-            float previousTouchPressure = lastTouchPoint.getTouchPressure();
-            float previousTouchSize = lastTouchPoint.getTouchSize();
-            float distance = coord.distance(previousCoord);
+            TouchData previousTouchData = lastTouchData;
+            float distance = touchData.getPosition().distance(lastTouchData.getPosition());
 
             int interpolations = (int) (distance / MIN_DISTANCE);
 
+            // Interpolate so that there are no gaps larger than MIN_DISTANCE
             if (interpolations > 0) {
 
-                // Interpolate so that there are no gaps larger than MIN_DISTANCE
                 for (int i = 0; i < interpolations; i++) {
 
-                    float x = previousCoord.getX() + (coord.getX() - previousCoord.getX()) * (i + 1f) / ((float) interpolations + 1f);
-                    float y = previousCoord.getY() + (coord.getY() - previousCoord.getY()) * (i + 1f) / ((float) interpolations + 1f);
+                    float x = previousTouchData.getX() + (touchData.getX() - previousTouchData.getX()) *
+                            (i + 1f) / ((float) interpolations + 1f);
+                    float y = previousTouchData.getY() + (touchData.getY() - previousTouchData.getY()) *
+                            (i + 1f) / ((float) interpolations + 1f);
 
-                    float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
-                    float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
-                    addPoint(x, y, interpolatedTouchSize, interpolatedTouchPressure);
+                    float size = Utils.getThrottledValue(previousTouchData.getSize(),
+                            touchData.getSize());
+                    float pressure = Utils.getThrottledValue(previousTouchData.getPressure(),
+                            touchData.getPressure());
 
-                    previousTouchSize = interpolatedTouchSize;
-                    previousTouchPressure = interpolatedTouchPressure;
+                    TouchData interpolatedTouchData = new TouchData(x, y, size, pressure);
+                    addPoint(interpolatedTouchData);
                 }
             }
 
-            float interpolatedTouchSize = Point.getThrottledValue(previousTouchSize, touchSize);
-            float interpolatedTouchPressure = Point.getThrottledValue(previousTouchPressure, touchPressure);
+            // Only add if not too close to last point
+            if(distance >= MIN_DISTANCE) {
 
-            addPoint(coord, interpolatedTouchSize, interpolatedTouchPressure);
+                // Throttle values so that they do not increse too quickly
+                float size = Utils.getThrottledValue(previousTouchData.getSize(), touchData.getSize());
+                float pressure = Utils.getThrottledValue(previousTouchData.getSize(), touchData.getPressure());
+
+                touchData.setSize(size);
+                touchData.setPressure(pressure);
+
+                addPoint(touchData);
+            }
         }
+    }
+
+    /** Takes a coord and adds it to the renderer */
+    public void addPoint(TouchData touchData) {
+        Point p = new Point(touchData);
+        unrenderedPointArrayList.add(p);
+        lastTouchData = touchData;
+    }
+
+    /** Clears all the ArrayList of Point of all objects*/
+    public void clearPoints() {
+        unrenderedPointArrayList.clear();
+        lastTouchData = null;
+    }
+
+    public void clearScreen() {
+        clearPoints();
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
     /** Translates a viewport vector to world vector */
@@ -236,43 +261,5 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float worldY = -(2 * (vec.getY() / mHeight) - 1);
 
         return new Vector2(worldX, worldY);
-    }
-
-    /** Takes a list of coords and adds them to the renderer */
-    public void addPoints(ArrayList<Vector2> coordList, ArrayList<Float> touchSizeList,
-                          ArrayList<Float> touchPressureList) {
-
-        for(int i = 0; i < coordList.size(); i++) {
-            addInterpolatedPoints(viewportToWorld(coordList.get(i)), touchSizeList.get(i),
-                    touchPressureList.get(i));
-        }
-    }
-
-    /** Takes a coord and adds it to the renderer */
-    public void addPoint(Vector2 coord, float touchSize, float touchPressure) {
-        addPoint(coord.getX(), coord.getY(), touchSize, touchPressure);
-    }
-
-    /** Takes a coord and adds it to the renderer */
-    public void addPoint(float x, float y, float touchSize, float touchPressure) {
-        Point p = new Point(x, y, touchSize, touchPressure);
-        unrenderedPointArrayList.add(p);
-        lastTouchPoint = p;
-    }
-
-    /** Return the previous point to interpolate from */
-    private Point getPreviousPoint() {
-        return lastTouchPoint;
-    }
-
-    /** Clears all the ArrayList of Point of all objects*/
-    public void clearPoints() {
-        unrenderedPointArrayList.clear();
-        lastTouchPoint = null;
-    }
-
-    public void clearScreen() {
-        clearPoints();
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 }

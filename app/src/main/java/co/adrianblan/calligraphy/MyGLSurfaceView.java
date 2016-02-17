@@ -64,28 +64,25 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
             case MotionEvent.ACTION_MOVE:
 
-                final ArrayList<Vector2> coordList = new ArrayList<>(e.getHistorySize() + 1);
-                final ArrayList<Float> touchSizeList = new ArrayList<>(e.getHistorySize() + 1);
-                final ArrayList<Float> touchPressureList = new ArrayList<>(e.getHistorySize() + 1);
+                final ArrayList<TouchData> touchDataList = new ArrayList<>(e.getHistorySize() + 1);
+                Vector2 viewportPosition;
 
                 // Add previous touch coordinates
                 for(int i = 0; i < e.getHistorySize(); i++) {
-                    coordList.add(new Vector2(e.getHistoricalX(i), e.getHistoricalY(i)));
-                    touchSizeList.add(e.getHistoricalSize(i));
-                    touchPressureList.add(e.getHistoricalPressure(i));
+                    viewportPosition = new Vector2(e.getHistoricalX(i), e.getHistoricalY(i));
+                    touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition), e.getHistoricalSize(i), e.getHistoricalPressure(i)));
                 }
 
                 // Add current touch coordinates
-                coordList.add(new Vector2(e.getX(), e.getY()));
-                touchSizeList.add(e.getSize());
-                touchPressureList.add(e.getPressure());
+                viewportPosition = new Vector2(e.getX(), e.getY());
+                touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition), e.getSize(), e.getPressure()));
 
                 // Ensure we call switchMode() on the OpenGL thread.
                 // queueEvent() is a method of GLSurfaceView that will do this for us.
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.addPoints(coordList, touchSizeList, touchPressureList);
+                        mRenderer.addPoints(touchDataList);
 
                     }
                 });

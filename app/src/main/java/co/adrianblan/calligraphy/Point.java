@@ -69,9 +69,6 @@ public class Point {
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
 
-    private Vector2 mCoord;
-    private float mTouchSize;
-    private float mTouchPressure;
     private static boolean initialized = false;
 
     // number of coordinates per vertex in this array
@@ -99,12 +96,14 @@ public class Point {
     static float blackColor[] = {0f, 0f, 0f, 1.0f};
     static float blueColor[] = { 0.17647058f, 0.63921568f, 0.90980392f, 1f };
     private float [] mColor;
+
+    private TouchData touchData;
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Point(float x, float y, float touchSize, float touchPressure) {
+    public Point(TouchData touchData) {
 
-        mCoord = new Vector2(x, y);
+        this.touchData = touchData;
 
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
@@ -115,18 +114,8 @@ public class Point {
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
 
-
-        // The touch size is always 0.0 on an emulator
-        if(!Utils.floatsAreEquivalent(touchSize, 0f)) {
-            mTouchSize = touchSize;
-        } else {
-            mTouchSize = 1.0f;
-        }
-
-        mTouchPressure = touchPressure;
-
-        float [] vertexCoords = getTranslatedVertexCoords(x, y,
-                getNormalizedTouchSize(touchSize, getNormalizedPressure()) * 3.5f + 0.5f);
+        float [] vertexCoords = getTranslatedVertexCoords(touchData.getPosition(),
+                touchData.getNormalizedTouchSize() * 3.5f + 0.5f);
 
         // add the coordinates to the FloatBuffer
         vertexBuffer.put(vertexCoords);
@@ -140,8 +129,7 @@ public class Point {
         textureBuffer.position(0);
 
         mColor = blackColor.clone();
-        mColor[3] = getAlpha(getNormalizedTouchSize(touchSize, getNormalizedPressure()));
-
+        mColor[3] = getAlpha(touchData.getNormalizedTouchSize());
 
         // Ugly static hack to only initialize common variables once
         // TODO proper initialization
@@ -169,14 +157,6 @@ public class Point {
 
             initialized = true;
         }
-    }
-
-    public Point() {
-        this(0f, 0f, 1.0f, 1.0f);
-    }
-
-    public Point(Vector2 vec) {
-        this(vec.getX(), vec.getY(), 1.0f, 1.0f);
     }
 
     /**
@@ -253,7 +233,7 @@ public class Point {
     }
 
     /** Returns a matrix of vertex coords that has been translated in x and y axis */
-    private float[] getTranslatedVertexCoords(float x, float y, float vertexScale) {
+    private float[] getTranslatedVertexCoords(Vector2 position, float vertexScale) {
         float [] coords = squareCoords.clone();
 
         for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += COORDS_PER_VERTEX) {
@@ -261,63 +241,25 @@ public class Point {
             coords[vertexOffset + 1] *= vertexScale;
             coords[vertexOffset + 2] *= vertexScale;
 
-            coords[vertexOffset + 0] += x;
-            coords[vertexOffset + 1] += y;
+            coords[vertexOffset + 0] += position.getX();
+            coords[vertexOffset + 1] += position.getY();
         }
 
         return coords;
     }
 
-    /** Get the (x, y) position of the point */
-    public Vector2 getCoord() {
-        return mCoord;
-    }
-
-    /** Returns the touch size of the point */
-    public float getTouchSize () {
-        return mTouchSize;
-    }
-
-    /** Returns the touch pressure of the point */
-    public float getTouchPressure () {
-        return mTouchPressure;
-    }
-
-    /** Gets the normalized pressure in proportion to screen size, 1f is roughly normal */
-    public float getNormalizedPressure() {
-
-        if(Utils.floatsAreEquivalent(mTouchPressure, 1.0f)) {
-            return 1.0f;
-        } else {
-            return mTouchPressure / (mTouchSize * 10f);
-        }
-    }
-
-    /** Takes a touch size and returns the normalized size [0, 1] */
-    public static float getNormalizedTouchSize(float touchSize, float normalizedPressure) {
-
-        float TOUCH_SIZE_MIN = 0.2f; // The minimum touch size treshold
-        float TOUCH_SIZE_MAX = 0.4f; // The maximum touch size treshold
-
-        return Utils.normalize(touchSize * normalizedPressure, TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
-    }
-
-    /** Returns a throttled value that is a given percent from previousvalue towards targetValue */
-    public static float getThrottledValue(float previousValue, float targetValue) {
-        final float VALUE_SCALE = 0.02f;
-        float difference = targetValue - previousValue;
-
-        return previousValue + difference * VALUE_SCALE;
-    }
-
     /** Takes pressure, and returns the alpha for that pressure */
     public static float getAlpha(float normalizedSize) {
 
-        float ALPHA_BASE = 0.55f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.2f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.2f; // The maximum positive change treshold in alpha
+        float ALPHA_BASE = 0.10f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.05f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.05f; // The maximum positive change treshold in alpha
 
         return Utils.clamp(ALPHA_BASE * (1f - normalizedSize) * 2.0f, ALPHA_BASE + ALPHA_DELTA_MIN,
                 ALPHA_BASE + ALPHA_DELTA_MAX);
+    }
+
+    public TouchData getTouchData() {
+        return touchData;
     }
 }
