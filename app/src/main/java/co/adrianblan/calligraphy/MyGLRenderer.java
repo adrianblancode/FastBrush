@@ -59,7 +59,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** The texture pointer */
     private int[] textures = new int[1];
 
-    private TouchData lastTouchData;
+    private TouchData prevTouchData;
     private ArrayList<Point> unrenderedPointArrayList;
 
     public MyGLRenderer(Context context) {
@@ -117,7 +117,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         if(!unrenderedPointArrayList.isEmpty()) {
-            lastTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
+            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
             unrenderedPointArrayList.clear();
         }
     }
@@ -190,16 +190,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    /** Takes a Vector2, and interpolates objects based on a distance to the previous object */
+    /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedTouchData(TouchData touchData){
 
         final float MIN_DISTANCE = 0.005f;
 
-        if(lastTouchData != null) {
+        if(prevTouchData == null) {
+            addPoint(touchData);
+            prevTouchData = touchData;
+        } else {
 
-            TouchData previousTouchData = lastTouchData;
-            float distance = touchData.getPosition().distance(lastTouchData.getPosition());
-
+            float distance = touchData.getPosition().distance(prevTouchData.getPosition());
+            TouchData prevInterpolatedTouchData = prevTouchData;
             int interpolations = (int) (distance / MIN_DISTANCE);
 
             // Interpolate so that there are no gaps larger than MIN_DISTANCE
@@ -207,17 +209,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
                 for (int i = 0; i < interpolations; i++) {
 
-                    float x = previousTouchData.getX() + (touchData.getX() - previousTouchData.getX()) *
+                    float x = prevTouchData.getX() + (touchData.getX() - prevTouchData.getX()) *
                             (i + 1f) / ((float) interpolations + 1f);
-                    float y = previousTouchData.getY() + (touchData.getY() - previousTouchData.getY()) *
+                    float y = prevTouchData.getY() + (touchData.getY() - prevTouchData.getY()) *
                             (i + 1f) / ((float) interpolations + 1f);
 
-                    float size = Utils.getThrottledValue(previousTouchData.getSize(),
+                    float size = Utils.getThrottledValue(prevInterpolatedTouchData.getSize(),
                             touchData.getSize());
-                    float pressure = Utils.getThrottledValue(previousTouchData.getPressure(),
+                    float pressure  = Utils.getThrottledValue(prevInterpolatedTouchData.getPressure(),
                             touchData.getPressure());
 
                     TouchData interpolatedTouchData = new TouchData(x, y, size, pressure);
+                    prevInterpolatedTouchData = interpolatedTouchData;
                     addPoint(interpolatedTouchData);
                 }
             }
@@ -225,15 +228,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             // Only add if not too close to last point
             if(distance >= MIN_DISTANCE) {
 
-                // Throttle values so that they do not increse too quickly
-                float size = Utils.getThrottledValue(previousTouchData.getSize(), touchData.getSize());
-                float pressure = Utils.getThrottledValue(previousTouchData.getSize(), touchData.getPressure());
+                // Throttle values so that they do not increase too quickly
+                float size = Utils.getThrottledValue(prevTouchData.getSize(), touchData.getSize());
+                float pressure = Utils.getThrottledValue(prevTouchData.getPressure(), touchData.getPressure());
 
-                touchData.setSize(size);
-                touchData.setPressure(pressure);
-
-                addPoint(touchData);
+                TouchData td = new TouchData(touchData.getPosition(), size, pressure);
+                addPoint(td);
+                prevTouchData = touchData;
             }
+        }
+    }
+
+    public void addPoints(ArrayList<TouchData> touchDataList) {
+        for(TouchData td : touchDataList) {
+            addInterpolatedTouchData(td);
         }
     }
 
@@ -241,13 +249,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void addPoint(TouchData touchData) {
         Point p = new Point(touchData);
         unrenderedPointArrayList.add(p);
-        lastTouchData = touchData;
     }
 
     /** Clears all the ArrayList of Point of all objects*/
     public void clearPoints() {
         unrenderedPointArrayList.clear();
-        lastTouchData = null;
+        prevTouchData = null;
     }
 
     public void clearScreen() {
