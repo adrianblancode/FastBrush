@@ -55,6 +55,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private float mRatio;
 
     private int[] frameBufferArray = new int[1];
+    private int[] depthBufferArray = new int[1];
     private int[] renderTextureArray = new int[1];
 
     private int[] brushTextureArray = new int[1];
@@ -188,6 +189,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Generate frame buffer and texture
         GLES20.glGenFramebuffers(1, frameBufferArray, 0);
+        GLES20.glGenFramebuffers(1, depthBufferArray, 0);
 
         GLES20.glGenTextures(1, renderTextureArray, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
@@ -203,16 +205,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             System.err.println("Height or width can not be zero");
         }
 
-        // Fill with blank image
+        // Depth buffer
+        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, mWidth, mHeight);
+
+        // Generate texture
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, mWidth, mHeight, 0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, null);
 
-        // Bind to framebuffer
+        // Bind depth buffer and texture to frame buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, renderTextureArray[0], 0);
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
 
-        // Check status
+        // Check status of framebuffer
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+
         if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
             System.err.println("Framebuffer error: " + status);
         }
