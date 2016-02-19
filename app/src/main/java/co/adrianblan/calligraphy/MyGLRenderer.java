@@ -107,9 +107,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glEnable(GLES20.GL_BLEND);
 
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-        //GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
         // Draw point
         for (Point p : unrenderedPointArrayList) {
@@ -197,10 +197,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         if(prevTouchData == null) {
             addPoint(touchData);
-            prevTouchData = touchData;
         } else {
 
             float distance = touchData.getPosition().distance(prevTouchData.getPosition());
+            TouchData parentTouchData = prevTouchData;
             TouchData prevInterpolatedTouchData = prevTouchData;
             int interpolations = (int) (distance / MIN_DISTANCE);
 
@@ -209,9 +209,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
                 for (int i = 0; i < interpolations; i++) {
 
-                    float x = prevTouchData.getX() + (touchData.getX() - prevTouchData.getX()) *
+                    float x = parentTouchData.getX() + (touchData.getX() - parentTouchData.getX()) *
                             (i + 1f) / ((float) interpolations + 1f);
-                    float y = prevTouchData.getY() + (touchData.getY() - prevTouchData.getY()) *
+                    float y = parentTouchData.getY() + (touchData.getY() - parentTouchData.getY()) *
                             (i + 1f) / ((float) interpolations + 1f);
 
                     float size = Utils.getThrottledValue(prevInterpolatedTouchData.getSize(),
@@ -234,7 +234,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
                 TouchData td = new TouchData(touchData.getPosition(), size, pressure);
                 addPoint(td);
-                prevTouchData = touchData;
             }
         }
     }
@@ -249,6 +248,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void addPoint(TouchData touchData) {
         Point p = new Point(touchData);
         unrenderedPointArrayList.add(p);
+        prevTouchData = touchData;
     }
 
     /** Clears all the ArrayList of Point of all objects*/
