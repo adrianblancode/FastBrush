@@ -47,8 +47,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private final float[] mModelMatrix = new float[16];
-    private final float[] matrixProduct = new float[16];
 
     private Context context;
 
@@ -56,8 +54,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int mHeight;
     private float mRatio;
 
-    /** The texture pointer */
-    private int[] textures = new int[1];
+    private int[] frameBufferArray = new int[1];
+    private int[] renderTextureArray = new int[1];
+
+    private int[] brushTextureArray = new int[1];
+
 
     private TouchData prevTouchData;
     private ArrayList<Point> unrenderedPointArrayList;
@@ -68,58 +69,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-
         // Set the background frame color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         unrenderedPointArrayList = new ArrayList<>();
-
-        loadGLTexture(unused, context);
-    }
-
-
-    public void loadGLTexture(GL10 gl, Context context) {
-        // loading texture
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.brushdot2);
-
-        // generate one texture pointer
-        gl.glGenTextures(1, textures, 0);
-        // ...and bind it to our array
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
-
-        // create nearest filtered texture
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-
-        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
-
-        // Clean up
-        bitmap.recycle();
-    }
-
-    @Override
-    public void onDrawFrame(GL10 unused) {
-
-        // WARNING: Totally unsupported hack to enable GL_MAX
-        int GL_MAX = 0x8008;
-
-        GLES20.glEnable(GLES20.GL_BLEND);
-
-        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
-
-        // Draw point
-        for (Point p : unrenderedPointArrayList) {
-            p.draw(mMVPMatrix, textures[0]);
-        }
-
-        if(!unrenderedPointArrayList.isEmpty()) {
-            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
-            unrenderedPointArrayList.clear();
-        }
     }
 
     @Override
@@ -129,8 +82,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
 
         // TODO use render to texture?
-        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW),
-                EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
+        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
         mWidth = width;
         mHeight = height;
@@ -145,6 +97,125 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
+        generateBackFramebuffer();
+
+        // Generate and load textures
+        GLES20.glGenTextures(1, brushTextureArray, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, brushTextureArray[0]);
+        loadDrawableToTexture(R.drawable.brushdot2, context);
+
+        // Bind standard buffer
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 unused) {
+
+        // WARNING: Totally unsupported hack to enable GL_MAX
+        int GL_MAX = 0x8008;
+
+        GLES20.glViewport(0, 0, mWidth, mHeight);
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
+
+        // Bind back buffer
+        //GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
+
+        // Draw point
+        for (Point p : unrenderedPointArrayList) {
+            p.draw(mMVPMatrix, brushTextureArray[0]);
+        }
+
+        if(!unrenderedPointArrayList.isEmpty()) {
+            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
+            unrenderedPointArrayList.clear();
+        }
+
+        renderBackBufferToScreen();
+    }
+
+    private void renderBackBufferToScreen() {
+
+        // Bind default buffer
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+
+        // Generate mipmap
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
+        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        //GLES20.glUniform1i(.Uniforms[UNIFORM_BASIC_SAMPLER0], 0);
+
+        /*
+        GLES20.glVertexAttribPointer(ATTRIBUTE_BASIC_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), _screenQuadVertices);
+        GLES20.glVertexAttribPointer(ATTRIBUTE_BASIC_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &_screenQuadVertices[3] );
+        GLES20.glEnableVertexAttribArray(ATTRIBUTE_BASIC_POSITION);
+        GLES20.glEnableVertexAttribArray(ATTRIBUTE_BASIC_TEX_COORD);
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
+
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, _screenQuadIndices);
+        */
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+    }
+
+    /** Loads a drawable into the currently bound texture */
+    private void loadDrawableToTexture(int drawable, Context context) {
+        // loading texture
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), drawable);
+
+        // create nearest filtered texture
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+
+        // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+        // Clean up
+        bitmap.recycle();
+    }
+
+    /** Generates the framebuffer and texture necessary to render to a second screen */
+    private void generateBackFramebuffer() {
+
+        // Generate frame buffer and texture
+        GLES20.glGenFramebuffers(1, frameBufferArray, 0);
+
+        GLES20.glGenTextures(1, renderTextureArray, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
+
+        // Clamp the render texture to the edges
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+
+        // Make sure that mWidth and mHeight have been set and are nonzero
+        if(mWidth == 0 || mHeight == 0) {
+            System.err.println("Height or width can not be zero");
+        }
+
+        // Fill with blank image
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, mWidth, mHeight, 0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, null);
+
+        // Bind to framebuffer
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, renderTextureArray[0], 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
+
+        // Check status
+        int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+        if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
+            System.err.println("Framebuffer error: " + status);
+        }
     }
 
     /**
