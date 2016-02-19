@@ -28,6 +28,10 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 /**
@@ -54,12 +58,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int mHeight;
     private float mRatio;
 
+    private FloatBuffer textureBuffer;
+    private static float textureCoordinates[] = {
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f
+    };
+
+    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 };
+
     private int[] frameBufferArray = new int[1];
     private int[] depthBufferArray = new int[1];
     private int[] renderTextureArray = new int[1];
-
     private int[] brushTextureArray = new int[1];
-
 
     private TouchData prevTouchData;
     private ArrayList<Point> unrenderedPointArrayList;
@@ -109,6 +121,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Bind standard buffer
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+
+        ByteBuffer bb2 = ByteBuffer.allocateDirect(textureCoordinates.length * 4);
+        bb2.order(ByteOrder.nativeOrder());
+        textureBuffer = bb2.asFloatBuffer();
+        textureBuffer.put(textureCoordinates);
+        textureBuffer.position(0);
     }
 
     @Override
@@ -153,16 +171,35 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         //GLES20.glUniform1i(.Uniforms[UNIFORM_BASIC_SAMPLER0], 0);
 
-        /*
-        GLES20.glVertexAttribPointer(ATTRIBUTE_BASIC_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), _screenQuadVertices);
-        GLES20.glVertexAttribPointer(ATTRIBUTE_BASIC_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &_screenQuadVertices[3] );
-        GLES20.glEnableVertexAttribArray(ATTRIBUTE_BASIC_POSITION);
-        GLES20.glEnableVertexAttribArray(ATTRIBUTE_BASIC_TEX_COORD);
+        // get handle to vertex shader's vPosition member
+        int mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
+        MyGLRenderer.checkGlError("glGetAttribLocation");
+
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+        GLES20.glVertexAttribPointer(
+                mTextureCoordinateHandle, 2,
+                GLES20.GL_FLOAT, false,
+                textureStride, textureBuffer);
+
+        GLES20.glVertexAttribPointer(mPositionHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, textureBuffer);
+        GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, textureBuffer);
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(mTexCoordHandle);
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, _screenQuadIndices);
-        */
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 2 bytes per short)
+                drawOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
+        ShortBuffer drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put(drawOrder);
+        drawListBuffer.position(0);
+
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length, GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
