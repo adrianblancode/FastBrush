@@ -39,12 +39,12 @@ public class BackBufferSquare extends TexturedSquare {
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public BackBufferSquare(float ratio) {
-        vertexBuffer = initBuffer(getTranslatedVertexCoords(DEFAULT_SQUARE_COORDS, ratio));
-        textureBuffer = initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        vertexBuffer = GLhelper.initBuffer(getTranslatedVertexCoords(DEFAULT_SQUARE_COORDS, ratio));
+        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
         sProgram = GLES20.glCreateProgram();
-        loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
+        GLhelper.loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -59,7 +59,7 @@ public class BackBufferSquare extends TexturedSquare {
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
-        MyGLRenderer.checkGlError("glGetAttribLocation");
+        GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -72,11 +72,11 @@ public class BackBufferSquare extends TexturedSquare {
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
+        GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        MyGLRenderer.checkGlError("glUniformMatrix4fv");
+        GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
         mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");

@@ -70,15 +70,23 @@ public class TouchData {
         if(Utils.floatsAreEquivalent(pressure, 1.0f)) {
             return 1.0f;
         } else {
-            return pressure / (pressure * 10f);
+            return pressure / (size * 10f);
         }
     }
 
     /** Takes a touch size and returns the normalized size [0, 1] */
     public float getNormalizedTouchSize() {
 
-        float TOUCH_SIZE_MIN = 0.2f; // The minimum touch size treshold
-        float TOUCH_SIZE_MAX = 0.4f; // The maximum touch size treshold
+        float TOUCH_SIZE_MIN; // The minimum touch size treshold
+        float TOUCH_SIZE_MAX; // The maximum touch size treshold
+
+        if(Utils.isTablet()) {
+            TOUCH_SIZE_MIN = 0.1f;
+            TOUCH_SIZE_MAX = 0.25f;
+        } else {
+            TOUCH_SIZE_MIN = 0.2f;
+            TOUCH_SIZE_MAX = 0.4f;
+        }
 
         return Utils.normalize(size * getNormalizedPressure(), TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
     }

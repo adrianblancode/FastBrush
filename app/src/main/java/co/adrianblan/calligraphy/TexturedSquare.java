@@ -23,7 +23,7 @@ import java.nio.ShortBuffer;
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class TexturedSquare extends GLobject {
+public class TexturedSquare {
 
     protected static final String DEFAULT_VERTEX_SHADER_CODE =
             // This matrix member variable provides a hook to manipulate
@@ -83,12 +83,12 @@ public class TexturedSquare extends GLobject {
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public TexturedSquare() {
-        vertexBuffer = initBuffer(DEFAULT_SQUARE_COORDS);
-        textureBuffer = initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        vertexBuffer = GLhelper.initBuffer(DEFAULT_SQUARE_COORDS);
+        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
         sProgram = GLES20.glCreateProgram();
-        loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
+        GLhelper.loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -103,7 +103,7 @@ public class TexturedSquare extends GLobject {
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
-        MyGLRenderer.checkGlError("glGetAttribLocation");
+        GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -116,11 +116,11 @@ public class TexturedSquare extends GLobject {
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
+        GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        MyGLRenderer.checkGlError("glUniformMatrix4fv");
+        GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
         mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");

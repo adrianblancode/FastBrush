@@ -74,13 +74,13 @@ public class Point extends TexturedSquare {
      */
     public Point() {
 
-        vertexBuffer = initBuffer(DEFAULT_SQUARE_COORDS);
+        vertexBuffer = GLhelper.initBuffer(DEFAULT_SQUARE_COORDS);
 
-        textureBuffer = initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
         sProgram = GLES20.glCreateProgram();
-        loadShaders(sProgram, vertexShaderCode, fragmentShaderCode);
+        GLhelper.loadShaders(sProgram, vertexShaderCode, fragmentShaderCode);
 
         mColor = blackColor.clone();
     }
@@ -107,7 +107,7 @@ public class Point extends TexturedSquare {
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
-        MyGLRenderer.checkGlError("glGetAttribLocation");
+        GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -120,18 +120,18 @@ public class Point extends TexturedSquare {
 
         // Get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(sProgram, "vColor");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
+        GLhelper.checkGlError("glGetUniformLocation");
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, mColor, 0);
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
+        GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        MyGLRenderer.checkGlError("glUniformMatrix4fv");
+        GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
         mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");
@@ -184,9 +184,9 @@ public class Point extends TexturedSquare {
     /** Takes pressure, and returns the alpha for that pressure */
     private static float getAlpha(float normalizedSize) {
 
-        float ALPHA_BASE = 0.40f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.35f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.35f; // The maximum positive change treshold in alpha
+        float ALPHA_BASE = 0.50f; // The base alpha level
+        float ALPHA_DELTA_MIN = -0.40f; // The maximum negative change treshold in alpha
+        float ALPHA_DELTA_MAX = 0.40f; // The maximum positive change treshold in alpha
 
         return Utils.clamp(ALPHA_BASE * (1f - normalizedSize) * 2.0f, ALPHA_BASE + ALPHA_DELTA_MIN,
                 ALPHA_BASE + ALPHA_DELTA_MAX);

@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set immersive mode if >= Android 4.4
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            uiVisibilityFlags = uiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE;
+            uiVisibilityFlags = uiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
 
         getWindow().getDecorView().setSystemUiVisibility(uiVisibilityFlags);

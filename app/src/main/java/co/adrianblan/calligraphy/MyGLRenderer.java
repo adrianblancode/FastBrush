@@ -31,6 +31,7 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
@@ -44,8 +45,6 @@ import java.util.ArrayList;
  * </ul>
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
-
-    private static final String TAG = "MyGLRenderer";
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -110,7 +109,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Generate and load textures
         GLES20.glGenTextures(1, brushTextureArray, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, brushTextureArray[0]);
-        loadDrawableToTexture(R.drawable.brushdot2, context);
+        loadDrawableToTexture(R.drawable.brushdry, context);
 
         // Bind standard buffer
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
@@ -193,6 +192,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             System.err.println("Height or width can not be zero");
         }
 
+        int[] maxTextureSize = new int[1];
+        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
+
+        if(maxTextureSize[0] < mWidth) {
+            System.err.println("Texture size not large enough! " + maxTextureSize[0] + " < " + mWidth);
+        }
+
         // Depth buffer
         GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
         GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, mWidth, mHeight);
@@ -214,53 +220,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    /**
-     * Utility method for compiling a OpenGL shader.
-     *
-     * <p><strong>Note:</strong> When developing shaders, use the checkGlError()
-     * method to debug shader coding errors.</p>
-     *
-     * @param type - Vertex or fragment shader type.
-     * @param shaderCode - String containing the shader code.
-     * @return - Returns an id for the shader.
-     */
-    public static int loadShader(int type, String shaderCode){
-
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shaderId = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shaderId, shaderCode);
-        GLES20.glCompileShader(shaderId);
-
-        return shaderId;
-    }
-
-    /**
-    * Utility method for debugging OpenGL calls. Provide the name of the call
-    * just after making it:
-    *
-    * <pre>
-    * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-    * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
-    *
-    * If the operation is not successful, the check throws an error.
-    *
-    * @param glOperation - Name of the OpenGL call to check.
-    */
-    public static void checkGlError(String glOperation) {
-        int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
-        }
-    }
-
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedTouchData(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.005f;
+        final float MIN_DISTANCE = 0.003f;
 
         if(prevTouchData == null) {
             addPoint(touchData);
