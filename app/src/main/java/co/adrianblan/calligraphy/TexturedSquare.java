@@ -15,19 +15,17 @@
  */
 package co.adrianblan.calligraphy;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import android.opengl.GLES20;
+
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import android.opengl.GLES20;
-
 /**
- * A Square object for use as a drawn object in OpenGL ES 2.0.
+ * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class Point extends TexturedSquare {
+public class TexturedSquare extends GLobject {
 
-    private static final String vertexShaderCode =
+    protected static final String DEFAULT_VERTEX_SHADER_CODE =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
@@ -43,46 +41,54 @@ public class Point extends TexturedSquare {
             "  v_TexCoordinate = a_TexCoordinate;" +
             "}";
 
-    private static final String fragmentShaderCode =
+    protected static final String DEFAULT_FRAGMENT_SHADER_CODE =
             "precision mediump float;" +
-            "uniform vec4 vColor;" +
             "uniform sampler2D u_Texture;" +
             "varying vec2 v_TexCoordinate;" +
             "void main() {" +
-            //"  gl_FragColor = vColor;" +
-            "  vec4 col = vColor * texture2D(u_Texture, v_TexCoordinate);" +
-            //"  col.w = vColor.w;" +
-            "  gl_FragColor = col;" +
+            "  gl_FragColor = texture2D(u_Texture, v_TexCoordinate);" +
             "}";
 
-    private final FloatBuffer vertexBuffer;
-    private final FloatBuffer textureBuffer;
-    private static ShortBuffer textureDrawOrderBuffer;
+    private FloatBuffer vertexBuffer;
+    private FloatBuffer textureBuffer;
+    private ShortBuffer textureDrawOrderBuffer;
 
-    private static int sProgram;
+    private int sProgram;
     private int mPositionHandle;
-    private int mColorHandle;
     private int mMVPMatrixHandle;
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
 
-    static final float blackColor[] = {0f, 0f, 0f, 1.0f};
-    private float [] mColor;
+    protected static final float DEFAULT_SQUARE_COORDS[] = {
+            -1.0f,  1.0f, 0.0f,   // top left
+            -1.0f, -1.0f, 0.0f,   // bottom left
+            1.0f, -1.0f, 0.0f,    // bottom right
+            1.0f,  1.0f, 0.0f     // top right
+    };
+
+    protected static final float DEFAULT_TEXTURE_COORDS[] = {
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f
+    };
+
+    protected static final short DEFAULT_TEXTURE_DRAW_ORDER[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+
+    protected static final int DEFAULT_COORDS_PER_SQUARE_VERTEX = 3;
+    protected static final int DEFAULT_SQUARE_VERTEX_STRIDE = 3 * 4; // 4 bytes per vertex
+    protected static final int DEFAULT_TEXTURE_VERTEX_STRIDE = 2 * 4;
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Point() {
-
+    public TexturedSquare() {
         vertexBuffer = initBuffer(DEFAULT_SQUARE_COORDS);
-
         textureBuffer = initBuffer(DEFAULT_TEXTURE_COORDS);
         textureDrawOrderBuffer = initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
         sProgram = GLES20.glCreateProgram();
-        loadShaders(sProgram, vertexShaderCode, fragmentShaderCode);
-
-        mColor = blackColor.clone();
+        loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -91,25 +97,15 @@ public class Point extends TexturedSquare {
      * @param mvpMatrix - The Model View Project matrix in which to draw
      * this shape.
      */
-    public void draw(float[] mvpMatrix, int texture, TouchData touchData) {
+    public void draw(float[] mvpMatrix, int texture) {
         // Add program to OpenGL environment
         GLES20.glUseProgram(sProgram);
-
-        // Init properties for touch data
-        vertexBuffer.clear();
-        vertexBuffer.put(getTranslatedVertexCoords(DEFAULT_SQUARE_COORDS, touchData.getPosition(),
-                touchData.getNormalizedTouchSize() * 0.2f + 0.03f));
-        vertexBuffer.position(0);
-
-        mColor[3] = getAlpha(touchData.getNormalizedTouchSize());
-
-        // Shader code
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
         MyGLRenderer.checkGlError("glGetAttribLocation");
 
-        // Enable a handle to the triangle vertices
+        // Enable a handle to the vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
@@ -117,13 +113,6 @@ public class Point extends TexturedSquare {
                 mPositionHandle, DEFAULT_COORDS_PER_SQUARE_VERTEX,
                 GLES20.GL_FLOAT, false,
                 DEFAULT_SQUARE_VERTEX_STRIDE, vertexBuffer);
-
-        // Get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(sProgram, "vColor");
-        MyGLRenderer.checkGlError("glGetUniformLocation");
-
-        // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, mColor, 0);
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
@@ -163,32 +152,5 @@ public class Point extends TexturedSquare {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mTextureCoordinateHandle);
-    }
-
-    /** Returns a matrix of vertex coords that has been translated in x and y axis */
-    private float[] getTranslatedVertexCoords(float[] vertexCoords, Vector2 position, float vertexScale) {
-        float [] coords = vertexCoords.clone();
-
-        for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += DEFAULT_COORDS_PER_SQUARE_VERTEX) {
-            coords[vertexOffset + 0] *= vertexScale;
-            coords[vertexOffset + 1] *= vertexScale;
-            coords[vertexOffset + 2] *= vertexScale;
-
-            coords[vertexOffset + 0] += position.getX();
-            coords[vertexOffset + 1] += position.getY();
-        }
-
-        return coords;
-    }
-
-    /** Takes pressure, and returns the alpha for that pressure */
-    private static float getAlpha(float normalizedSize) {
-
-        float ALPHA_BASE = 0.40f; // The base alpha level
-        float ALPHA_DELTA_MIN = -0.35f; // The maximum negative change treshold in alpha
-        float ALPHA_DELTA_MAX = 0.35f; // The maximum positive change treshold in alpha
-
-        return Utils.clamp(ALPHA_BASE * (1f - normalizedSize) * 2.0f, ALPHA_BASE + ALPHA_DELTA_MIN,
-                ALPHA_BASE + ALPHA_DELTA_MAX);
     }
 }

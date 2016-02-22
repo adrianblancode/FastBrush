@@ -63,8 +63,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] renderTextureArray = new int[1];
     private int[] brushTextureArray = new int[1];
 
+    private Point point;
     private TouchData prevTouchData;
-    private ArrayList<Point> unrenderedPointArrayList;
+    private ArrayList<TouchData> unrenderedPointArrayList;
     private BackBufferSquare backBufferSquare;
 
     public MyGLRenderer(Context context) {
@@ -77,6 +78,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         unrenderedPointArrayList = new ArrayList<>();
+        point = new Point();
     }
 
     @Override
@@ -138,12 +140,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
         // Draw everything to back buffer
-        for (Point p : unrenderedPointArrayList) {
-            p.draw(mMVPMatrix, brushTextureArray[0]);
+        for (TouchData td : unrenderedPointArrayList) {
+            point.draw(mMVPMatrix, brushTextureArray[0], td);
         }
 
         if(!unrenderedPointArrayList.isEmpty()) {
-            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1).getTouchData();
+            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
             unrenderedPointArrayList.clear();
         }
 
@@ -226,13 +228,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
+        int shaderId = GLES20.glCreateShader(type);
 
         // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
+        GLES20.glShaderSource(shaderId, shaderCode);
+        GLES20.glCompileShader(shaderId);
 
-        return shader;
+        return shaderId;
     }
 
     /**
@@ -311,8 +313,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Takes a coord and adds it to the renderer */
     public void addPoint(TouchData touchData) {
-        Point p = new Point(touchData);
-        unrenderedPointArrayList.add(p);
+        unrenderedPointArrayList.add(touchData);
         prevTouchData = touchData;
     }
 
