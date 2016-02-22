@@ -109,7 +109,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Generate and load textures
         GLES20.glGenTextures(1, brushTextureArray, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, brushTextureArray[0]);
-        loadDrawableToTexture(R.drawable.brushdry, context);
+        loadDrawableToTexture(R.drawable.brushdot2, context);
 
         // Bind standard buffer
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);

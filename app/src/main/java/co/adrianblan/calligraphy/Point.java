@@ -21,6 +21,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 
 /**
  * A Square object for use as a drawn object in OpenGL ES 2.0.
@@ -167,7 +168,10 @@ public class Point extends TexturedSquare {
 
     /** Returns a matrix of vertex coords that has been translated in x and y axis */
     private float[] getTranslatedVertexCoords(float[] vertexCoords, Vector2 position, float vertexScale) {
+
         float [] coords = vertexCoords.clone();
+
+        rotateMatrix(coords);
 
         for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += DEFAULT_COORDS_PER_SQUARE_VERTEX) {
             coords[vertexOffset + 0] *= vertexScale;
@@ -179,6 +183,30 @@ public class Point extends TexturedSquare {
         }
 
         return coords;
+    }
+
+    /** Rotates a 3x3 matrix by a random amount */
+    private void rotateMatrix(float[] coords) {
+        float [] vector = {0f, 0f, 0f, 1f};
+
+        int angle = (int)(Math.random() * 361);
+        float [] rotationMatrix = new float[16];
+        Matrix.setIdentityM(rotationMatrix, 0);
+
+        for(int i = 0; i < 4; i++) {
+
+            vector[0] = coords[0 + i];
+            vector[1] = coords[1 + i];
+            vector[2] = coords[2 + i];
+
+            // TODO buggy as hell
+            Matrix.setRotateM(rotationMatrix, 0, angle, 0, 0, 1f);
+            Matrix.multiplyMV(coords, 0, rotationMatrix, 0, vector, 0);
+
+            coords[0 + i] = vector[0];
+            coords[1 + i] = vector[1];
+            coords[2 + i] = vector[2];
+        }
     }
 
     /** Takes pressure, and returns the alpha for that pressure */
