@@ -86,7 +86,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
 
         // TODO use render to texture?
-        //EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
+        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
         mWidth = width;
         mHeight = height;
@@ -137,7 +137,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
         GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
-        // Draw point
+        // Draw everything to back buffer
         for (Point p : unrenderedPointArrayList) {
             p.draw(mMVPMatrix, brushTextureArray[0]);
         }
@@ -147,19 +147,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             unrenderedPointArrayList.clear();
         }
 
-        renderBackBufferToScreen();
-    }
-
-    private void renderBackBufferToScreen() {
-
         // Bind default buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
-        // Allocate and generate mipmap in renderTextureArray
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
-        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-
+        // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
     }
 

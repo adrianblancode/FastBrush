@@ -96,7 +96,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     @Override
                     public void run() {
                         mRenderer.clearPoints();
-
                     }
                 });
 
