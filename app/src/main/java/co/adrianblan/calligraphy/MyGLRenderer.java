@@ -87,8 +87,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
 
-        // TODO use render to texture?
-        //EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
+        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
         mWidth = width;
         mHeight = height;
@@ -115,6 +114,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Bind standard buffer
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
     @Override
@@ -124,44 +125,49 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         int GL_MAX = 0x8008;
 
         GLES20.glViewport(0, 0, mWidth, mHeight);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Bind back buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
 
+        // Enable blending
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
         //GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
+        // Enable depth testing to slightly above paper
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
         GLES20.glDepthMask(true);
+        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glClearDepthf(0.1f);
 
-        GLES20.glLineWidth(2f);
+        GLES20.glLineWidth(3f);
 
-        System.out.println("Touch points:" + unrenderedPointArrayList.size());
-
+        // Imprint brush on paper
         for(TouchData td : unrenderedPointArrayList) {
             brush.draw(mMVPMatrix, td);
         }
 
+        // We rendered all the points, now we clear them
         unrenderedPointArrayList.clear();
 
         // Bind default buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
 
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        // Disable blending and depth test
         GLES20.glDisable(GLES20.GL_BLEND);
-
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+        // Clear color and depth
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
+        // Draw brush
         if(prevTouchData != null) {
             brush.draw(mMVPMatrix, prevTouchData);
         }
@@ -218,18 +224,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Generate texture
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mWidth, mHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
 
-        // Bind depth buffer and texture to frame buffer
+        // Bind depth buffer and texture to back buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, renderTextureArray[0], 0);
         GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
 
         // Check status of framebuffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
         int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
 
         if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
             System.err.println("Framebuffer error: " + status);
         }
+
+        // Clear back buffer
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */

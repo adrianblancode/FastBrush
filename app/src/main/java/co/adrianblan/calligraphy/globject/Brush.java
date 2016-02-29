@@ -13,7 +13,7 @@ public class Brush {
     private ArrayList<Bristle> bristles;
     private Vector3 position;
 
-    private static final float NUM_BRISTLES = 50;
+    private static final float NUM_BRISTLES = 300;
 
     public Brush() {
         bristles = new ArrayList<>();
