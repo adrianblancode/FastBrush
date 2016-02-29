@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.utils;
 
 import android.opengl.GLES20;
 import android.util.Log;
@@ -13,12 +13,17 @@ public abstract class GLhelper {
 
     private static final String TAG = "GLhelper";
 
-    /** Initializes a buffer with the size of content, and places content inside */
-    public static FloatBuffer initBuffer(float [] content) {
-        ByteBuffer bb = ByteBuffer.allocateDirect(content.length * 4);
+    /** Initializes a buffer with the size of content */
+    public static FloatBuffer initFloatBuffer(int size) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(size * 4);
         bb.order(ByteOrder.nativeOrder());
 
-        FloatBuffer buffer = bb.asFloatBuffer();
+        return bb.asFloatBuffer();
+    }
+
+    /** Initializes a buffer with the size of content, and places content inside */
+    public static FloatBuffer initFloatBuffer(float[] content) {
+        FloatBuffer buffer = initFloatBuffer(content.length);
         buffer.put(content);
         buffer.position(0);
 
@@ -26,7 +31,7 @@ public abstract class GLhelper {
     }
 
     /** Initializes a buffer with the size of content, and places content inside */
-    public static ShortBuffer initBuffer(short [] content) {
+    public static ShortBuffer initShortBuffer(short[] content) {
         ByteBuffer bb = ByteBuffer.allocateDirect(content.length * 2);
         bb.order(ByteOrder.nativeOrder());
 

@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.globject;
 
 import android.opengl.GLES20;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import co.adrianblan.calligraphy.utils.GLhelper;
+
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class BackBufferSquare extends TexturedSquare {
+public class BackBufferSquare {
 
     private final FloatBuffer vertexBuffer;
     private final FloatBuffer textureBuffer;
     private static ShortBuffer textureDrawOrderBuffer;
 
-    private static int sProgram;
+    private int mProgram;
     private int mPositionHandle;
     private int mMVPMatrixHandle;
     private int mTextureUniformHandle;
@@ -39,12 +41,13 @@ public class BackBufferSquare extends TexturedSquare {
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public BackBufferSquare(float ratio) {
-        vertexBuffer = GLhelper.initBuffer(getTranslatedVertexCoords(DEFAULT_SQUARE_COORDS, ratio));
-        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        vertexBuffer = GLhelper.initFloatBuffer(getTranslatedVertexCoords(TexturedSquare.DEFAULT_SQUARE_COORDS, ratio));
+        textureBuffer = GLhelper.initFloatBuffer(TexturedSquare.DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initShortBuffer(TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER);
 
-        sProgram = GLES20.glCreateProgram();
-        GLhelper.loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
+        mProgram = GLES20.glCreateProgram();
+        GLhelper.loadShaders(mProgram, TexturedSquare.DEFAULT_VERTEX_SHADER_CODE,
+                TexturedSquare.DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -55,10 +58,10 @@ public class BackBufferSquare extends TexturedSquare {
      */
     public void draw(float[] mvpMatrix, int texture) {
         // Add program to OpenGL environment
-        GLES20.glUseProgram(sProgram);
+        GLES20.glUseProgram(mProgram);
 
         // Get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
@@ -66,12 +69,12 @@ public class BackBufferSquare extends TexturedSquare {
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(
-                mPositionHandle, DEFAULT_COORDS_PER_SQUARE_VERTEX,
+                mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                DEFAULT_SQUARE_VERTEX_STRIDE, vertexBuffer);
+                GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
 
         // Get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
@@ -79,8 +82,8 @@ public class BackBufferSquare extends TexturedSquare {
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
-        mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");
-        mTextureCoordinateHandle = GLES20.glGetAttribLocation(sProgram, "a_TexCoordinate");
+        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
+        mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "a_TexCoordinate");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
@@ -89,7 +92,7 @@ public class BackBufferSquare extends TexturedSquare {
         GLES20.glVertexAttribPointer(
                 mTextureCoordinateHandle, 2,
                 GLES20.GL_FLOAT, false,
-                DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
+                TexturedSquare.DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
 
         // Set the active texture unit to texture unit 0.
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -102,7 +105,7 @@ public class BackBufferSquare extends TexturedSquare {
 
         // Draw the square
         GLES20.glDrawElements(
-                GLES20.GL_TRIANGLES, DEFAULT_TEXTURE_DRAW_ORDER.length,
+                GLES20.GL_TRIANGLES, TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER.length,
                 GLES20.GL_UNSIGNED_SHORT, textureDrawOrderBuffer);
 
         // Disable vertex array

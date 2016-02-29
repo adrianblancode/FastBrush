@@ -15,11 +15,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*
-        glSurfaceView = new MyGLSurfaceView(this);
-        setContentView(glSurfaceView);
-        */
-
         setContentView(co.adrianblan.calligraphy.R.layout.activity_main);
         FrameLayout frame = (FrameLayout) findViewById(co.adrianblan.calligraphy.R.id.frame);
 

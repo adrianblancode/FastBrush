@@ -26,14 +26,14 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
+
+import co.adrianblan.calligraphy.globject.BackBufferSquare;
+import co.adrianblan.calligraphy.globject.Brush;
+import co.adrianblan.calligraphy.globject.Point;
+import co.adrianblan.calligraphy.utils.Utils;
+import co.adrianblan.calligraphy.vector.Vector2;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class
@@ -50,6 +50,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
+    private final int CAMERA_DISTANCE = 10;
 
     private Context context;
 
@@ -62,6 +63,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] renderTextureArray = new int[1];
     private int[] brushTextureArray = new int[1];
 
+    private Brush brush;
     private Point point;
     private TouchData prevTouchData;
     private ArrayList<TouchData> unrenderedPointArrayList;
@@ -78,6 +80,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         unrenderedPointArrayList = new ArrayList<>();
         point = new Point();
+        brush = new Brush();
     }
 
     @Override
@@ -87,7 +90,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
 
         // TODO use render to texture?
-        EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
+        //EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
         mWidth = width;
         mHeight = height;
@@ -98,10 +101,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, 3, 7);
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -124,11 +127,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glViewport(0, 0, mWidth, mHeight);
 
-        // Bind default buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
         // Bind back buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
@@ -143,16 +141,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             point.draw(mMVPMatrix, brushTextureArray[0], td);
         }
 
-        if(!unrenderedPointArrayList.isEmpty()) {
-            prevTouchData = unrenderedPointArrayList.get(unrenderedPointArrayList.size() - 1);
-            unrenderedPointArrayList.clear();
-        }
+        unrenderedPointArrayList.clear();
 
         // Bind default buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
+
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES20.glDisable(GLES20.GL_BLEND);
 
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
+
+        if(prevTouchData != null) {
+            GLES20.glLineWidth(100f);
+            brush.draw(mMVPMatrix, prevTouchData);
+        }
     }
 
     /** Loads a drawable into the currently bound texture */

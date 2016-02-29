@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.globject;
 
 import android.opengl.GLES20;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
+import co.adrianblan.calligraphy.utils.GLhelper;
 
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
@@ -53,7 +55,7 @@ public class TexturedSquare {
     private FloatBuffer textureBuffer;
     private ShortBuffer textureDrawOrderBuffer;
 
-    private int sProgram;
+    private int mProgram;
     private int mPositionHandle;
     private int mMVPMatrixHandle;
     private int mTextureUniformHandle;
@@ -74,21 +76,18 @@ public class TexturedSquare {
     };
 
     protected static final short DEFAULT_TEXTURE_DRAW_ORDER[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
-
-    protected static final int DEFAULT_COORDS_PER_SQUARE_VERTEX = 3;
-    protected static final int DEFAULT_SQUARE_VERTEX_STRIDE = 3 * 4; // 4 bytes per vertex
     protected static final int DEFAULT_TEXTURE_VERTEX_STRIDE = 2 * 4;
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
     public TexturedSquare() {
-        vertexBuffer = GLhelper.initBuffer(DEFAULT_SQUARE_COORDS);
-        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        vertexBuffer = GLhelper.initFloatBuffer(DEFAULT_SQUARE_COORDS);
+        textureBuffer = GLhelper.initFloatBuffer(DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initShortBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
-        sProgram = GLES20.glCreateProgram();
-        GLhelper.loadShaders(sProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
+        mProgram = GLES20.glCreateProgram();
+        GLhelper.loadShaders(mProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -99,10 +98,10 @@ public class TexturedSquare {
      */
     public void draw(float[] mvpMatrix, int texture) {
         // Add program to OpenGL environment
-        GLES20.glUseProgram(sProgram);
+        GLES20.glUseProgram(mProgram);
 
         // Get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the vertices
@@ -110,12 +109,12 @@ public class TexturedSquare {
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(
-                mPositionHandle, DEFAULT_COORDS_PER_SQUARE_VERTEX,
+                mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                DEFAULT_SQUARE_VERTEX_STRIDE, vertexBuffer);
+                GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
 
         // Get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
@@ -123,8 +122,8 @@ public class TexturedSquare {
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
-        mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");
-        mTextureCoordinateHandle = GLES20.glGetAttribLocation(sProgram, "a_TexCoordinate");
+        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
+        mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "a_TexCoordinate");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);

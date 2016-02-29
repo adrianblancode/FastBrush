@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.vector;
 
 /** Defines a vector in 2D space */
 public class Vector2 {

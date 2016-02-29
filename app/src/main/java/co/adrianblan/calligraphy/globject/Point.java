@@ -13,20 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.globject;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
+import co.adrianblan.calligraphy.TouchData;
+import co.adrianblan.calligraphy.utils.GLhelper;
+import co.adrianblan.calligraphy.utils.Utils;
+import co.adrianblan.calligraphy.vector.Vector2;
+
 /**
  * A Square object for use as a drawn object in OpenGL ES 2.0.
  */
-public class Point extends TexturedSquare {
+public class Point {
 
     private static final String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
@@ -60,14 +63,13 @@ public class Point extends TexturedSquare {
     private final FloatBuffer textureBuffer;
     private static ShortBuffer textureDrawOrderBuffer;
 
-    private static int sProgram;
+    private int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
 
-    static final float blackColor[] = {0f, 0f, 0f, 1.0f};
     private float [] mColor;
 
     /**
@@ -75,15 +77,15 @@ public class Point extends TexturedSquare {
      */
     public Point() {
 
-        vertexBuffer = GLhelper.initBuffer(DEFAULT_SQUARE_COORDS);
+        vertexBuffer = GLhelper.initFloatBuffer(TexturedSquare.DEFAULT_SQUARE_COORDS);
 
-        textureBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = GLhelper.initBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
+        textureBuffer = GLhelper.initFloatBuffer(TexturedSquare.DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initShortBuffer(TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER);
 
-        sProgram = GLES20.glCreateProgram();
-        GLhelper.loadShaders(sProgram, vertexShaderCode, fragmentShaderCode);
+        mProgram = GLES20.glCreateProgram();
+        GLhelper.loadShaders(mProgram, vertexShaderCode, fragmentShaderCode);
 
-        mColor = blackColor.clone();
+        mColor = Utils.blackColor;
     }
 
     /**
@@ -94,11 +96,11 @@ public class Point extends TexturedSquare {
      */
     public void draw(float[] mvpMatrix, int texture, TouchData touchData) {
         // Add program to OpenGL environment
-        GLES20.glUseProgram(sProgram);
+        GLES20.glUseProgram(mProgram);
 
         // Init properties for touch data
         vertexBuffer.clear();
-        vertexBuffer.put(getTranslatedVertexCoords(DEFAULT_SQUARE_COORDS, touchData.getPosition(),
+        vertexBuffer.put(getTranslatedVertexCoords(TexturedSquare.DEFAULT_SQUARE_COORDS, touchData.getPosition(),
                 touchData.getNormalizedTouchSize() * 0.2f + 0.03f));
         vertexBuffer.position(0);
 
@@ -107,7 +109,7 @@ public class Point extends TexturedSquare {
         // Shader code
 
         // Get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(sProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
@@ -115,19 +117,19 @@ public class Point extends TexturedSquare {
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(
-                mPositionHandle, DEFAULT_COORDS_PER_SQUARE_VERTEX,
+                mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                DEFAULT_SQUARE_VERTEX_STRIDE, vertexBuffer);
+                GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
 
         // Get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(sProgram, "vColor");
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, mColor, 0);
 
         // Get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(sProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
@@ -135,8 +137,8 @@ public class Point extends TexturedSquare {
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
-        mTextureUniformHandle = GLES20.glGetUniformLocation(sProgram, "u_Texture");
-        mTextureCoordinateHandle = GLES20.glGetAttribLocation(sProgram, "a_TexCoordinate");
+        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
+        mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "a_TexCoordinate");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
@@ -145,7 +147,7 @@ public class Point extends TexturedSquare {
         GLES20.glVertexAttribPointer(
                 mTextureCoordinateHandle, 2,
                 GLES20.GL_FLOAT, false,
-                DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
+                TexturedSquare.DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
 
         // Set the active texture unit to texture unit 0.
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -158,7 +160,7 @@ public class Point extends TexturedSquare {
 
         // Draw the square
         GLES20.glDrawElements(
-                GLES20.GL_TRIANGLES, DEFAULT_TEXTURE_DRAW_ORDER.length,
+                GLES20.GL_TRIANGLES, TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER.length,
                 GLES20.GL_UNSIGNED_SHORT, textureDrawOrderBuffer);
 
         // Disable vertex array
@@ -171,9 +173,9 @@ public class Point extends TexturedSquare {
 
         float [] coords = vertexCoords.clone();
 
-        rotateMatrix(coords);
+        //rotateMatrix(coords);
 
-        for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += DEFAULT_COORDS_PER_SQUARE_VERTEX) {
+        for(int vertexOffset = 0; vertexOffset < coords.length; vertexOffset += GLobject.DEFAULT_COORDS_PER_VERTEX) {
             coords[vertexOffset + 0] *= vertexScale;
             coords[vertexOffset + 1] *= vertexScale;
             coords[vertexOffset + 2] *= vertexScale;
@@ -201,7 +203,7 @@ public class Point extends TexturedSquare {
 
             // TODO buggy as hell
             Matrix.setRotateM(rotationMatrix, 0, angle, 0, 0, 1f);
-            Matrix.multiplyMV(coords, 0, rotationMatrix, 0, vector, 0);
+            Matrix.multiplyMV(vector, 0, rotationMatrix, 0, vector, 0);
 
             coords[0 + i] = vector[0];
             coords[1 + i] = vector[1];

@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.utils;
 
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
@@ -6,6 +6,8 @@ import android.view.Display;
 
 /** Utility functions */
 public class Utils {
+
+    public static final float blackColor[] = {0f, 0f, 0f, 1.0f};
 
     /** Returns the value of val, clamped between min and max */
     public static float clamp (float val, float min, float max) {
@@ -26,6 +28,43 @@ public class Utils {
         float epsilon = 0.0001f;
 
         return Math.abs(val1 - val2) < epsilon;
+    }
+
+    /**
+     * Wrapper for replacing data in a float array, taken from another array from index zero.
+     */
+    public static void replaceInFloatArray(float[] floatArray, int floatArrayIndex, float [] contentArray) {
+        replaceInFloatArray(floatArray, floatArrayIndex, contentArray, 0);
+    }
+
+    /**
+     * Takes a float array, and a content array. Replaces the data in the float array from index
+     * floatArrayIndex with the data from content array from contentArrayIndex.
+     *
+     * @param floatArray the array which data is replaced in
+     * @param floatArrayIndex the index which data should start to be replaced from
+     * @param contentArray the array which contains the content place in float array
+     * @param contentArrayIndex the index which content begins from
+     */
+    public static void replaceInFloatArray(float[] floatArray, int floatArrayIndex, float [] contentArray,
+                                           int contentArrayIndex) {
+
+        if(floatArrayIndex < 0 || contentArrayIndex < 0 || floatArrayIndex >= floatArray.length ||
+                contentArrayIndex >= contentArray.length) {
+            System.err.println("Invalid input indexes");
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        int contentArrayReplaceLength = contentArray.length - contentArrayIndex;
+
+        if(floatArrayIndex + contentArrayReplaceLength > floatArray.length) {
+            System.err.println("Float array cannot fit content");
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        for(int i = 0; floatArrayIndex + i < floatArray.length; i++) {
+            floatArray[floatArrayIndex + i] = contentArray[contentArrayIndex + i];
+        }
     }
 
     /** Returns a throttled value that is a given percent from previousvalue towards targetValue */

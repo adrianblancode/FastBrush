@@ -1,5 +1,8 @@
 package co.adrianblan.calligraphy;
 
+import co.adrianblan.calligraphy.utils.Utils;
+import co.adrianblan.calligraphy.vector.Vector2;
+
 /**
  * Class which encapsulates touch data.
  */

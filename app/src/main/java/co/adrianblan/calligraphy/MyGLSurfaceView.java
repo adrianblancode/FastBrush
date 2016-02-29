@@ -16,15 +16,13 @@
 package co.adrianblan.calligraphy;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+
+import co.adrianblan.calligraphy.vector.Vector2;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
@@ -41,6 +39,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
+        // Sets a paper background to the scene
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setBackgroundResource(R.drawable.paperbright);
@@ -98,6 +97,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                         mRenderer.clearPoints();
                     }
                 });
+                requestRender();
 
                 break;
         }
@@ -111,7 +111,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 mRenderer.clearScreen();
             }
         });
-
         requestRender();
     }
 }
