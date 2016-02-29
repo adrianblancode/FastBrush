@@ -15,7 +15,7 @@
  */
 package co.adrianblan.calligraphy.globject;
 
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -45,7 +45,7 @@ public class BackBufferSquare {
         textureBuffer = GLhelper.initFloatBuffer(TexturedSquare.DEFAULT_TEXTURE_COORDS);
         textureDrawOrderBuffer = GLhelper.initShortBuffer(TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER);
 
-        mProgram = GLES20.glCreateProgram();
+        mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, TexturedSquare.DEFAULT_VERTEX_SHADER_CODE,
                 TexturedSquare.DEFAULT_FRAGMENT_SHADER_CODE);
     }
@@ -58,59 +58,59 @@ public class BackBufferSquare {
      */
     public void draw(float[] mvpMatrix, int texture) {
         // Add program to OpenGL environment
-        GLES20.glUseProgram(mProgram);
+        GLES30.glUseProgram(mProgram);
 
         // Get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES30.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(
+        GLES30.glVertexAttribPointer(
                 mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+                GLES30.GL_FLOAT, false,
                 GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
 
         // Get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         /*  Textures */
-        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgram, "u_Texture");
-        mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgram, "a_TexCoordinate");
+        mTextureUniformHandle = GLES30.glGetUniformLocation(mProgram, "u_Texture");
+        mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgram, "a_TexCoordinate");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
+        GLES30.glEnableVertexAttribArray(mTextureCoordinateHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(
+        GLES30.glVertexAttribPointer(
                 mTextureCoordinateHandle, 2,
-                GLES20.GL_FLOAT, false,
+                GLES30.GL_FLOAT, false,
                 TexturedSquare.DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
 
         // Set the active texture unit to texture unit 0.
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
 
         // Bind the texture to this unit.
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture);
 
         // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-        GLES20.glUniform1i(mTextureUniformHandle, 0);
+        GLES30.glUniform1i(mTextureUniformHandle, 0);
 
         // Draw the square
-        GLES20.glDrawElements(
-                GLES20.GL_TRIANGLES, TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER.length,
-                GLES20.GL_UNSIGNED_SHORT, textureDrawOrderBuffer);
+        GLES30.glDrawElements(
+                GLES30.GL_TRIANGLES, TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER.length,
+                GLES30.GL_UNSIGNED_SHORT, textureDrawOrderBuffer);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-        GLES20.glDisableVertexAttribArray(mTextureCoordinateHandle);
+        GLES30.glDisableVertexAttribArray(mPositionHandle);
+        GLES30.glDisableVertexAttribArray(mTextureCoordinateHandle);
     }
 
     /** Returns a matrix of vertex coords that has been translated in x and y axis */

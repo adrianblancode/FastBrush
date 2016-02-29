@@ -1,6 +1,6 @@
 package co.adrianblan.calligraphy.globject;
 
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
 
@@ -42,7 +42,7 @@ public class Bristle {
         top = new Vector3(upperRadius * horizontal, upperRadius * vertical + VERTICAL_OFFSET, 0f);
         bottom = new Vector3(lowerRadius * horizontal, lowerRadius * vertical, -LENGTH + TIP_LENGTH * verticalAngle);
 
-        mProgram = GLES20.glCreateProgram();
+        mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
     }
@@ -52,40 +52,40 @@ public class Bristle {
         updateBristlePosition(brushPosition);
 
         // Add program to OpenGL environment
-        GLES20.glUseProgram(mProgram);
+        GLES30.glUseProgram(mProgram);
 
         // Get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES30.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(
+        GLES30.glVertexAttribPointer(
                 mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+                GLES30.GL_FLOAT, false,
                 GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, Utils.blackColor, 0);
+        GLES30.glUniform4fv(mColorHandle, 1, Utils.blackColor, 0);
 
         // Get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         // Draw line
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, 2);
+        GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2);
 
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES30.glDisableVertexAttribArray(mPositionHandle);
     }
 
     private void updateBristlePosition(Vector3 brushPosition) {

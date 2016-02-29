@@ -22,7 +22,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.EGL14;
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
@@ -75,7 +75,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         unrenderedPointArrayList = new ArrayList<>();
         brush = new Brush();
@@ -85,7 +85,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         // Adjust the viewport based on geometry changes,
         // such as screen rotation
-        GLES20.glViewport(0, 0, width, height);
+        GLES30.glViewport(0, 0, width, height);
 
         EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
@@ -107,43 +107,40 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // Generate and load textures
-        GLES20.glGenTextures(1, brushTextureArray, 0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, brushTextureArray[0]);
+        GLES30.glGenTextures(1, brushTextureArray, 0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, brushTextureArray[0]);
         loadDrawableToTexture(R.drawable.brushdot2, context);
 
         // Bind standard buffer
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
 
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
 
-        // WARNING: Totally unsupported hack to enable GL_MAX
-        int GL_MAX = 0x8008;
-
-        GLES20.glViewport(0, 0, mWidth, mHeight);
+        GLES30.glViewport(0, 0, mWidth, mHeight);
 
         // Bind back buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
 
         // Enable blending
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-        //GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
+        GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        //GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE);
+        //GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
 
         // Enable depth testing to slightly above paper
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-        GLES20.glDepthMask(true);
-        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-        GLES20.glClearDepthf(0.1f);
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES30.GL_LEQUAL);
+        GLES30.glDepthMask(true);
+        GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClearDepthf(0.1f);
 
-        GLES20.glLineWidth(3f);
+        GLES30.glLineWidth(3f);
 
         // Imprint brush on paper
         for(TouchData td : unrenderedPointArrayList) {
@@ -154,15 +151,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         unrenderedPointArrayList.clear();
 
         // Bind default buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
 
         // Disable blending and depth test
-        GLES20.glDisable(GLES20.GL_BLEND);
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
 
         // Clear color and depth
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
@@ -179,11 +176,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), drawable);
 
         // create nearest filtered texture
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+        GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST);
+        GLES30.glTexParameterf(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST);
 
         // Use Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0);
 
         // Clean up
         bitmap.recycle();
@@ -193,17 +190,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private void generateBackFramebuffer() {
 
         // Generate frame buffer and texture
-        GLES20.glGenFramebuffers(1, frameBufferArray, 0);
-        GLES20.glGenFramebuffers(1, depthBufferArray, 0);
+        GLES30.glGenFramebuffers(1, frameBufferArray, 0);
+        GLES30.glGenFramebuffers(1, depthBufferArray, 0);
 
-        GLES20.glGenTextures(1, renderTextureArray, 0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTextureArray[0]);
+        GLES30.glGenTextures(1, renderTextureArray, 0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, renderTextureArray[0]);
 
         // Clamp the render texture to the edges
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
 
         // Make sure that mWidth and mHeight have been set and are nonzero
         if(mWidth == 0 || mHeight == 0) {
@@ -211,35 +208,35 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         int[] maxTextureSize = new int[1];
-        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
+        GLES30.glGetIntegerv(GLES30.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
 
         if(maxTextureSize[0] < mWidth) {
             System.err.println("Texture size not large enough! " + maxTextureSize[0] + " < " + mWidth);
         }
 
         // Depth buffer
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
-        GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, mWidth, mHeight);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glRenderbufferStorage(GLES30.GL_RENDERBUFFER, GLES30.GL_DEPTH_COMPONENT16, mWidth, mHeight);
 
         // Generate texture
-        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mWidth, mHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, null);
 
         // Bind depth buffer and texture to back buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, renderTextureArray[0], 0);
-        GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, renderTextureArray[0], 0);
+        GLES30.glFramebufferRenderbuffer(GLES30.GL_FRAMEBUFFER, GLES30.GL_DEPTH_ATTACHMENT, GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
 
         // Check status of framebuffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
-        int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
+        int status = GLES30.glCheckFramebufferStatus(GLES30.GL_FRAMEBUFFER);
 
-        if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
+        if (status != GLES30.GL_FRAMEBUFFER_COMPLETE) {
             System.err.println("Framebuffer error: " + status);
         }
 
         // Clear back buffer
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
     }
 
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
@@ -312,14 +309,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         clearPoints();
 
         // Bind back buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
 
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         // Bind default buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, 0);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
     }
 
     /** Translates a viewport vector to world vector */

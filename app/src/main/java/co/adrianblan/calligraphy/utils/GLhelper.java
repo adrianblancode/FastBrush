@@ -1,6 +1,6 @@
 package co.adrianblan.calligraphy.utils;
 
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -52,13 +52,13 @@ public abstract class GLhelper {
     public static void loadShaders(int program, String vertexShaderCode, String fragmentShaderCode) {
         // prepare shaders and OpenGL program
         int vertexShaderId = loadShader(
-                GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+                GLES30.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShaderId = loadShader(
-                GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+                GLES30.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        GLES20.glAttachShader(program, vertexShaderId);   // add the vertex shader to program
-        GLES20.glAttachShader(program, fragmentShaderId); // add the fragment shader to program
-        GLES20.glLinkProgram(program);                  // create OpenGL program executables
+        GLES30.glAttachShader(program, vertexShaderId);   // add the vertex shader to program
+        GLES30.glAttachShader(program, fragmentShaderId); // add the fragment shader to program
+        GLES30.glLinkProgram(program);                  // create OpenGL program executables
     }
 
     /**
@@ -73,13 +73,13 @@ public abstract class GLhelper {
      */
     public static int loadShader(int type, String shaderCode){
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shaderId = GLES20.glCreateShader(type);
+        // create a vertex shader type (GLES30.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES30.GL_FRAGMENT_SHADER)
+        int shaderId = GLES30.glCreateShader(type);
 
         // add the source code to the shader and compile it
-        GLES20.glShaderSource(shaderId, shaderCode);
-        GLES20.glCompileShader(shaderId);
+        GLES30.glShaderSource(shaderId, shaderCode);
+        GLES30.glCompileShader(shaderId);
 
         return shaderId;
     }
@@ -89,7 +89,7 @@ public abstract class GLhelper {
      * just after making it:
      *
      * <pre>
-     * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+     * mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
      * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
      *
      * If the operation is not successful, the check throws an error.
@@ -98,7 +98,7 @@ public abstract class GLhelper {
      */
     public static void checkGlError(String glOperation) {
         int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR) {
             Log.e(TAG, glOperation + ": glError " + error);
             throw new RuntimeException(glOperation + ": glError " + error);
         }
