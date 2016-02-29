@@ -64,7 +64,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] brushTextureArray = new int[1];
 
     private Brush brush;
-    private Point point;
     private TouchData prevTouchData;
     private ArrayList<TouchData> unrenderedPointArrayList;
     private BackBufferSquare backBufferSquare;
@@ -79,7 +78,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         unrenderedPointArrayList = new ArrayList<>();
-        point = new Point();
         brush = new Brush();
     }
 
@@ -126,19 +124,28 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         int GL_MAX = 0x8008;
 
         GLES20.glViewport(0, 0, mWidth, mHeight);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Bind back buffer
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBufferArray[0]);
         GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthBufferArray[0]);
 
         GLES20.glEnable(GLES20.GL_BLEND);
-        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-        GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+        //GLES20.glBlendEquationSeparate(GLES20.GL_FUNC_ADD, GL_MAX);
 
-        // Draw everything to back buffer
-        for (TouchData td : unrenderedPointArrayList) {
-            point.draw(mMVPMatrix, brushTextureArray[0], td);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glDepthMask(true);
+        GLES20.glClearDepthf(0.1f);
+
+        GLES20.glLineWidth(2f);
+
+        System.out.println("Touch points:" + unrenderedPointArrayList.size());
+
+        for(TouchData td : unrenderedPointArrayList) {
+            brush.draw(mMVPMatrix, td);
         }
 
         unrenderedPointArrayList.clear();
@@ -150,11 +157,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glDisable(GLES20.GL_BLEND);
 
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
         if(prevTouchData != null) {
-            GLES20.glLineWidth(100f);
             brush.draw(mMVPMatrix, prevTouchData);
         }
     }
@@ -227,7 +235,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     private void addInterpolatedTouchData(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.003f;
+        final float MIN_DISTANCE = 0.004f;
 
         if(prevTouchData == null) {
             addPoint(touchData);

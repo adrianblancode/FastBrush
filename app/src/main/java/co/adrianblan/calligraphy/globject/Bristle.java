@@ -13,11 +13,12 @@ import co.adrianblan.calligraphy.vector.Vector3;
  */
 public class Bristle {
 
-    private static final float LENGTH = 2.0f;
-    private static final float VERTICAL_OFFSET = 0.5f;
+    public static final float LENGTH = 2.0f;
+    private static final float VERTICAL_OFFSET = 0.0f;
+    private static final float TIP_LENGTH = 0.1f;
 
-    private Vector3 start;
-    private Vector3 end;
+    private Vector3 top;
+    private Vector3 bottom;
 
     private final FloatBuffer vertexBuffer;
 
@@ -29,15 +30,17 @@ public class Bristle {
     public Bristle() {
         vertexBuffer = GLhelper.initFloatBuffer(6);
 
-        int angle = (int)(Math.random() * 361);
-        float horizontal = (float) Math.cos(angle);
-        float vertical = (float) Math.sin(angle);
+        float radiusAngle = (float) (Math.random() * 2 * Math.PI);
+        float verticalAngle = (float) Math.random();
+
+        float horizontal = (float) Math.cos(radiusAngle) * verticalAngle;
+        float vertical = (float) Math.sin(radiusAngle) * verticalAngle;
 
         float upperRadius = 0.4f;
-        float lowerRadius = 0.02f;
+        float lowerRadius = 0.2f;
 
-        start = new Vector3(upperRadius * horizontal, upperRadius * vertical + VERTICAL_OFFSET, 0.0f);
-        end = new Vector3(lowerRadius * horizontal, lowerRadius * vertical, -LENGTH);
+        top = new Vector3(upperRadius * horizontal, upperRadius * vertical + VERTICAL_OFFSET, 0f);
+        bottom = new Vector3(lowerRadius * horizontal, lowerRadius * vertical, -LENGTH + TIP_LENGTH * verticalAngle);
 
         mProgram = GLES20.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
@@ -86,16 +89,12 @@ public class Bristle {
     }
 
     private void updateBristlePosition(Vector3 brushPosition) {
-        Vector3 absoluteStart = start.add(brushPosition);
-        Vector3 absoluteEnd = end.add(brushPosition);
+        Vector3 absoluteStart = top.add(brushPosition);
+        Vector3 absoluteEnd = bottom.add(brushPosition);
 
         vertexBuffer.clear();
         vertexBuffer.put(absoluteStart.toFloatArray());
         vertexBuffer.put(absoluteEnd.toFloatArray());
         vertexBuffer.position(0);
-    }
-
-    public static float getLength() {
-        return 0.5f;
     }
 }
