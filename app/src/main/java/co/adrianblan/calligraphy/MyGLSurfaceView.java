@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
+import co.adrianblan.calligraphy.data.TouchData;
 import co.adrianblan.calligraphy.vector.Vector2;
 
 /**
@@ -81,8 +82,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.addPoints(touchDataList);
-
+                        mRenderer.addTouchData(touchDataList);
                     }
                 });
 
@@ -94,7 +94,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        mRenderer.clearPoints();
+                        mRenderer.touchHasEnded();
                     }
                 });
                 requestRender();

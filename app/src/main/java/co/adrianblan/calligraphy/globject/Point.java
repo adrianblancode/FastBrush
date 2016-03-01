@@ -21,7 +21,7 @@ import java.nio.ShortBuffer;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import co.adrianblan.calligraphy.TouchData;
+import co.adrianblan.calligraphy.data.TouchData;
 import co.adrianblan.calligraphy.utils.GLhelper;
 import co.adrianblan.calligraphy.utils.Utils;
 import co.adrianblan.calligraphy.vector.Vector2;

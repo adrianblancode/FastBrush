@@ -27,6 +27,9 @@ public class Bristle {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
+    private Vector3 absoluteStart;
+    private Vector3 absoluteEnd;
+
     public Bristle() {
         vertexBuffer = GLhelper.initFloatBuffer(6);
 
@@ -42,14 +45,15 @@ public class Bristle {
         top = new Vector3(upperRadius * horizontal, upperRadius * vertical + VERTICAL_OFFSET, 0f);
         bottom = new Vector3(lowerRadius * horizontal, lowerRadius * vertical, -LENGTH + TIP_LENGTH * verticalAngle);
 
+        absoluteStart = new Vector3();
+        absoluteEnd = new Vector3();
+
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
-    public void draw(float[] mvpMatrix, Vector3 brushPosition) {
-
-        updateBristlePosition(brushPosition);
+    public void draw(float[] mvpMatrix) {
 
         // Add program to OpenGL environment
         GLES30.glUseProgram(mProgram);
@@ -88,13 +92,13 @@ public class Bristle {
         GLES30.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    private void updateBristlePosition(Vector3 brushPosition) {
-        Vector3 absoluteStart = top.add(brushPosition);
-        Vector3 absoluteEnd = bottom.add(brushPosition);
+    public void update(Vector3 brushPosition) {
+        absoluteStart.addFast(top, brushPosition);
+        absoluteEnd.addFast(bottom, brushPosition);
 
-        vertexBuffer.clear();
-        vertexBuffer.put(absoluteStart.toFloatArray());
-        vertexBuffer.put(absoluteEnd.toFloatArray());
+        vertexBuffer.position(0);
+        vertexBuffer.put(absoluteStart.vector);
+        vertexBuffer.put(absoluteEnd.vector);
         vertexBuffer.position(0);
     }
 }

@@ -29,10 +29,10 @@ import android.opengl.Matrix;
 
 import java.util.ArrayList;
 
+import co.adrianblan.calligraphy.data.TouchData;
+import co.adrianblan.calligraphy.data.TouchDataContainer;
 import co.adrianblan.calligraphy.globject.BackBufferSquare;
 import co.adrianblan.calligraphy.globject.Brush;
-import co.adrianblan.calligraphy.globject.Point;
-import co.adrianblan.calligraphy.utils.Utils;
 import co.adrianblan.calligraphy.vector.Vector2;
 
 /**
@@ -64,8 +64,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] brushTextureArray = new int[1];
 
     private Brush brush;
-    private TouchData prevTouchData;
-    private ArrayList<TouchData> unrenderedPointArrayList;
+    private TouchDataContainer touchDataContainer;
     private BackBufferSquare backBufferSquare;
 
     public MyGLRenderer(Context context) {
@@ -77,8 +76,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        unrenderedPointArrayList = new ArrayList<>();
         brush = new Brush();
+        touchDataContainer = new TouchDataContainer();
     }
 
     @Override
@@ -138,17 +137,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glDepthFunc(GLES30.GL_LEQUAL);
         GLES30.glDepthMask(true);
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
-        GLES30.glClearDepthf(0.1f);
+        GLES30.glClearDepthf(0.11f);
 
-        GLES30.glLineWidth(3f);
+        GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+
+        System.out.println("Numdata: " + touchDataContainer.get().size());
 
         // Imprint brush on paper
-        for(TouchData td : unrenderedPointArrayList) {
-            brush.draw(mMVPMatrix, td);
+        for(TouchData td : touchDataContainer.get()) {
+            brush.update(td);
+            brush.draw(mMVPMatrix);
         }
-
-        // We rendered all the points, now we clear them
-        unrenderedPointArrayList.clear();
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
@@ -165,9 +164,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
         // Draw brush
-        if(prevTouchData != null) {
-            brush.draw(mMVPMatrix, prevTouchData);
+        if(touchDataContainer.hasTouchData()) {
+            brush.draw(mMVPMatrix);
         }
+
+        // We are done rendering TouchData, now we clear them
+        touchHasEnded();
     }
 
     /** Loads a drawable into the currently bound texture */
@@ -239,74 +241,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
     }
 
-    /** Takes touch data information, and interpolates objects based on a distance to the previous object */
-    private void addInterpolatedTouchData(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.004f;
-
-        if(prevTouchData == null) {
-            addPoint(touchData);
-        } else {
-
-            float distance = touchData.getPosition().distance(prevTouchData.getPosition());
-            TouchData parentTouchData = prevTouchData;
-            TouchData prevInterpolatedTouchData = prevTouchData;
-            int interpolations = (int) (distance / MIN_DISTANCE);
-
-            // Interpolate so that there are no gaps larger than MIN_DISTANCE
-            if (interpolations > 0) {
-
-                for (int i = 0; i < interpolations; i++) {
-
-                    float x = parentTouchData.getX() + (touchData.getX() - parentTouchData.getX()) *
-                            (i + 1f) / ((float) interpolations + 1f);
-                    float y = parentTouchData.getY() + (touchData.getY() - parentTouchData.getY()) *
-                            (i + 1f) / ((float) interpolations + 1f);
-
-                    float size = Utils.getThrottledValue(prevInterpolatedTouchData.getSize(),
-                            touchData.getSize());
-                    float pressure  = Utils.getThrottledValue(prevInterpolatedTouchData.getPressure(),
-                            touchData.getPressure());
-
-                    TouchData interpolatedTouchData = new TouchData(x, y, size, pressure);
-                    prevInterpolatedTouchData = interpolatedTouchData;
-                    addPoint(interpolatedTouchData);
-                }
-            }
-
-            // Only add if not too close to last point
-            if(distance >= MIN_DISTANCE) {
-
-                // Throttle values so that they do not increase too quickly
-                float size = Utils.getThrottledValue(prevTouchData.getSize(), touchData.getSize());
-                float pressure = Utils.getThrottledValue(prevTouchData.getPressure(), touchData.getPressure());
-
-                TouchData td = new TouchData(touchData.getPosition(), size, pressure);
-                addPoint(td);
-            }
+    /** Takes a list of TouchData and adds it to the container */
+    public void addTouchData(ArrayList<TouchData> touchDataList) {
+        for(TouchData touchData : touchDataList) {
+            touchDataContainer.addInterpolated(touchData);
         }
-    }
-
-    public void addPoints(ArrayList<TouchData> touchDataList) {
-        for(TouchData td : touchDataList) {
-            addInterpolatedTouchData(td);
-        }
-    }
-
-    /** Takes a coord and adds it to the renderer */
-    public void addPoint(TouchData touchData) {
-        unrenderedPointArrayList.add(touchData);
-        prevTouchData = touchData;
     }
 
     /** Clears all the ArrayList of Point of all objects*/
-    public void clearPoints() {
-        unrenderedPointArrayList.clear();
-        prevTouchData = null;
+    public void touchHasEnded() {
+        touchDataContainer.clear();
+        touchDataContainer.touchHasEnded();
     }
 
     public void clearScreen() {
-        clearPoints();
+        touchHasEnded();
 
         // Bind back buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);

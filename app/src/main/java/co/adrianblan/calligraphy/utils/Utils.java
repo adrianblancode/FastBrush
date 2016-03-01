@@ -2,12 +2,11 @@ package co.adrianblan.calligraphy.utils;
 
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
-import android.view.Display;
 
 /** Utility functions */
 public class Utils {
 
-    public static final float blackColor[] = {0f, 0f, 0f, 0.7f};
+    public static final float blackColor[] = {0f, 0f, 0f, 0.66f};
 
     /** Returns the value of val, clamped between min and max */
     public static float clamp (float val, float min, float max) {
@@ -24,6 +23,7 @@ public class Utils {
         return (clampedVal + offset) * scale;
     }
 
+    /** Returns whether two floats are equivalent to each other within a treshold */
     public static boolean floatsAreEquivalent(float val1, float val2) {
         float epsilon = 0.0001f;
 

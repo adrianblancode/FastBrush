@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.calligraphy.data;
 
 import co.adrianblan.calligraphy.utils.Utils;
 import co.adrianblan.calligraphy.vector.Vector2;

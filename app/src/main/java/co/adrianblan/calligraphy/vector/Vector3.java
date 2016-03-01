@@ -3,9 +3,7 @@ package co.adrianblan.calligraphy.vector;
 /** Defines a vector in 3D space */
 public class Vector3 {
 
-    private float x;
-    private float y;
-    private float z;
+    public float[] vector = {0f, 0f, 0f};
 
     public Vector3(){}
 
@@ -18,39 +16,39 @@ public class Vector3 {
     }
 
     public void set(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        setX(x);
+        setY(y);
+        setZ(z);
     }
 
     public void set(Vector2 v, float z) {
-        this.x = v.getX();
-        this.y = v.getY();
-        this.z = z;
+        setX(v.getX());
+        setY(v.getY());
+        setZ(z);
     }
 
     public float getX() {
-        return x;
+        return vector[0];
     }
 
     public void setX(float x) {
-        this.x = x;
+        vector[0] = x;
     }
 
     public float getY() {
-        return y;
+        return vector[1];
     }
 
     public void setY(float y) {
-        this.y = y;
+        vector[1] = y;
     }
 
     public float getZ() {
-        return z;
+        return vector[2];
     }
 
     public void setZ(float z) {
-        this.z = z;
+        vector[2] = z;
     }
 
     /** Returns a new object with the same member variables as the current object */
@@ -60,14 +58,14 @@ public class Vector3 {
 
     /** Returns the euclidian length of the vector */
     public float length() {
-        return (float) Math.sqrt(x * x + y * y + z * z);
+        return (float) Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ());
     }
 
     /** Returns the euclidian distance of the vectors */
     public float distance(Vector3 vec) {
-        float xDistance = this.x - vec.getX();
-        float yDistance = this.y - vec.getY();
-        float zDistance = this.z - vec.getZ();
+        float xDistance = this.getX() - vec.getX();
+        float yDistance = this.getY() - vec.getY();
+        float zDistance = this.getZ() - vec.getZ();
 
         return (float) Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
     }
@@ -79,25 +77,27 @@ public class Vector3 {
 
     /** Returns a new vector that has the position of both vectors added together */
     public Vector3 add(Vector3 vec) {
-        return new Vector3(x + vec.getX(), y + vec.getY(), z + vec.getZ());
+        return new Vector3(getX() + vec.getX(), getY() + vec.getY(), getZ() + vec.getZ());
+    }
+
+    /** Sums the two vectors in the current vector */
+    public void addFast(Vector3 vec1, Vector3 vec2) {
+        vector[0] = vec1.vector[0] + vec2.vector[0];
+        vector[1] = vec1.vector[1] + vec2.vector[1];
+        vector[2] = vec1.vector[2] + vec2.vector[2];
     }
 
     /** Subtracts the given vector from the current vector */
     public Vector3 subtract (Vector3 vec) {
-        return new Vector3(x - vec.getX(), y - vec.getY(), z - vec.getZ());
+        return new Vector3(getX() - vec.getX(), getY() - vec.getY(), getZ() - vec.getZ());
     }
 
     /** Returns a new vector that is the current vector scaled to a factor */
     public Vector3 scale(float scale) {
-        return new Vector3(x * scale, y * scale, z * scale);
+        return new Vector3(getX() * scale, getY() * scale, getZ() * scale);
     }
 
     public String toString() {
-        return "(" + x + ", " + y + ", " + z + ")";
-    }
-
-    public float[] toFloatArray () {
-        float [] ret = {x, y, z};
-        return ret;
+        return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
     }
 }
