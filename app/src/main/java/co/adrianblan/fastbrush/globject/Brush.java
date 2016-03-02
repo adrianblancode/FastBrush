@@ -19,8 +19,8 @@ public class Brush {
     private Vector3 position;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 2000;
-    public static final float BRISTLE_THICKNESS = 3f;
+    private static final int NUM_BRISTLES = 1000;
+    public static final float BRISTLE_THICKNESS = 5f;
 
     private final FloatBuffer vertexBuffer;
 
