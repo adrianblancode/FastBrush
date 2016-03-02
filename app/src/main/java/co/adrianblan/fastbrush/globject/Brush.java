@@ -19,7 +19,7 @@ public class Brush {
     private Vector3 position;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 3000;
+    private static final int NUM_BRISTLES = 1000;
     public static final float BRISTLE_THICKNESS = 2f;
 
     private final FloatBuffer vertexBuffer;
@@ -47,7 +47,7 @@ public class Brush {
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
     public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
+        position.set(touchData.getPosition(), 0.5f + Bristle.BASE_LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
 
         vertexBuffer.position(0);
 
