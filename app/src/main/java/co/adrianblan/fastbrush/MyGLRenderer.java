@@ -46,17 +46,30 @@ import co.adrianblan.fastbrush.vector.Vector2;
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
-    private final int CAMERA_DISTANCE = 30;
-    private final float IMPRINT_DEPTH = 0.02f;
+
+
+    private static final float CAMERA_DISTANCE = 20;
+    private static final float CAMERA_DISTANCE_FAR_SCALE = 4f;
+
+    private static final float IMPRINT_DEPTH = 0.01f;
+
+    private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.15f;
+    private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.12f;
+    private static final float BRUSH_VIEW_SCALE = 0.2f;
+
+    private static final boolean SHOW_BRUSH_VIEW = true;
+
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
-    private final float[] mModelMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
-    private final float[] mModelMatrix2 = new float[16];
-
+    private final float[] mBrushViewModelMatrix = new float[16];
+    private final float[] mBrushViewProjectionMatrix = new float[16];
+    private final float[] mBrushViewViewMatrix = new float[16];
+    private final float[] mBrushViewMVMatrix = new float[16];
+    private final float[] mBrushViewMVPMatrix = new float[16];
 
     private Context context;
 
@@ -85,9 +98,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         brush = new Brush();
         touchDataContainer = new TouchDataContainer();
 
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.setIdentityM(mModelMatrix2, 0);
-        Matrix.translateM(mModelMatrix2, 0, mWidth, -mHeight / 2, 0);
+        Matrix.setIdentityM(mBrushViewModelMatrix, 0);
+        Matrix.translateM(mBrushViewModelMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
+        Matrix.scaleM(mBrushViewModelMatrix, 0, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE);
     }
 
     @Override
@@ -106,12 +119,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         generateBackFramebuffer();
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * 4);
-        //Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * 4);
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
+                CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+        //Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        //Matrix.setLookAtM(mViewMatrix, 0, 0, -CAMERA_DISTANCE, 0, 0f, 0f, 0f, 0f, 0.0f, 1.0f);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -130,9 +143,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
-
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         GLES30.glViewport(0, 0, mWidth, mHeight);
 
@@ -180,16 +190,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             brush.draw(mMVPMatrix);
         }
 
-        if(touchDataContainer.hasTouchData()) {
+        if(SHOW_BRUSH_VIEW) {
 
-            Vector2 v2W = viewportToWorld(new Vector2());
-            // TODO do not recompute every frame
-            Matrix.setLookAtM(mViewMatrix, 0,
-                    touchDataContainer.getLast().getX() + 1.0f * 4, -CAMERA_DISTANCE * 4 + 1.0f, 2.0f,
-                    touchDataContainer.getLast().getX() + 1.0f * 4, 0f, 2.0f,
+            Matrix.setLookAtM(mBrushViewViewMatrix, 0,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
-            Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-            brush.draw(mMVPMatrix);
+
+            Matrix.orthoM(mBrushViewProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
+                    CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+
+            Matrix.multiplyMM(mBrushViewMVMatrix, 0, mBrushViewViewMatrix, 0, mBrushViewModelMatrix, 0);
+            Matrix.multiplyMM(mBrushViewMVPMatrix, 0, mBrushViewProjectionMatrix, 0, mBrushViewMVMatrix, 0);
+            brush.draw(mBrushViewMVPMatrix);
         }
 
 

@@ -35,6 +35,10 @@ public class Vector3 {
         vector[0] = x;
     }
 
+    public void addX(float x) {
+        vector[0] += x;
+    }
+
     public float getY() {
         return vector[1];
     }
@@ -43,12 +47,20 @@ public class Vector3 {
         vector[1] = y;
     }
 
+    public void addY(float y) {
+        vector[1] += y;
+    }
+
     public float getZ() {
         return vector[2];
     }
 
     public void setZ(float z) {
         vector[2] = z;
+    }
+
+    public void addZ(float z) {
+        vector[2] += z;
     }
 
     /** Returns a new object with the same member variables as the current object */
@@ -78,6 +90,13 @@ public class Vector3 {
     /** Returns a new vector that has the position of both vectors added together */
     public Vector3 add(Vector3 vec) {
         return new Vector3(getX() + vec.getX(), getY() + vec.getY(), getZ() + vec.getZ());
+    }
+
+    /** Adds the vector in the current vector */
+    public void addFast(Vector3 vec) {
+        vector[0] += vec.vector[0];
+        vector[1] += vec.vector[1];
+        vector[2] += vec.vector[2];
     }
 
     /** Sums the two vectors in the current vector */

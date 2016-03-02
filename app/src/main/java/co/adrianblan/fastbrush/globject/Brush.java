@@ -17,9 +17,10 @@ public class Brush {
 
     private ArrayList<Bristle> bristles;
     private Vector3 position;
+    private Vector3 jitter;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 1000;
+    private static final int NUM_BRISTLES = 2000;
     public static final float BRISTLE_THICKNESS = 2f;
 
     private final FloatBuffer vertexBuffer;
@@ -32,6 +33,7 @@ public class Brush {
     public Brush() {
         bristles = new ArrayList<>();
         position = new Vector3();
+        jitter = new Vector3();
 
         for(int i = 0; i < NUM_BRISTLES; i++){
             bristles.add(new Bristle());
@@ -47,7 +49,11 @@ public class Brush {
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
     public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), 0.5f + Bristle.BASE_LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
+        position.set(touchData.getPosition(), Bristle.BASE_LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
+
+        updateJitter();
+
+        position.addFast(jitter);
 
         vertexBuffer.position(0);
 
@@ -113,5 +119,19 @@ public class Brush {
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle);
+    }
+
+    public Vector3 getPosition() {
+        return position;
+    }
+
+    private void updateJitter() {
+        float maxJitter = 0.001f;
+
+        float jitterX = (2.0f - 1.0f * (float) Math.random()) * maxJitter;
+        float jitterY = (2.0f - 1.0f * (float) Math.random()) * maxJitter;
+        //float jitterZ = (2.0f - 1.0f * (float) Math.random()) * maxJitter;
+
+        jitter.set(jitterX, jitterY, 0);
     }
 }
