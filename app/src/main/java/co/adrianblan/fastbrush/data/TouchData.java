@@ -8,11 +8,13 @@ import co.adrianblan.fastbrush.vector.Vector2;
  */
 public class TouchData {
     private Vector2 position;
+    private Vector2 velocity;
     private float size;
     private float pressure;
 
-    public TouchData(Vector2 position, float size, float pressure) {
+    public TouchData(Vector2 position, Vector2 velocity, float size, float pressure) {
         this.position = position;
+        this.velocity = velocity;
         this.pressure = pressure;
 
         // The touch size is always 0.0 on an emulator
@@ -23,8 +25,9 @@ public class TouchData {
         }
     }
 
-    public TouchData(float x, float y, float size, float pressure) {
+    public TouchData(float x, float y, float xv, float yv, float size, float pressure) {
         this.position = new Vector2(x, y);
+        this.velocity = new Vector2(xv, yv);
         this.pressure = pressure;
 
         // The touch size is always 0.0 on an emulator
@@ -41,6 +44,10 @@ public class TouchData {
 
     public void setPosition(Vector2 position) {
         this.position = position;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
     }
 
     public float getX() {

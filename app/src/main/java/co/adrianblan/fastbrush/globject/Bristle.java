@@ -1,5 +1,6 @@
 package co.adrianblan.fastbrush.globject;
 
+import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
@@ -7,9 +8,9 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Bristle {
 
-    public static final float BASE_LENGTH = 1.6f;
-    public static final float TIP_LENGTH = 0.4f;
-    private static final float BASE_VERTICAL_OFFSET = 0.1f;
+    public static final float BASE_LENGTH = 1.0f;
+    public static final float TIP_LENGTH = 0.35f;
+    private static final float BASE_VERTICAL_OFFSET = 0.0f;
     private static final float BRUSH_RADIUS_UPPER = 0.4f;
     private static final float BRUSH_RADIUS_LOWER = 0.2f;
 
@@ -27,7 +28,7 @@ public class Bristle {
         float horizontal = (float) Math.cos(radiusAngle) * verticalAngle;
         float vertical = (float) Math.sin(radiusAngle) * verticalAngle;
 
-        top = new Vector3(BRUSH_RADIUS_UPPER * horizontal, BRUSH_RADIUS_UPPER * vertical + BASE_VERTICAL_OFFSET, 0f);
+        top = new Vector3(BRUSH_RADIUS_UPPER * horizontal, BRUSH_RADIUS_UPPER * vertical, 0f);
         bottom = new Vector3(BRUSH_RADIUS_LOWER * horizontal, BRUSH_RADIUS_LOWER * vertical,
                 -(BASE_LENGTH - TIP_LENGTH + TIP_LENGTH * (float) Math.cos(verticalAngle * 0.5f * Math.PI)));
 
@@ -35,8 +36,10 @@ public class Bristle {
         absoluteEnd = new Vector3();
     }
 
-    public void update(Vector3 brushPosition) {
+    public void update(Vector3 brushPosition, Vector2 tilt) {
         absoluteStart.addFast(top, brushPosition);
         absoluteEnd.addFast(bottom, brushPosition);
+        absoluteStart.addX(tilt.getX());
+        absoluteStart.addY(tilt.getY() + BASE_VERTICAL_OFFSET);
     }
 }

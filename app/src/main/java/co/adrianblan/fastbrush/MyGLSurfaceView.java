@@ -18,7 +18,9 @@ package co.adrianblan.fastbrush;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 
 import java.util.ArrayList;
 
@@ -33,6 +35,7 @@ import co.adrianblan.fastbrush.vector.Vector2;
 public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
+    private VelocityTracker mVelocityTracker;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -62,20 +65,41 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         switch (e.getAction()) {
 
+            case MotionEvent.ACTION_DOWN:
+                if(mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    mVelocityTracker.clear();
+                }
+
+                // No break is intentional
+
             case MotionEvent.ACTION_MOVE:
+
+                mVelocityTracker.addMovement(e);
+
+                // Compute velocity in pixels per second
+                mVelocityTracker.computeCurrentVelocity(1);
 
                 final ArrayList<TouchData> touchDataList = new ArrayList<>(e.getHistorySize() + 1);
                 Vector2 viewportPosition;
 
+                Vector2 viewportVelocity =
+                        new Vector2(VelocityTrackerCompat.getXVelocity(mVelocityTracker, e.getActionIndex()),
+                        VelocityTrackerCompat.getYVelocity(mVelocityTracker, e.getActionIndex()));
+
                 // Add previous touch coordinates
                 for(int i = 0; i < e.getHistorySize(); i++) {
                     viewportPosition = new Vector2(e.getHistoricalX(i), e.getHistoricalY(i));
-                    touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition), e.getHistoricalSize(i), e.getHistoricalPressure(i)));
+
+                            touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition),
+                                    viewportVelocity,
+                                    e.getHistoricalSize(i), e.getHistoricalPressure(i)));
                 }
 
                 // Add current touch coordinates
                 viewportPosition = new Vector2(e.getX(), e.getY());
-                touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition), e.getSize(), e.getPressure()));
+                touchDataList.add(new TouchData(mRenderer.viewportToWorld(viewportPosition), viewportVelocity, e.getSize(), e.getPressure()));
 
                 // Ensure we call switchMode() on the OpenGL thread.
                 // queueEvent() is a method of GLSurfaceView that will do this for us.
@@ -98,7 +122,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     }
                 });
                 requestRender();
-
                 break;
         }
         return true;

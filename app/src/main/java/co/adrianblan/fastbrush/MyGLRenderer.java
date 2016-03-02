@@ -33,6 +33,7 @@ import co.adrianblan.fastbrush.data.TouchData;
 import co.adrianblan.fastbrush.data.TouchDataContainer;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
+import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
@@ -48,14 +49,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 
 
-    private static final float CAMERA_DISTANCE = 20;
-    private static final float CAMERA_DISTANCE_FAR_SCALE = 4f;
+    private static final float CAMERA_DISTANCE = 50;
+    private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.01f;
+    private static final float IMPRINT_DEPTH = 0.001f;
 
-    private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.15f;
-    private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.12f;
-    private static final float BRUSH_VIEW_SCALE = 0.2f;
+    private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
+    private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
+    private static final float BRUSH_VIEW_SCALE = 0.3f;
 
     private static final boolean SHOW_BRUSH_VIEW = true;
 
@@ -119,15 +120,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         generateBackFramebuffer();
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
-                CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
-        //Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+        //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+        Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
+        Matrix.orthoM(mBrushViewProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
+                CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Generate and load textures
         GLES30.glGenTextures(1, brushTextureArray, 0);
@@ -185,11 +188,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
-        // Draw brush
-        if(touchDataContainer.hasTouchData()) {
-            brush.draw(mMVPMatrix);
-        }
-
         if(SHOW_BRUSH_VIEW) {
 
             Matrix.setLookAtM(mBrushViewViewMatrix, 0,
@@ -197,12 +195,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
-            Matrix.orthoM(mBrushViewProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
-                    CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
-
             Matrix.multiplyMM(mBrushViewMVMatrix, 0, mBrushViewViewMatrix, 0, mBrushViewModelMatrix, 0);
             Matrix.multiplyMM(mBrushViewMVPMatrix, 0, mBrushViewProjectionMatrix, 0, mBrushViewMVMatrix, 0);
-            brush.draw(mBrushViewMVPMatrix);
+
+            GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+            brush.draw(mBrushViewMVPMatrix, Utils.brownColor);
+        }
+
+        // Draw brush
+        if(touchDataContainer.hasTouchData()) {
+            GLES30.glLineWidth(4f);
+            brush.draw(mMVPMatrix, Utils.brownColor);
         }
 
 

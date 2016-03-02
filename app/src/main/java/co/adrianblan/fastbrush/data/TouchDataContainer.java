@@ -50,7 +50,7 @@ public class TouchDataContainer {
                 float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
 
-                TouchData td = new TouchData(touchData.getPosition(), size, pressure);
+                TouchData td = new TouchData(touchData.getPosition(), touchData.getVelocity(), size, pressure);
 
                 add(td);
             }
@@ -77,10 +77,15 @@ public class TouchDataContainer {
         float y = parentTouchData.getY() + (touchData.getY() - parentTouchData.getY()) *
                 (interpolation + 1f) / ((float) maxInterpolations + 1f);
 
+        float xv = parentTouchData.getVelocity().getX() + (touchData.getVelocity().getX() - parentTouchData.getVelocity().getX()) *
+                (interpolation + 1f) / ((float) maxInterpolations + 1f);
+        float yv = parentTouchData.getVelocity().getY() + (touchData.getVelocity().getY() - parentTouchData.getVelocity().getY()) *
+                (interpolation + 1f) / ((float) maxInterpolations + 1f);
+
         float size = Utils.getThrottledValue(prevSize, touchData.getSize());
         float pressure  = Utils.getThrottledValue(prevPressure, touchData.getPressure());
 
-        TouchData interpolatedTouchData = new TouchData(x, y, size, pressure);
+        TouchData interpolatedTouchData = new TouchData(x, y, xv, yv, size, pressure);
 
         return interpolatedTouchData;
     }

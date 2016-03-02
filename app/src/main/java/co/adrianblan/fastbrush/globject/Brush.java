@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import co.adrianblan.fastbrush.data.TouchData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
+import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
@@ -18,10 +19,11 @@ public class Brush {
     private ArrayList<Bristle> bristles;
     private Vector3 position;
     private Vector3 jitter;
+    private Vector2 tilt;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 2000;
-    public static final float BRISTLE_THICKNESS = 2f;
+    private static final int NUM_BRISTLES = 1000;
+    public static final float BRISTLE_THICKNESS = 1.5f;
 
     private final FloatBuffer vertexBuffer;
 
@@ -34,6 +36,7 @@ public class Brush {
         bristles = new ArrayList<>();
         position = new Vector3();
         jitter = new Vector3();
+        tilt = new Vector2();
 
         for(int i = 0; i < NUM_BRISTLES; i++){
             bristles.add(new Bristle());
@@ -49,8 +52,10 @@ public class Brush {
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
     public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.BASE_LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
+        position.set(touchData.getPosition(), Bristle.BASE_LENGTH + 0.15f -
+                Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
 
+        updateTilt(touchData);
         updateJitter();
 
         position.addFast(jitter);
@@ -61,7 +66,7 @@ public class Brush {
         float [] vector;
 
         for(Bristle bristle : bristles){
-            bristle.update(position);
+            bristle.update(position, tilt);
 
             vector = bristle.absoluteStart.vector;
 
@@ -83,6 +88,10 @@ public class Brush {
     }
 
     public void draw(float[] mvpMatrix) {
+        draw(mvpMatrix, Utils.blackColor);
+    }
+
+    public void draw(float[] mvpMatrix, float[] color) {
 
         // Add program to OpenGL environment
         GLES30.glUseProgram(mProgram);
@@ -104,7 +113,7 @@ public class Brush {
         mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES30.glUniform4fv(mColorHandle, 1, Utils.blackColor, 0);
+        GLES30.glUniform4fv(mColorHandle, 1, color, 0);
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -133,5 +142,14 @@ public class Brush {
         //float jitterZ = (2.0f - 1.0f * (float) Math.random()) * maxJitter;
 
         jitter.set(jitterX, jitterY, 0);
+    }
+
+    private void updateTilt(TouchData touchData) {
+        float maxTilt = 0.2f;
+
+        float tiltX = Utils.clamp(touchData.getVelocity().getX(), -maxTilt, maxTilt);
+        float tiltY = Utils.clamp(touchData.getVelocity().getY(), -maxTilt, maxTilt);
+
+        tilt.set(tiltX, tiltY);
     }
 }
