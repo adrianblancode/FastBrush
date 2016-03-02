@@ -46,11 +46,14 @@ import co.adrianblan.fastbrush.vector.Vector2;
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
+    private final int CAMERA_DISTANCE = 20;
+    private final float IMPRINT_DEPTH = 0.03f;
+
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private final int CAMERA_DISTANCE = 10;
+
 
     private Context context;
 
@@ -96,11 +99,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         generateBackFramebuffer();
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method
-        //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
-        Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
+        //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 5);
+        Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 5);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        //Matrix.setLookAtM(mViewMatrix, 0, 0, -CAMERA_DISTANCE, 0, 0f, 0f, 0f, 0f, 0.0f, 1.0f);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -137,7 +141,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glDepthFunc(GLES30.GL_LEQUAL);
         GLES30.glDepthMask(true);
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
-        GLES30.glClearDepthf(0.11f);
+        GLES30.glClearDepthf(IMPRINT_DEPTH);
 
         GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
 

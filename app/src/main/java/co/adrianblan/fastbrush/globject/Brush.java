@@ -19,8 +19,8 @@ public class Brush {
     private Vector3 position;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 1000;
-    public static final float BRISTLE_THICKNESS = 5f;
+    private static final int NUM_BRISTLES = 3000;
+    public static final float BRISTLE_THICKNESS = 2f;
 
     private final FloatBuffer vertexBuffer;
 
@@ -43,6 +43,37 @@ public class Brush {
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
+    }
+
+    /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
+    public void update(TouchData touchData) {
+        position.set(touchData.getPosition(), Bristle.LENGTH - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize());
+
+        vertexBuffer.position(0);
+
+        int index = 0;
+        float [] vector;
+
+        for(Bristle bristle : bristles){
+            bristle.update(position);
+
+            vector = bristle.absoluteStart.vector;
+
+            vertexData[index] = vector[0];
+            vertexData[index + 1] = vector[1];
+            vertexData[index + 2] = vector[2];
+
+            index += 3;
+            vector = bristle.absoluteEnd.vector;
+
+            vertexData[index] = vector[0];
+            vertexData[index + 1] = vector[1];
+            vertexData[index + 2] = vector[2];
+            index += 3;
+        }
+
+        vertexBuffer.put(vertexData);
+        vertexBuffer.position(0);
     }
 
     public void draw(float[] mvpMatrix) {
@@ -82,41 +113,5 @@ public class Brush {
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle);
-    }
-
-    /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
-    public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.LENGTH);
-
-        vertexBuffer.position(0);
-
-        int index = 0;
-        float [] vector;
-
-        for(Bristle bristle : bristles){
-            bristle.update(position);
-
-            vector = bristle.absoluteStart.vector;
-
-            vertexData[index] = vector[0];
-            vertexData[index + 1] = vector[1];
-            vertexData[index + 2] = vector[2];
-
-            index += 3;
-            vector = bristle.absoluteEnd.vector;
-
-            vertexData[index] = vector[0];
-            vertexData[index + 1] = vector[1];
-            vertexData[index + 2] = vector[2];
-            index += 3;
-        }
-
-        vertexBuffer.put(vertexData);
-        vertexBuffer.position(0);
-    }
-
-    /** Adds data from a vector into the vertexData float array by an index */
-    private void addVertexData(Vector3 vec, int index) {
-
     }
 }

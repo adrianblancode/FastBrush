@@ -19,7 +19,7 @@ public class TouchDataContainer {
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     public void addInterpolated(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.004f;
+        final float MIN_DISTANCE = 0.003f;
 
         if(prevTouchData == null) {
             add(touchData);
@@ -45,7 +45,7 @@ public class TouchDataContainer {
             }
 
 
-            if(distance >= MIN_DISTANCE) {
+            if(true) {
                 // Throttle values so that they do not increase too quickly
                 float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
