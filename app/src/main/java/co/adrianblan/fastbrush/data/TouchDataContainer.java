@@ -1,8 +1,8 @@
-package co.adrianblan.calligraphy.data;
+package co.adrianblan.fastbrush.data;
 
 import java.util.ArrayList;
 
-import co.adrianblan.calligraphy.utils.Utils;
+import co.adrianblan.fastbrush.utils.Utils;
 
 /**
  * Class which contains TouchData objects and methods.

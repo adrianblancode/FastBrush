@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy.vector;
+package co.adrianblan.fastbrush.vector;
 
 /** Defines a vector in 2D space */
 public class Vector2 {

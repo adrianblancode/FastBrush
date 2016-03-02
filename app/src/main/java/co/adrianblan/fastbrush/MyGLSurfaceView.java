@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy;
+package co.adrianblan.fastbrush;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -22,8 +22,8 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
-import co.adrianblan.calligraphy.data.TouchData;
-import co.adrianblan.calligraphy.vector.Vector2;
+import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.

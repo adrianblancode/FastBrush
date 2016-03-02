@@ -1,7 +1,7 @@
-package co.adrianblan.calligraphy.data;
+package co.adrianblan.fastbrush.data;
 
-import co.adrianblan.calligraphy.utils.Utils;
-import co.adrianblan.calligraphy.vector.Vector2;
+import co.adrianblan.fastbrush.utils.Utils;
+import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
  * Class which encapsulates touch data.

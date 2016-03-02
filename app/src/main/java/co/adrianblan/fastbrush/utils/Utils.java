@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy.utils;
+package co.adrianblan.fastbrush.utils;
 
 import android.content.res.Resources;
 import android.util.DisplayMetrics;

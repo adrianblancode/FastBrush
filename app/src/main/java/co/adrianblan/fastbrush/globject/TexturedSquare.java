@@ -13,23 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy.globject;
+package co.adrianblan.fastbrush.globject;
 
 import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import co.adrianblan.calligraphy.utils.GLhelper;
+import co.adrianblan.fastbrush.utils.GLhelper;
 
 /**
  * A two-dimensional triangle for use as a drawn object in OpenGL ES 2.0.
  */
-public class BackBufferSquare {
+public class TexturedSquare {
 
-    private final FloatBuffer vertexBuffer;
-    private final FloatBuffer textureBuffer;
-    private static ShortBuffer textureDrawOrderBuffer;
+    protected static final String DEFAULT_VERTEX_SHADER_CODE =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+            "attribute vec2 a_TexCoordinate;" + // Per-vertex texture coordinate information we will pass in.
+            "attribute vec4 vPosition;" +
+            "varying vec2 v_TexCoordinate;" +   // This will be passed into the fragment shader.
+            "void main() {" +
+            // the matrix must be included as a modifier of gl_Position
+            // Note that the uMVPMatrix factor *must be first* in order
+            // for the matrix multiplication product to be correct.
+            "  gl_Position = uMVPMatrix * vPosition;" +
+            // Pass through the texture coordinate.
+            "  v_TexCoordinate = a_TexCoordinate;" +
+            "}";
+
+    protected static final String DEFAULT_FRAGMENT_SHADER_CODE =
+            "precision mediump float;" +
+            "uniform sampler2D u_Texture;" +
+            "varying vec2 v_TexCoordinate;" +
+            "void main() {" +
+            "  gl_FragColor = texture2D(u_Texture, v_TexCoordinate);" +
+            "}";
+
+    private FloatBuffer vertexBuffer;
+    private FloatBuffer textureBuffer;
+    private ShortBuffer textureDrawOrderBuffer;
 
     private int mProgram;
     private int mPositionHandle;
@@ -37,17 +61,33 @@ public class BackBufferSquare {
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
 
+    protected static final float DEFAULT_SQUARE_COORDS[] = {
+            -1.0f,  1.0f, 0.0f,   // top left
+            -1.0f, -1.0f, 0.0f,   // bottom left
+            1.0f, -1.0f, 0.0f,    // bottom right
+            1.0f,  1.0f, 0.0f     // top right
+    };
+
+    protected static final float DEFAULT_TEXTURE_COORDS[] = {
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f
+    };
+
+    protected static final short DEFAULT_TEXTURE_DRAW_ORDER[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+    protected static final int DEFAULT_TEXTURE_VERTEX_STRIDE = 2 * 4;
+
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public BackBufferSquare(float ratio) {
-        vertexBuffer = GLhelper.initFloatBuffer(getTranslatedVertexCoords(TexturedSquare.DEFAULT_SQUARE_COORDS, ratio));
-        textureBuffer = GLhelper.initFloatBuffer(TexturedSquare.DEFAULT_TEXTURE_COORDS);
-        textureDrawOrderBuffer = GLhelper.initShortBuffer(TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER);
+    public TexturedSquare() {
+        vertexBuffer = GLhelper.initFloatBuffer(DEFAULT_SQUARE_COORDS);
+        textureBuffer = GLhelper.initFloatBuffer(DEFAULT_TEXTURE_COORDS);
+        textureDrawOrderBuffer = GLhelper.initShortBuffer(DEFAULT_TEXTURE_DRAW_ORDER);
 
         mProgram = GLES30.glCreateProgram();
-        GLhelper.loadShaders(mProgram, TexturedSquare.DEFAULT_VERTEX_SHADER_CODE,
-                TexturedSquare.DEFAULT_FRAGMENT_SHADER_CODE);
+        GLhelper.loadShaders(mProgram, DEFAULT_VERTEX_SHADER_CODE, DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
     /**
@@ -64,7 +104,7 @@ public class BackBufferSquare {
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
         GLhelper.checkGlError("glGetAttribLocation");
 
-        // Enable a handle to the triangle vertices
+        // Enable a handle to the vertices
         GLES30.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
@@ -92,7 +132,7 @@ public class BackBufferSquare {
         GLES30.glVertexAttribPointer(
                 mTextureCoordinateHandle, 2,
                 GLES30.GL_FLOAT, false,
-                TexturedSquare.DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
+                DEFAULT_TEXTURE_VERTEX_STRIDE, textureBuffer);
 
         // Set the active texture unit to texture unit 0.
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
@@ -105,23 +145,11 @@ public class BackBufferSquare {
 
         // Draw the square
         GLES30.glDrawElements(
-                GLES30.GL_TRIANGLES, TexturedSquare.DEFAULT_TEXTURE_DRAW_ORDER.length,
+                GLES30.GL_TRIANGLES, DEFAULT_TEXTURE_DRAW_ORDER.length,
                 GLES30.GL_UNSIGNED_SHORT, textureDrawOrderBuffer);
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle);
         GLES30.glDisableVertexAttribArray(mTextureCoordinateHandle);
-    }
-
-    /** Returns a matrix of vertex coords that has been translated in x and y axis */
-    private float[] getTranslatedVertexCoords(float [] vertexCoords, float ratio) {
-        float [] coords = vertexCoords.clone();
-
-        coords[0 * 3] = -1.0f * ratio;
-        coords[1 * 3] = -1.0f * ratio;
-        coords[2 * 3] = 1.0f * ratio;
-        coords[3 * 3] = 1.0f * ratio;
-
-        return coords;
     }
 }

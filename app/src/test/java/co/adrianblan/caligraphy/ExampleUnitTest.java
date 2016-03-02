@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.fastbrush;
 
 import org.junit.Test;
 

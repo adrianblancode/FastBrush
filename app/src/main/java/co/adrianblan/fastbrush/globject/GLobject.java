@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy.globject;
+package co.adrianblan.fastbrush.globject;
 
 /**
  * Basic OpenGL object.

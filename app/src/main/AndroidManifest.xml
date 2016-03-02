@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="co.adrianblan.calligraphy">
+    package="co.adrianblan.fastbrush">
 
     <!-- Tell the system this app requires OpenGL ES 3.0. -->
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="co.adrianblan.calligraphy.MainActivity"
+            android:name="co.adrianblan.fastbrush.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar">

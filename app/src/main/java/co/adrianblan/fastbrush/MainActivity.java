@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy;
+package co.adrianblan.fastbrush;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -15,13 +15,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(co.adrianblan.calligraphy.R.layout.activity_main);
-        FrameLayout frame = (FrameLayout) findViewById(co.adrianblan.calligraphy.R.id.frame);
+        setContentView(co.adrianblan.fastbrush.R.layout.activity_main);
+        FrameLayout frame = (FrameLayout) findViewById(co.adrianblan.fastbrush.R.id.frame);
 
         glSurfaceView = new MyGLSurfaceView(this);
         frame.addView(glSurfaceView, 0);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(co.adrianblan.calligraphy.R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(co.adrianblan.fastbrush.R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 glSurfaceView.clearScreen();

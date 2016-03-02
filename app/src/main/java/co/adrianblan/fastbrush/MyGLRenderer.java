@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy;
+package co.adrianblan.fastbrush;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -29,11 +29,11 @@ import android.opengl.Matrix;
 
 import java.util.ArrayList;
 
-import co.adrianblan.calligraphy.data.TouchData;
-import co.adrianblan.calligraphy.data.TouchDataContainer;
-import co.adrianblan.calligraphy.globject.BackBufferSquare;
-import co.adrianblan.calligraphy.globject.Brush;
-import co.adrianblan.calligraphy.vector.Vector2;
+import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.data.TouchDataContainer;
+import co.adrianblan.fastbrush.globject.BackBufferSquare;
+import co.adrianblan.fastbrush.globject.Brush;
+import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class

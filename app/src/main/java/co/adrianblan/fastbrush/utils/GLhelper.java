@@ -1,4 +1,4 @@
-package co.adrianblan.calligraphy.utils;
+package co.adrianblan.fastbrush.utils;
 
 import android.opengl.GLES30;
 import android.util.Log;

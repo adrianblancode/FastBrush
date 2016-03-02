@@ -1,12 +1,6 @@
-package co.adrianblan.calligraphy.globject;
+package co.adrianblan.fastbrush.globject;
 
-import android.opengl.GLES30;
-
-import java.nio.FloatBuffer;
-
-import co.adrianblan.calligraphy.utils.GLhelper;
-import co.adrianblan.calligraphy.utils.Utils;
-import co.adrianblan.calligraphy.vector.Vector3;
+import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
  * Writing primitive for the brush.

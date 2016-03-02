@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.calligraphy.globject;
+package co.adrianblan.fastbrush.globject;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -21,10 +21,10 @@ import java.nio.ShortBuffer;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import co.adrianblan.calligraphy.data.TouchData;
-import co.adrianblan.calligraphy.utils.GLhelper;
-import co.adrianblan.calligraphy.utils.Utils;
-import co.adrianblan.calligraphy.vector.Vector2;
+import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.utils.GLhelper;
+import co.adrianblan.fastbrush.utils.Utils;
+import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
  * A Square object for use as a drawn object in OpenGL ES 2.0.
