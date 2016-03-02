@@ -44,15 +44,16 @@ public class TouchDataContainer {
                 }
             }
 
-            // MIN_DISTANCE?
 
-            // Throttle values so that they do not increase too quickly
-            float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
-            float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
+            if(distance >= MIN_DISTANCE) {
+                // Throttle values so that they do not increase too quickly
+                float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
+                float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
 
-            TouchData td = new TouchData(touchData.getPosition(), size, pressure);
+                TouchData td = new TouchData(touchData.getPosition(), size, pressure);
 
-            add(td);
+                add(td);
+            }
         }
     }
 

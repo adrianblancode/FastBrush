@@ -6,7 +6,7 @@ import android.util.DisplayMetrics;
 /** Utility functions */
 public class Utils {
 
-    public static final float blackColor[] = {0f, 0f, 0f, 0.66f};
+    public static final float blackColor[] = {0f, 0f, 0f, 0.2f};
 
     /** Returns the value of val, clamped between min and max */
     public static float clamp (float val, float min, float max) {

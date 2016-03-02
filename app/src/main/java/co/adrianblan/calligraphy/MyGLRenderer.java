@@ -95,9 +95,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferSquare = new BackBufferSquare(mRatio);
         generateBackFramebuffer();
 
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
+        // This projection matrix is applied to object coordinates in the onDrawFrame() method
+        //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
+        Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE + 3);
 
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
@@ -141,8 +141,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
 
-        System.out.println("Numdata: " + touchDataContainer.get().size());
-
         // Imprint brush on paper
         for(TouchData td : touchDataContainer.get()) {
             brush.update(td);
@@ -169,7 +167,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         // We are done rendering TouchData, now we clear them
-        touchHasEnded();
+        touchDataContainer.clear();
     }
 
     /** Loads a drawable into the currently bound texture */
