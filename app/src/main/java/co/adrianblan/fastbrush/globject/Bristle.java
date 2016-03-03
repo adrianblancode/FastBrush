@@ -1,5 +1,7 @@
 package co.adrianblan.fastbrush.globject;
 
+import android.opengl.Matrix;
+
 import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
@@ -13,12 +15,17 @@ public class Bristle {
     private static final float BASE_VERTICAL_OFFSET = 0.0f;
     private static final float BRUSH_RADIUS_UPPER = 0.4f;
     private static final float BRUSH_RADIUS_LOWER = 0.2f;
+    private static final Vector3 basePos = new Vector3(0, 0, -BASE_LENGTH);
 
     private Vector3 top;
     private Vector3 bottom;
+    private Vector3 diff;
+    float distanceToBasePos;
+    float inherentAngle;
+    float length;
 
-    public Vector3 absoluteStart;
-    public Vector3 absoluteEnd;
+    public Vector3 absoluteTop;
+    public Vector3 absoluteBottom;
 
     public Bristle() {
 
@@ -28,18 +35,35 @@ public class Bristle {
         float horizontal = (float) Math.cos(radiusAngle) * verticalAngle;
         float vertical = (float) Math.sin(radiusAngle) * verticalAngle;
 
+        inherentAngle = (float) (Math.sqrt(horizontal * horizontal + vertical * vertical) / (BASE_LENGTH * Math.PI / 2f));
+
         top = new Vector3(BRUSH_RADIUS_UPPER * horizontal, BRUSH_RADIUS_UPPER * vertical, 0f);
         bottom = new Vector3(BRUSH_RADIUS_LOWER * horizontal, BRUSH_RADIUS_LOWER * vertical,
                 -(BASE_LENGTH - TIP_LENGTH + TIP_LENGTH * (float) Math.cos(verticalAngle * 0.5f * Math.PI)));
 
-        absoluteStart = new Vector3();
-        absoluteEnd = new Vector3();
+        absoluteTop = new Vector3();
+        absoluteBottom = new Vector3();
+        diff = new Vector3();
+        length = basePos.distance(top);
+
+        distanceToBasePos = basePos.distance(bottom);
     }
 
-    public void update(Vector3 brushPosition, Vector2 tilt) {
-        absoluteStart.addFast(top, brushPosition);
-        absoluteEnd.addFast(bottom, brushPosition);
-        absoluteStart.addX(tilt.getX());
-        absoluteStart.addY(tilt.getY() + BASE_VERTICAL_OFFSET);
+    public void update(Vector3 brushPosition, float[] rotationMatrix) {
+
+        top.addZ(BASE_LENGTH);
+        bottom.addZ(BASE_LENGTH);
+
+        Matrix.multiplyMV(absoluteTop.vector, 0, rotationMatrix, 0, top.vector, 0);
+        Matrix.multiplyMV(absoluteBottom.vector, 0, rotationMatrix, 0, bottom.vector, 0);
+
+        absoluteTop.addFast(brushPosition);
+        absoluteBottom.addFast(brushPosition);
+
+        top.addZ(-BASE_LENGTH);
+        bottom.addZ(-BASE_LENGTH);
+
+        absoluteTop.addZ(-BASE_LENGTH);
+        absoluteBottom.addZ(-BASE_LENGTH);
     }
 }

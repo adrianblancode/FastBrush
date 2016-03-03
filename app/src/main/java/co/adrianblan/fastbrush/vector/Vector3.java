@@ -3,7 +3,7 @@ package co.adrianblan.fastbrush.vector;
 /** Defines a vector in 3D space */
 public class Vector3 {
 
-    public float[] vector = {0f, 0f, 0f};
+    public float[] vector = {0f, 0f, 0f, 1f};
 
     public Vector3(){}
 

@@ -1,6 +1,7 @@
 package co.adrianblan.fastbrush.globject;
 
 import android.opengl.GLES30;
+import android.opengl.Matrix;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class Brush {
     private Vector2 tilt;
     private float[] vertexData;
 
-    private static final int NUM_BRISTLES = 1000;
+    private static final int NUM_BRISTLES = 100;
     public static final float BRISTLE_THICKNESS = 1.5f;
 
     private final FloatBuffer vertexBuffer;
@@ -52,30 +53,36 @@ public class Brush {
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
     public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.BASE_LENGTH + 0.15f -
-                Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
+        position.set(touchData.getPosition(), Bristle.BASE_LENGTH
+                + 0.15f - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
 
-        updateTilt(touchData);
         updateJitter();
-
         position.addFast(jitter);
 
+        updateTilt(touchData);
+
+        float x = tilt.getX();
+        float y = tilt.getY();
+        float angle = (float) (Math.sqrt(x * x + y * y) / (Bristle.BASE_LENGTH)) * 90;
+        float[] rotationMatrix = new float[16];
+
+        Matrix.setRotateM(rotationMatrix, 0, angle, -y, x, 0);
         vertexBuffer.position(0);
 
         int index = 0;
         float [] vector;
 
         for(Bristle bristle : bristles){
-            bristle.update(position, tilt);
+            bristle.update(position, rotationMatrix);
 
-            vector = bristle.absoluteStart.vector;
+            vector = bristle.absoluteTop.vector;
 
             vertexData[index] = vector[0];
             vertexData[index + 1] = vector[1];
             vertexData[index + 2] = vector[2];
 
             index += 3;
-            vector = bristle.absoluteEnd.vector;
+            vector = bristle.absoluteBottom.vector;
 
             vertexData[index] = vector[0];
             vertexData[index + 1] = vector[1];
@@ -145,10 +152,11 @@ public class Brush {
     }
 
     private void updateTilt(TouchData touchData) {
-        float maxTilt = 0.2f;
+        float maxTilt = 0.4f;
+        float tiltScale = 0.6f;
 
-        float tiltX = Utils.clamp(touchData.getVelocity().getX(), -maxTilt, maxTilt);
-        float tiltY = Utils.clamp(touchData.getVelocity().getY(), -maxTilt, maxTilt);
+        float tiltX = Utils.clamp(touchData.getVelocity().getX() * tiltScale, -maxTilt, maxTilt);
+        float tiltY = Utils.clamp(touchData.getVelocity().getY() * tiltScale, -maxTilt, maxTilt);
 
         tilt.set(tiltX, tiltY);
     }
