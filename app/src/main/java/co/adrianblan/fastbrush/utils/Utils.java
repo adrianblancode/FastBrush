@@ -7,8 +7,7 @@ import android.util.DisplayMetrics;
 public class Utils {
 
     public static final float blackColor[] = {0f, 0f, 0f, 0.2f};
-    public static final float brownColor[] = {0.26f, 0.18f, 0.14f, 0.9f};
-
+    public static final float brownColor[] = {0.26f, 0.18f, 0.14f, 0.85f};
 
     /** Returns the value of val, clamped between min and max */
     public static float clamp (float val, float min, float max) {
@@ -110,5 +109,12 @@ public class Utils {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         float dp = px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         return dp;
+    }
+
+    public static void printMatrix(float[] m) {
+
+        for(int i = 0; i < m.length; i += 4) {
+            System.out.println("{" + m[i + 0] + ", " + m[i + 1] + ", " + m[i + 2] + ", " + m[i + 3] + "}");
+        }
     }
 }

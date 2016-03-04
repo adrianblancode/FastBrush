@@ -49,21 +49,9 @@ public class Bristle {
         distanceToBasePos = basePos.distance(bottom);
     }
 
-    public void update(Vector3 brushPosition, float[] rotationMatrix) {
+    public void update(Vector3 brushPosition) {
 
-        top.addZ(BASE_LENGTH);
-        bottom.addZ(BASE_LENGTH);
-
-        Matrix.multiplyMV(absoluteTop.vector, 0, rotationMatrix, 0, top.vector, 0);
-        Matrix.multiplyMV(absoluteBottom.vector, 0, rotationMatrix, 0, bottom.vector, 0);
-
-        absoluteTop.addFast(brushPosition);
-        absoluteBottom.addFast(brushPosition);
-
-        top.addZ(-BASE_LENGTH);
-        bottom.addZ(-BASE_LENGTH);
-
-        absoluteTop.addZ(-BASE_LENGTH);
-        absoluteBottom.addZ(-BASE_LENGTH);
+        absoluteTop.addFast(top, brushPosition);
+        absoluteBottom.addFast(bottom, brushPosition);
     }
 }

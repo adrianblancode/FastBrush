@@ -7,6 +7,10 @@ import co.adrianblan.fastbrush.vector.Vector2;
  * Class which encapsulates touch data.
  */
 public class TouchData {
+
+    private static final float MAX_TILT = 0.2f;
+    private static final float TILT_SCALE = 0.4f;
+
     private Vector2 position;
     private Vector2 velocity;
     private float size;
@@ -99,5 +103,16 @@ public class TouchData {
         }
 
         return Utils.normalize(size * getNormalizedPressure(), TOUCH_SIZE_MIN, TOUCH_SIZE_MAX);
+    }
+
+    public float getTiltX() {
+
+
+        return Utils.clamp(getVelocity().getX() * TILT_SCALE, -MAX_TILT, MAX_TILT);
+    }
+
+    public float getTiltY() {
+
+        return Utils.clamp(getVelocity().getY() * TILT_SCALE, -MAX_TILT, MAX_TILT);
     }
 }

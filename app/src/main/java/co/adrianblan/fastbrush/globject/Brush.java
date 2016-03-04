@@ -17,27 +17,29 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Brush {
 
-    private ArrayList<Bristle> bristles;
-    private Vector3 position;
-    private Vector3 jitter;
-    private Vector2 tilt;
-    private float[] vertexData;
-
     private static final int NUM_BRISTLES = 100;
     public static final float BRISTLE_THICKNESS = 1.5f;
-
-    private final FloatBuffer vertexBuffer;
 
     private int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+    private float[] vertexData;
+
+    private ArrayList<Bristle> bristles;
+    private Vector3 position;
+    private Vector3 jitter;
+    private float angle;
+
+    private final FloatBuffer vertexBuffer;
 
     public Brush() {
-        bristles = new ArrayList<>();
+
         position = new Vector3();
+        resetPosition();
+
+        bristles = new ArrayList<>();
         jitter = new Vector3();
-        tilt = new Vector2();
 
         for(int i = 0; i < NUM_BRISTLES; i++){
             bristles.add(new Bristle());
@@ -59,21 +61,19 @@ public class Brush {
         updateJitter();
         position.addFast(jitter);
 
-        updateTilt(touchData);
+        float xTilt = touchData.getTiltX();
+        float yTilt = touchData.getTiltY();
 
-        float x = tilt.getX();
-        float y = tilt.getY();
-        float angle = (float) (Math.sqrt(x * x + y * y) / (Bristle.BASE_LENGTH)) * 90;
-        float[] rotationMatrix = new float[16];
+        angle = Utils.clamp((float) (Math.sqrt(xTilt * xTilt + yTilt * yTilt) / (Bristle.BASE_LENGTH)) * 90,
+                0, 90);
 
-        Matrix.setRotateM(rotationMatrix, 0, angle, -y, x, 0);
         vertexBuffer.position(0);
 
         int index = 0;
         float [] vector;
 
         for(Bristle bristle : bristles){
-            bristle.update(position, rotationMatrix);
+            bristle.update(position);
 
             vector = bristle.absoluteTop.vector;
 
@@ -141,6 +141,14 @@ public class Brush {
         return position;
     }
 
+    public void resetPosition() {
+        position.set(0, 0, Bristle.BASE_LENGTH);
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
     private void updateJitter() {
         float maxJitter = 0.001f;
 
@@ -149,15 +157,5 @@ public class Brush {
         //float jitterZ = (2.0f - 1.0f * (float) Math.random()) * maxJitter;
 
         jitter.set(jitterX, jitterY, 0);
-    }
-
-    private void updateTilt(TouchData touchData) {
-        float maxTilt = 0.4f;
-        float tiltScale = 0.6f;
-
-        float tiltX = Utils.clamp(touchData.getVelocity().getX() * tiltScale, -maxTilt, maxTilt);
-        float tiltY = Utils.clamp(touchData.getVelocity().getY() * tiltScale, -maxTilt, maxTilt);
-
-        tilt.set(tiltX, tiltY);
     }
 }

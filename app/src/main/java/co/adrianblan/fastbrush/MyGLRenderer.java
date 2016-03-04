@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import co.adrianblan.fastbrush.data.TouchData;
 import co.adrianblan.fastbrush.data.TouchDataContainer;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
@@ -63,14 +64,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
-    private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
+    private final float[] mProjectionMatrix = new float[16];
 
-    private final float[] mBrushViewModelMatrix = new float[16];
-    private final float[] mBrushViewProjectionMatrix = new float[16];
-    private final float[] mBrushViewViewMatrix = new float[16];
-    private final float[] mBrushViewMVMatrix = new float[16];
-    private final float[] mBrushViewMVPMatrix = new float[16];
+    private final float[] mBrushModelMatrix = new float[16];
+    private final float[] mBrushModelOffsetMatrix = new float[16];
+    private final float[] mBrushProjectionMatrix = new float[16];
+    private final float[] mBrushViewMatrix = new float[16];
+    private final float[] mBrushMVMatrix = new float[16];
+    private final float[] mBrushMVPMatrix = new float[16];
+
+    private final float[] translateToOrigin = new float[16];
+    private final float[] translateFromOrigin = new float[16];
+    private final float[] rotationMatrix = new float[16];
 
     private Context context;
 
@@ -99,9 +105,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         brush = new Brush();
         touchDataContainer = new TouchDataContainer();
 
-        Matrix.setIdentityM(mBrushViewModelMatrix, 0);
-        Matrix.translateM(mBrushViewModelMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
-        Matrix.scaleM(mBrushViewModelMatrix, 0, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE);
+        Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
+        Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
+        Matrix.scaleM(mBrushModelOffsetMatrix, 0, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        Matrix.orthoM(mBrushViewProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
+        Matrix.orthoM(mBrushProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
                 CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Generate and load textures
@@ -170,8 +176,27 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Imprint brush on paper
         for(TouchData td : touchDataContainer.get()) {
+
             brush.update(td);
-            brush.draw(mMVPMatrix);
+
+            Matrix.setIdentityM(mBrushModelMatrix, 0);
+            Matrix.setIdentityM(translateToOrigin, 0);
+            Matrix.setIdentityM(translateFromOrigin, 0);
+            Matrix.setIdentityM(rotationMatrix, 0);
+
+            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(),
+                    -brush.getPosition().getZ() + Bristle.BASE_LENGTH);
+            Matrix.setRotateM(rotationMatrix, 0, brush.getAngle(), -td.getTiltY(), td.getTiltX(), 0);
+            Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(),
+                    brush.getPosition().getZ() - Bristle.BASE_LENGTH);
+
+            Matrix.multiplyMM(mBrushModelMatrix, 0, rotationMatrix, 0, translateToOrigin, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromOrigin, 0, mBrushModelMatrix, 0);
+
+            Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
+
+            brush.draw(mBrushMVPMatrix);
         }
 
         // Bind default buffer
@@ -188,26 +213,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
+        // Draw brush
+        if(touchDataContainer.hasTouchData()) {
+            GLES30.glLineWidth(4f);
+            brush.draw(mBrushMVPMatrix, Utils.brownColor);
+        }
+
         if(SHOW_BRUSH_VIEW) {
 
-            Matrix.setLookAtM(mBrushViewViewMatrix, 0,
+            Matrix.setLookAtM(mBrushViewMatrix, 0,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
-            Matrix.multiplyMM(mBrushViewMVMatrix, 0, mBrushViewViewMatrix, 0, mBrushViewModelMatrix, 0);
-            Matrix.multiplyMM(mBrushViewMVPMatrix, 0, mBrushViewProjectionMatrix, 0, mBrushViewMVMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, mBrushModelOffsetMatrix, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
 
             GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
-            brush.draw(mBrushViewMVPMatrix, Utils.brownColor);
+            brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
-
-        // Draw brush
-        if(touchDataContainer.hasTouchData()) {
-            GLES30.glLineWidth(4f);
-            brush.draw(mMVPMatrix, Utils.brownColor);
-        }
-
 
         // We are done rendering TouchData, now we clear them
         touchDataContainer.clear();
@@ -294,6 +319,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void touchHasEnded() {
         touchDataContainer.clear();
         touchDataContainer.touchHasEnded();
+        //brush.resetPosition();
     }
 
     public void clearScreen() {

@@ -59,6 +59,10 @@ public class Vector3 {
         vector[2] = z;
     }
 
+    public float getW(){
+        return vector[3];
+    }
+
     public void addZ(float z) {
         vector[2] += z;
     }
@@ -117,6 +121,6 @@ public class Vector3 {
     }
 
     public String toString() {
-        return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
+        return "(" + getX() + ", " + getY() + ", " + getZ() + ", " + getW() + ")";
     }
 }
