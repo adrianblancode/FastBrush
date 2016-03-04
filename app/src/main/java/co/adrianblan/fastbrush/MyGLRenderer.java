@@ -34,6 +34,7 @@ import co.adrianblan.fastbrush.data.TouchDataContainer;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.globject.Brush;
+import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
 
@@ -53,7 +54,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.001f;
+    private static final float IMPRINT_DEPTH = 0.0002f;
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
@@ -90,6 +91,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] brushTextureArray = new int[1];
 
     private Brush brush;
+    private Line line;
     private TouchDataContainer touchDataContainer;
     private BackBufferSquare backBufferSquare;
 
@@ -103,6 +105,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         brush = new Brush();
+        line = new Line();
         touchDataContainer = new TouchDataContainer();
 
         Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
@@ -222,6 +225,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if(SHOW_BRUSH_VIEW) {
 
             Matrix.setLookAtM(mBrushViewMatrix, 0,
+                    0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
+                    0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
+                    0f, 0.0f, 1.0f);
+
+            Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelOffsetMatrix, 0);
+            Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
+
+            GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+            line.draw(mBrushMVPMatrix, Utils.brownColor);
+
+            Matrix.setLookAtM(mBrushViewMatrix, 0,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
@@ -232,6 +246,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
+
         }
 
         // We are done rendering TouchData, now we clear them

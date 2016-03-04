@@ -17,7 +17,7 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Brush {
 
-    private static final int NUM_BRISTLES = 100;
+    private static final int NUM_BRISTLES = 1000;
     public static final float BRISTLE_THICKNESS = 1.5f;
 
     private int mProgram;
@@ -26,12 +26,14 @@ public class Brush {
     private int mMVPMatrixHandle;
     private float[] vertexData;
 
+    private final FloatBuffer vertexBuffer;
+
     private ArrayList<Bristle> bristles;
     private Vector3 position;
     private Vector3 jitter;
     private float angle;
 
-    private final FloatBuffer vertexBuffer;
+
 
     public Brush() {
 
@@ -53,19 +55,23 @@ public class Brush {
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
-    /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
     public void update(TouchData touchData) {
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH
-                + 0.15f - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
-
-        updateJitter();
-        position.addFast(jitter);
+                - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
 
         float xTilt = touchData.getTiltX();
         float yTilt = touchData.getTiltY();
 
         angle = Utils.clamp((float) (Math.sqrt(xTilt * xTilt + yTilt * yTilt) / (Bristle.BASE_LENGTH)) * 90,
                 0, 90);
+
+        update();
+    }
+
+    /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
+    public void update() {
+        updateJitter();
+        position.addFast(jitter);
 
         vertexBuffer.position(0);
 
@@ -143,6 +149,7 @@ public class Brush {
 
     public void resetPosition() {
         position.set(0, 0, Bristle.BASE_LENGTH);
+        angle = 0;
     }
 
     public float getAngle() {
