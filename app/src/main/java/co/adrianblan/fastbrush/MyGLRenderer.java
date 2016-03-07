@@ -54,13 +54,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.0002f;
+    private static final float IMPRINT_DEPTH = 0.0001f;
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
     private static final float BRUSH_VIEW_SCALE = 0.3f;
 
     private static final boolean SHOW_BRUSH_VIEW = true;
+    private static final boolean BRUSH_DRY = true;
 
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -164,9 +165,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Enable blending
         GLES30.glEnable(GLES30.GL_BLEND);
-        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-        //GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE);
-        //GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
+
+        if(BRUSH_DRY) {
+            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        } else {
+            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE);
+            GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
+        }
 
         // Enable depth testing to slightly above paper
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
@@ -187,11 +192,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(translateFromOrigin, 0);
             Matrix.setIdentityM(rotationMatrix, 0);
 
-            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(),
-                    -brush.getPosition().getZ() + Bristle.BASE_LENGTH);
+            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(), 0);
             Matrix.setRotateM(rotationMatrix, 0, brush.getAngle(), -td.getTiltY(), td.getTiltX(), 0);
-            Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(),
-                    brush.getPosition().getZ() - Bristle.BASE_LENGTH);
+            Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
             Matrix.multiplyMM(mBrushModelMatrix, 0, rotationMatrix, 0, translateToOrigin, 0);
             Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromOrigin, 0, mBrushModelMatrix, 0);
