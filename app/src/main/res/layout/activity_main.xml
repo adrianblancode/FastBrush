@@ -1,17 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
-    android:id="@+id/frame"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/frame"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal" >
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fab_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
-        android:padding="16dp"
-        android:src="@drawable/ic_undo_white_36dp"/>
+        fab:fab_addButtonColorNormal="@color/white"
+        fab:fab_addButtonPlusIconColor="@android:color/background_dark"
+        fab:fab_addButtonStrokeVisible="false"
+        fab:fab_expandDirection="up"
+        fab:fab_labelStyle="@style/menu_labels_style"
+        fab:fab_labelsPosition="left">
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_brush"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_icon="@drawable/ic_brush_white_36dp"
+            fab:fab_title="Brush"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_ink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/ic_color_lens_white_36dp"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_title="Ink"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/ic_delete_white_36dp"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_title="Delete"/>
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </FrameLayout>

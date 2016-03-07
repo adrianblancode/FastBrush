@@ -22,7 +22,7 @@ public class TouchData {
         this.pressure = pressure;
 
         // The touch size is always 0.0 on an emulator
-        if(!Utils.floatsAreEquivalent(size, 0f)) {
+        if (!Utils.floatsAreEquivalent(size, 0f)) {
             this.size = size;
         } else {
             this.size = 1.0f;
@@ -35,11 +35,18 @@ public class TouchData {
         this.pressure = pressure;
 
         // The touch size is always 0.0 on an emulator
-        if(!Utils.floatsAreEquivalent(size, 0f)) {
+        if (!Utils.floatsAreEquivalent(size, 0f)) {
             this.size = size;
         } else {
             this.size = 1.0f;
         }
+    }
+
+    public TouchData (TouchData touchData){
+        this.position = touchData.position;
+        this.velocity = touchData.velocity;
+        this.size = touchData.size;
+        this.pressure = touchData.pressure;
     }
 
     public Vector2 getPosition() {
@@ -48,6 +55,10 @@ public class TouchData {
 
     public void setPosition(Vector2 position) {
         this.position = position;
+    }
+
+    public void setPosition(float x, float y) {
+        this.position.set(x, y);
     }
 
     public Vector2 getVelocity() {

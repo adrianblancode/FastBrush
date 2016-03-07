@@ -27,6 +27,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
@@ -220,13 +221,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
         // Draw brush
-        if(touchDataContainer.hasTouchData()) {
-            GLES30.glLineWidth(4f);
+        if(touchDataContainer.hasTouchData() && !touchDataContainer.hasTouchEnded()) {
+            GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
 
-        if(SHOW_BRUSH_VIEW) {
+        if(SHOW_BRUSH_VIEW && touchDataContainer.hasTouchData()) {
 
+            // Draw brush view line
             Matrix.setLookAtM(mBrushViewMatrix, 0,
                     0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
                     0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
@@ -235,9 +237,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelOffsetMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+            GLES30.glLineWidth(Utils.convertPixelsToDp(15f));
             line.draw(mBrushMVPMatrix, Utils.brownColor);
 
+            // Draw brush view brush
             Matrix.setLookAtM(mBrushViewMatrix, 0,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
                     (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
@@ -247,7 +250,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+            GLES30.glLineWidth(Brush.BRUSH_VIEW_BRISTLE_THICKNESS);
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
 
         }
@@ -335,7 +338,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Clears all the ArrayList of Point of all objects*/
     public void touchHasEnded() {
+
         touchDataContainer.clear();
+
+        if(touchDataContainer.hasLast()) {
+            ArrayList<TouchData> touchDataList = new ArrayList<>();
+
+            TouchData td = new TouchData(touchDataContainer.getLast());
+            td.setPosition(td.getX() + Math.min(td.getTiltX(), 0.001f), td.getY() + Math.min(td.getTiltY(), 0.001f));
+            td.setSize(0f);
+
+            touchDataList.add(td);
+            addTouchData(touchDataList);
+        }
+
         touchDataContainer.touchHasEnded();
         //brush.resetPosition();
     }

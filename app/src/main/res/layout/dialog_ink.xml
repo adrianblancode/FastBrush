@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/dialog_margin"
+    android:paddingRight="@dimen/dialog_margin"
+    android:paddingTop="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fluidity"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        tools:targetApi="lollipop"/>
+
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="8dp">
+        <RadioButton
+            android:id="@+id/radioButtonDry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dry"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            tools:targetApi="lollipop" />
+        <RadioButton
+            android:id="@+id/radioButtonWet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            android:text="Wet"
+            tools:targetApi="lollipop" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Opacity"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        tools:targetApi="lollipop" />
+
+    <SeekBar
+        android:id="@+id/seekBarInkOpacity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+</LinearLayout>

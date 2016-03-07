@@ -1,15 +1,28 @@
 package co.adrianblan.fastbrush;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import co.adrianblan.fastbrush.settings.SettingsManager;
+
 public class MainActivity extends AppCompatActivity {
 
+    @Bind(R.id.fab_menu)
+    FloatingActionsMenu fabMenu;
+
     private MyGLSurfaceView glSurfaceView;
+    private SettingsManager settingsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,19 +30,64 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(co.adrianblan.fastbrush.R.layout.activity_main);
         FrameLayout frame = (FrameLayout) findViewById(co.adrianblan.fastbrush.R.id.frame);
+        ButterKnife.bind(this);
 
         glSurfaceView = new MyGLSurfaceView(this);
         frame.addView(glSurfaceView, 0);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(co.adrianblan.fastbrush.R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                glSurfaceView.clearScreen();
-            }
-        });
+        settingsManager = SettingsManager.createInstance(this);
 
         hideSystemUi();
     }
+
+    @OnClick(R.id.fab_brush)
+    public void onClickFabBrush() {
+
+        fabMenu.collapse();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Brush Settings")
+                .setView(R.layout.dialog_brush)
+                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        settingsManager.save();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    @OnClick(R.id.fab_ink)
+    public void onClickFabInk() {
+
+        fabMenu.collapse();
+
+        new AlertDialog.Builder(this)
+                .setView(R.layout.dialog_ink)
+                .setTitle("Ink Settings")
+                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        settingsManager.save();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    @OnClick(R.id.fab_delete)
+    public void onClickFabDelete() {
+        fabMenu.collapse();
+        glSurfaceView.clearScreen();
+    }
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {

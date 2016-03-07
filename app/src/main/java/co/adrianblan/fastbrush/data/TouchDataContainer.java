@@ -11,9 +11,11 @@ public class TouchDataContainer {
 
     private ArrayList<TouchData> touchDataList;
     private TouchData prevTouchData;
+    private boolean touchHasEnded;
 
     public TouchDataContainer() {
         touchDataList = new ArrayList<>();
+        touchHasEnded = true;
     }
 
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
@@ -45,7 +47,7 @@ public class TouchDataContainer {
             }
 
 
-            if(true) {
+            if(distance < MIN_DISTANCE && false) {
                 // Throttle values so that they do not increase too quickly
                 float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
@@ -94,6 +96,7 @@ public class TouchDataContainer {
     private void add(TouchData touchData) {
         touchDataList.add(touchData);
         prevTouchData = touchData;
+        touchHasEnded = false;
     }
 
     /** Returns the list of TouchData */
@@ -101,18 +104,18 @@ public class TouchDataContainer {
         return touchDataList;
     }
 
-    /** Gets the last TouchData if it exists, otherwise null */
-    public TouchData getLast() {
-        if(hasTouchData()) {
-            return touchDataList.get(touchDataList.size() - 1);
-        } else {
-            return null;
-        }
-    }
-
     /** Returns whether there is any TouchData in the list */
     public boolean hasTouchData() {
         return !touchDataList.isEmpty();
+    }
+
+    /** Gets the last TouchData if it exists, otherwise null */
+    public TouchData getLast() {
+        return prevTouchData;
+    }
+
+    public boolean hasLast() {
+        return prevTouchData != null;
     }
 
     /** Clears all the TouchData */
@@ -122,5 +125,10 @@ public class TouchDataContainer {
 
     public void touchHasEnded() {
         prevTouchData = null;
+        touchHasEnded = true;
+    }
+
+    public boolean hasTouchEnded() {
+        return touchHasEnded;
     }
 }
