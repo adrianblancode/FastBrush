@@ -7,13 +7,14 @@ import co.adrianblan.fastbrush.utils.Utils;
 /**
  * Class which contains TouchData objects and methods.
  */
-public class TouchDataContainer {
+public class TouchDataManager {
 
     private ArrayList<TouchData> touchDataList;
     private TouchData prevTouchData;
     private boolean touchHasEnded;
+    private boolean touchIsEnding;
 
-    public TouchDataContainer() {
+    public TouchDataManager() {
         touchDataList = new ArrayList<>();
         touchHasEnded = true;
     }
@@ -47,7 +48,7 @@ public class TouchDataContainer {
             }
 
 
-            if(distance < MIN_DISTANCE && false) {
+            if(distance < MIN_DISTANCE && !touchIsEnding) {
                 // Throttle values so that they do not increase too quickly
                 float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
@@ -123,9 +124,14 @@ public class TouchDataContainer {
         touchDataList.clear();
     }
 
+    public void touchIsEnding() {
+        touchIsEnding = true;
+    }
+
     public void touchHasEnded() {
         prevTouchData = null;
         touchHasEnded = true;
+        touchIsEnding = false;
     }
 
     public boolean hasTouchEnded() {

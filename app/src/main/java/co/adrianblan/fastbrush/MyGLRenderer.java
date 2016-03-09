@@ -30,11 +30,10 @@ import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
-import co.adrianblan.fastbrush.data.TouchDataContainer;
+import co.adrianblan.fastbrush.data.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
@@ -95,7 +94,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Brush brush;
     private Line line;
-    private TouchDataContainer touchDataContainer;
+    private TouchDataManager touchDataManager;
     private BackBufferSquare backBufferSquare;
 
     public MyGLRenderer(Context context) {
@@ -109,7 +108,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         brush = new Brush();
         line = new Line();
-        touchDataContainer = new TouchDataContainer();
+        touchDataManager = new TouchDataManager();
 
         Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
         Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
@@ -185,7 +184,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
 
         // Imprint brush on paper
-        for(TouchData td : touchDataContainer.get()) {
+        for(TouchData td : touchDataManager.get()) {
 
             brush.update(td);
 
@@ -222,12 +221,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
 
         // Draw brush
-        if(touchDataContainer.hasTouchData() && !touchDataContainer.hasTouchEnded()) {
+        if(touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
             GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
 
-        if(SHOW_BRUSH_VIEW && touchDataContainer.hasTouchData()) {
+        if(SHOW_BRUSH_VIEW && !touchDataManager.hasTouchEnded()) {
 
             // Draw brush view line
             Matrix.setLookAtM(mBrushViewMatrix, 0,
@@ -257,7 +256,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         // We are done rendering TouchData, now we clear them
-        touchDataContainer.clear();
+        touchDataManager.clear();
     }
 
     /** Loads a drawable into the currently bound texture */
@@ -333,19 +332,20 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** Takes a list of TouchData and adds it to the container */
     public void addTouchData(ArrayList<TouchData> touchDataList) {
         for(TouchData touchData : touchDataList) {
-            touchDataContainer.addInterpolated(touchData);
+            touchDataManager.addInterpolated(touchData);
         }
     }
 
     /** Clears all the ArrayList of Point of all objects*/
     public void touchHasEnded() {
 
-        touchDataContainer.clear();
+        touchDataManager.clear();
+        touchDataManager.touchIsEnding();
 
-        if(touchDataContainer.hasLast()) {
+        if(touchDataManager.hasLast()) {
             ArrayList<TouchData> touchDataList = new ArrayList<>();
 
-            TouchData td = new TouchData(touchDataContainer.getLast());
+            TouchData td = new TouchData(touchDataManager.getLast());
             td.setPosition(td.getX() + Math.min(td.getTiltX(), 0.001f), td.getY() + Math.min(td.getTiltY(), 0.001f));
             td.setSize(0f);
 
@@ -353,8 +353,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             addTouchData(touchDataList);
         }
 
-        touchDataContainer.touchHasEnded();
-        //brush.resetPosition();
+        touchDataManager.touchHasEnded();
     }
 
     public void clearScreen() {

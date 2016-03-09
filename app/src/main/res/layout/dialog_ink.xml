@@ -15,11 +15,14 @@
         android:textAppearance="@android:style/TextAppearance.Material.Subhead"
         tools:targetApi="lollipop"/>
 
-    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    <RadioGroup
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/inkFluidity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginBottom="8dp">
+
         <RadioButton
             android:id="@+id/radioButtonDry"
             android:layout_width="wrap_content"
@@ -36,16 +39,35 @@
             tools:targetApi="lollipop" />
     </RadioGroup>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Opacity"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        tools:targetApi="lollipop" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bristle thickness"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            tools:targetApi="lollipop"/>
+
+        <TextView
+            android:id="@+id/inkBarOpacitySubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="16dp"
+            android:text="100"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            tools:targetApi="lollipop"/>
+
+    </RelativeLayout>
 
     <SeekBar
         android:id="@+id/seekBarInkOpacity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="-16dp"
+        android:max="100"
+        android:progress="50"/>
 </LinearLayout>

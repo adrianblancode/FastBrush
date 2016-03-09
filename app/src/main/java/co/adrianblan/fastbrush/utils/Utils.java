@@ -96,7 +96,7 @@ public class Utils {
         double diagonalInches = Math.sqrt((widthInches * widthInches)
                         + (heightInches * heightInches));
 
-        return diagonalInches >= (7 - 0.001);
+        return diagonalInches >= (6.8f);
     }
 
     /**

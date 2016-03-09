@@ -8,6 +8,7 @@ public class SettingsData {
     private float size;
     private int numBristles;
     private float pressureFactor;
+    private float bristleThickness;
     private boolean isDry;
     private float opacity;
 
@@ -15,6 +16,8 @@ public class SettingsData {
         size = 1.0f;
         numBristles = 500;
         pressureFactor = 1.0f;
+        bristleThickness = 7f;
+
         isDry = true;
         opacity = 0.8f;
     }
@@ -41,6 +44,14 @@ public class SettingsData {
 
     public void setPressureFactor(float pressureFactor) {
         this.pressureFactor = pressureFactor;
+    }
+
+    public float getBristleThickness() {
+        return bristleThickness;
+    }
+
+    public void setBristleThickness(float bristleThickness) {
+        this.bristleThickness = bristleThickness;
     }
 
     public boolean isDry() {

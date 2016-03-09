@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -16,6 +17,8 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import co.adrianblan.fastbrush.dialog.BrushDialogFragment;
+import co.adrianblan.fastbrush.dialog.InkDialogFragment;
 import co.adrianblan.fastbrush.settings.SettingsManager;
 import co.adrianblan.fastbrush.utils.Utils;
 
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         glSurfaceView = new MyGLSurfaceView(this);
         mainView.addView(glSurfaceView, 0);
 
-        settingsManager = SettingsManager.createInstance(this);
+        settingsManager = SettingsManager.getInstance(this);
 
         if(!Utils.isTablet()){
             fabBrush.setSize(FloatingActionButton.SIZE_MINI);
@@ -68,42 +71,16 @@ public class MainActivity extends AppCompatActivity {
     public void onClickFabBrush() {
 
         fabMenu.collapse();
-
-        new AlertDialog.Builder(this)
-                .setTitle("Brush Settings")
-                .setView(R.layout.dialog_brush)
-                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        settingsManager.save();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .show();
+        DialogFragment newFragment = new BrushDialogFragment();
+        newFragment.show(getSupportFragmentManager(), "brushDialog");
     }
 
     @OnClick(R.id.fab_ink)
     public void onClickFabInk() {
 
         fabMenu.collapse();
-
-        new AlertDialog.Builder(this)
-                .setView(R.layout.dialog_ink)
-                .setTitle("Ink Settings")
-                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        settingsManager.save();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .show();
+        DialogFragment newFragment = new InkDialogFragment();
+        newFragment.show(getSupportFragmentManager(), "inkDialog");
     }
 
     @OnClick(R.id.fab_save)

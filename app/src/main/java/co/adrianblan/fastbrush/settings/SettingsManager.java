@@ -2,6 +2,7 @@ package co.adrianblan.fastbrush.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 
@@ -13,19 +14,17 @@ public class SettingsManager {
     private static String PREFS_KEY = "settingsData";
     private static SettingsManager instance;
 
+    private SettingsData settingsData;
     private Gson gson;
     private SharedPreferences sharedPreferences;
-    private SettingsData settingsData;
 
-    public static SettingsManager createInstance(Context context) {
+    private boolean hasChanges;
+
+    public static SettingsManager getInstance(Context context) {
         if(instance == null){
             instance = new SettingsManager(context);
         }
 
-        return instance;
-    }
-
-    public static SettingsManager getInstance(Context context) {
         return instance;
     }
 
@@ -34,28 +33,42 @@ public class SettingsManager {
     }
 
     private SettingsManager(Context context) {
-        sharedPreferences = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         gson = new Gson();
-        load();
+        loadSettingsData();
     }
 
     public SettingsData getSettingsData() {
         return settingsData;
     }
 
-    public void save(){
+    public void saveSettingsData(SettingsData settingsData){
+
+        this.settingsData = settingsData;
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PREFS_KEY, gson.toJson(settingsData));
-        editor.commit();
+        editor.apply();
+
+        hasChanges = true;
     }
 
-    private void load() {
+    private void loadSettingsData() {
         String settingsDataString = sharedPreferences.getString(PREFS_KEY, null);
 
         if(settingsDataString == null) {
+            System.out.println("No settings data, creating new");
             settingsData = new SettingsData();
         } else {
             settingsData = gson.fromJson(settingsDataString, SettingsData.class);
         }
+    }
+
+    public boolean hasChanges() {
+        return hasChanges;
+    }
+
+    public void setChangesRead() {
+        hasChanges = false;
     }
 }
