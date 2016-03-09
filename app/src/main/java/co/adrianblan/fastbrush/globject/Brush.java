@@ -1,15 +1,14 @@
 package co.adrianblan.fastbrush.globject;
 
 import android.opengl.GLES30;
-import android.opengl.Matrix;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
-import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
@@ -17,9 +16,11 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Brush {
 
-    private static final int NUM_BRISTLES = 700;
     public static final float BRISTLE_THICKNESS = Utils.convertPixelsToDp(7f);
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.2f);
+
+    private int numBristles;
+    private float sizePressureFactor;
 
     private int mProgram;
     private int mPositionHandle;
@@ -34,7 +35,10 @@ public class Brush {
     private Vector3 jitter;
     private float angle;
 
-    public Brush() {
+    public Brush(SettingsData settingsData) {
+
+        numBristles = settingsData.getNumBristles();
+        sizePressureFactor = settingsData.getPressureFactor();
 
         position = new Vector3();
         resetPosition();
@@ -42,12 +46,12 @@ public class Brush {
         bristles = new ArrayList<>();
         jitter = new Vector3();
 
-        for(int i = 0; i < NUM_BRISTLES; i++){
-            bristles.add(new Bristle());
+        for(int i = 0; i < numBristles; i++){
+            bristles.add(new Bristle(settingsData));
         }
 
-        vertexData = new float[GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * NUM_BRISTLES];
-        vertexBuffer = GLhelper.initFloatBuffer(6 * NUM_BRISTLES);
+        vertexData = new float[GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles];
+        vertexBuffer = GLhelper.initFloatBuffer(6 * numBristles);
 
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
@@ -55,8 +59,8 @@ public class Brush {
     }
 
     public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.BASE_LENGTH
-                - Bristle.TIP_LENGTH * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure());
+        position.set(touchData.getPosition(), Bristle.length
+                - Bristle.tipLength * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure() * sizePressureFactor);
 
         float xTilt = touchData.getTiltX();
         float yTilt = touchData.getTiltY();
@@ -136,7 +140,7 @@ public class Brush {
         GLhelper.checkGlError("glUniformMatrix4fv");
 
         // Draw line
-        GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2 * NUM_BRISTLES);
+        GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2 * numBristles);
 
         // Disable vertex array
         GLES30.glDisableVertexAttribArray(mPositionHandle);

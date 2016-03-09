@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -44,6 +45,9 @@ public class BrushDialogFragment extends DialogFragment {
 
     @Bind(R.id.bristleThicknessSubtitle)
     TextView bristleThickessSubtitle;
+
+    @Bind(R.id.showBrushView)
+    CheckedTextView showBrushView;
 
     private SettingsManager settingsManager;
     private SettingsData settingsData;
@@ -86,10 +90,11 @@ public class BrushDialogFragment extends DialogFragment {
                         ContextCompat.getColor(getActivity(), R.color.colorAccent));
 
                 // Set default values, has no effect until dialog is shown
-                seekBarBrushSize.setProgress((int) (settingsData.getSize() * 100 / 2f));
-                seekBarBrushSizePressureFactor.setProgress((int) (settingsData.getPressureFactor() * 100 / 2f));
+                seekBarBrushSize.setProgress((int) (settingsData.getSize() * 100));
+                seekBarBrushSizePressureFactor.setProgress((int) (settingsData.getPressureFactor() * 100));
                 editTextBrushBristles.setText(String.valueOf(settingsData.getNumBristles()));
-                seekBarBristleThickness.setProgress((int) settingsData.getBristleThickness());
+                seekBarBristleThickness.setProgress((int) (settingsData.getBristleThickness() * 100));
+                showBrushView.setChecked(settingsData.isShowBrushView());
             }
         });
 
@@ -97,10 +102,12 @@ public class BrushDialogFragment extends DialogFragment {
         seekBarBrushSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float result = progress * 2f / 100f;
+                float result = progress / 100f;
 
-                settingsData.setSize(result);
-                brushSizeSubtitle.setText(String.valueOf(result));
+                if(progress > 0) {
+                    settingsData.setSize(result);
+                    brushSizeSubtitle.setText(String.valueOf(result));
+                }
             }
 
             @Override
@@ -115,17 +122,19 @@ public class BrushDialogFragment extends DialogFragment {
         seekBarBrushSizePressureFactor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float result = progress * 2f / 100f;
+                float result = progress / 100f;
 
                 settingsData.setPressureFactor(result);
                 brushSizePressureFactorSubtitle.setText(String.valueOf(result));
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         editTextBrushBristles.addTextChangedListener(new TextWatcher() {
@@ -135,8 +144,10 @@ public class BrushDialogFragment extends DialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                int result = Integer.parseInt(s.toString());
-                settingsData.setNumBristles(result);
+                if (s.length() > 0) {
+                    int result = Integer.parseInt(s.toString());
+                    settingsData.setNumBristles(result);
+                }
             }
 
             @Override
@@ -147,15 +158,29 @@ public class BrushDialogFragment extends DialogFragment {
         seekBarBristleThickness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                settingsData.setBristleThickness(progress);
-                bristleThickessSubtitle.setText(String.valueOf(progress));
+                float result = progress / 100f;
+
+                if (progress > 0) {
+                    settingsData.setBristleThickness(result);
+                    bristleThickessSubtitle.setText(String.valueOf(result));
+                }
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        showBrushView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showBrushView.toggle();
+                settingsData.setShowBrushView(showBrushView.isChecked());
+            }
         });
 
         return alertDialog;

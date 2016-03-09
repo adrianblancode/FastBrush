@@ -55,7 +55,7 @@ public class InkDialogFragment extends DialogFragment {
         ButterKnife.bind(this, mainView);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle("Brush Settings")
+                .setTitle("Ink Settings")
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         settingsManager.saveSettingsData(settingsData);
@@ -82,7 +82,7 @@ public class InkDialogFragment extends DialogFragment {
                         ContextCompat.getColor(getActivity(), R.color.colorAccent));
 
                 // Set default values, has no effect until dialog is shown
-                seekBarInkOpacity.setProgress((int) (settingsData.getSize() * 100 / 2f));
+                seekBarInkOpacity.setProgress((int) (settingsData.getOpacity() * 100));
                 radioButtonDry.setChecked(settingsData.isDry());
                 radioButtonWet.setChecked(!settingsData.isDry());
             }
@@ -92,10 +92,12 @@ public class InkDialogFragment extends DialogFragment {
         seekBarInkOpacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float result = progress * 2f / 100f;
+                float result = progress / 100f;
 
-                settingsData.setSize(result);
-                inkOpacitySubtitle.setText(String.valueOf(result));
+                if(progress > 0) {
+                    settingsData.setOpacity(result);
+                    inkOpacitySubtitle.setText(String.valueOf(result));
+                }
             }
 
             @Override
@@ -113,7 +115,7 @@ public class InkDialogFragment extends DialogFragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioButtonDry) {
                     settingsData.setIsDry(true);
-                } else {
+                } else if(checkedId == R.id.radioButtonWet){
                     settingsData.setIsDry(false);
                 }
             }

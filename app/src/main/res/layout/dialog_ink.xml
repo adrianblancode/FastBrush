@@ -46,7 +46,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bristle thickness"
+            android:text="Ink Opacity"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
             tools:targetApi="lollipop"/>
 

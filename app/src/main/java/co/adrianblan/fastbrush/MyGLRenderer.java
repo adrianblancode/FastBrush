@@ -38,6 +38,8 @@ import co.adrianblan.fastbrush.file.ImageSaver;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
+import co.adrianblan.fastbrush.settings.SettingsData;
+import co.adrianblan.fastbrush.settings.SettingsManager;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
 
@@ -55,15 +57,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.0001f;
+    private static final float IMPRINT_DEPTH = 0.00005f;
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
     private static final float BRUSH_VIEW_SCALE = 0.3f;
-
-    private static final boolean SHOW_BRUSH_VIEW = true;
-    private static final boolean BRUSH_DRY = true;
-
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -92,6 +90,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] renderTextureArray = new int[1];
     private int[] brushTextureArray = new int[1];
 
+    private SettingsManager settingsManager;
+    private SettingsData settingsData;
+
     private Brush brush;
     private Line line;
     private TouchDataManager touchDataManager;
@@ -99,6 +100,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public MyGLRenderer(Context context) {
         this.context = context;
+        settingsManager = SettingsManager.getInstance(context);
+        settingsData = settingsManager.getSettingsData();
     }
 
     @Override
@@ -106,7 +109,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        brush = new Brush();
+        brush = new Brush(settingsData);
         line = new Line();
         touchDataManager = new TouchDataManager();
 
@@ -158,6 +161,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
 
+        if(settingsManager.hasChanges()){
+            reconfigureSettingsChanges();
+        }
+
         GLES30.glViewport(0, 0, mWidth, mHeight);
 
         // Bind back buffer
@@ -167,8 +174,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Enable blending
         GLES30.glEnable(GLES30.GL_BLEND);
 
-        if(BRUSH_DRY) {
+        if(settingsData.isDry()) {
             GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+            GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
         } else {
             GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE);
             GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
@@ -181,7 +189,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glClearDepthf(IMPRINT_DEPTH);
 
-        GLES30.glLineWidth(Brush.BRISTLE_THICKNESS);
+        GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
         // Imprint brush on paper
         for(TouchData td : touchDataManager.get()) {
@@ -203,7 +211,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            brush.draw(mBrushMVPMatrix);
+            brush.draw(mBrushMVPMatrix, Utils.getColorWithAlpha(Utils.blackColor, settingsData.getOpacity()));
         }
 
         // Bind default buffer
@@ -226,7 +234,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
 
-        if(SHOW_BRUSH_VIEW && !touchDataManager.hasTouchEnded()) {
+        if(settingsData.isShowBrushView() && !touchDataManager.hasTouchEnded()) {
 
             // Draw brush view line
             Matrix.setLookAtM(mBrushViewMatrix, 0,
@@ -414,5 +422,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         canvasImage.drawBitmap(brushBitmap, 0f, 0f, null);
 
         return backgroundTextureScaled;
+    }
+
+    private void reconfigureSettingsChanges() {
+        settingsManager.setChangesRead();
+        settingsData = settingsManager.getSettingsData();
+        brush = new Brush(settingsData);
     }
 }

@@ -9,8 +9,11 @@ public class SettingsData {
     private int numBristles;
     private float pressureFactor;
     private float bristleThickness;
+
     private boolean isDry;
     private float opacity;
+
+    private boolean showBrushView;
 
     public SettingsData(){
         size = 1.0f;
@@ -20,6 +23,8 @@ public class SettingsData {
 
         isDry = true;
         opacity = 0.8f;
+
+        showBrushView = true;
     }
 
     public float getSize() {
@@ -68,5 +73,13 @@ public class SettingsData {
 
     public void setOpacity(float opacity) {
         this.opacity = opacity;
+    }
+
+    public boolean isShowBrushView() {
+        return showBrushView;
+    }
+
+    public void setShowBrushView(boolean showBrushView) {
+        this.showBrushView = showBrushView;
     }
 }

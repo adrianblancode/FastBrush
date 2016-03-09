@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="16dp"
-                android:text="2.0"
+                android:text="1.0"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
         </RelativeLayout>
@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="16dp"
-                android:text="2.0"
+                android:text="1.0"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
 
@@ -103,7 +103,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bristle thickness"
+                android:text="Bristle ink absorption"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
 
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="16dp"
-                android:text="10"
+                android:text="1.0"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
 
@@ -125,7 +125,19 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="-16dp"
-            android:max="10"
-            android:progress="5"/>
+            android:max="100"
+            android:progress="50"/>
+
+        <CheckedTextView
+            android:id="@+id/showBrushView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:text="Show brush side view"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+            tools:targetApi="lollipop"
+            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+            android:checked="true"/>
     </LinearLayout>
 </ScrollView>
