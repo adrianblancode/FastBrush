@@ -21,19 +21,22 @@ import javax.microedition.khronos.opengles.GL10;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.opengl.EGL14;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
-import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
 import co.adrianblan.fastbrush.data.TouchDataContainer;
+import co.adrianblan.fastbrush.file.ImageSaver;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
-import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.utils.Utils;
@@ -49,8 +52,6 @@ import co.adrianblan.fastbrush.vector.Vector2;
  * </ul>
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
-
-
 
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
@@ -376,5 +377,43 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float worldY = -(2 * (vec.getY() / mHeight) - 1);
 
         return new Vector2(worldX, worldY);
+    }
+
+    /** Saves the image on the current screen */
+    public void saveImage() {
+        ImageSaver.saveImageToStorage(createBitmapFromScreen(), context);
+    }
+
+    /** Creates a bitmap from the current screen */
+    private Bitmap createBitmapFromScreen() {
+
+        // Bind default buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
+
+        int screenshotSize = mWidth * mHeight;
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(screenshotSize * 4);
+        bb.order(ByteOrder.nativeOrder());
+
+        // Read the pixels from the default buffer
+        GLES30.glReadPixels(0, 0, mWidth, mHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, bb);
+
+        int pixelsBuffer[] = new int[screenshotSize];
+        bb.asIntBuffer().get(pixelsBuffer);
+
+        // Create bitmap of the default buffer
+        Bitmap brushBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        brushBitmap.setPixels(pixelsBuffer, screenshotSize - mWidth, -mWidth, 0, 0, mWidth, mHeight);
+
+        // Create bitmap of the background buffer
+        Bitmap backgroundTexture = BitmapFactory.decodeResource(context.getResources(), R.drawable.paperbright);
+        Bitmap backgroundTextureScaled = Bitmap.createScaledBitmap(backgroundTexture, mWidth, mHeight, true);
+
+        // Create a canvas for compositing the two images
+        Canvas canvasImage = new Canvas(backgroundTextureScaled);
+        canvasImage.drawBitmap(brushBitmap, 0f, 0f, null);
+
+        return backgroundTextureScaled;
     }
 }

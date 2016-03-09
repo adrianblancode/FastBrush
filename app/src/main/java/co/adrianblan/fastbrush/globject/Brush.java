@@ -34,8 +34,6 @@ public class Brush {
     private Vector3 jitter;
     private float angle;
 
-
-
     public Brush() {
 
         position = new Vector3();

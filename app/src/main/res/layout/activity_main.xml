@@ -32,9 +32,17 @@
             android:id="@+id/fab_ink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_color_lens_white_36dp"
+            fab:fab_icon="@drawable/ic_opacity_white_36dp"
             fab:fab_colorNormal="@color/colorAccent"
             fab:fab_title="Ink"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/ic_save_white_36dp"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_title="Save"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_delete"

@@ -3,39 +3,63 @@ package co.adrianblan.fastbrush;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import co.adrianblan.fastbrush.settings.SettingsManager;
+import co.adrianblan.fastbrush.utils.Utils;
 
 public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.fab_menu)
     FloatingActionsMenu fabMenu;
 
+    @Bind(R.id.fab_brush)
+    FloatingActionButton fabBrush;
+
+    @Bind(R.id.fab_ink)
+    FloatingActionButton fabInk;
+
+    @Bind(R.id.fab_save)
+    FloatingActionButton fabSave;
+
+    @Bind(R.id.fab_delete)
+    FloatingActionButton fabDelete;
+
     private MyGLSurfaceView glSurfaceView;
     private SettingsManager settingsManager;
+
+    private FrameLayout mainView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(co.adrianblan.fastbrush.R.layout.activity_main);
-        FrameLayout frame = (FrameLayout) findViewById(co.adrianblan.fastbrush.R.id.frame);
+        mainView = (FrameLayout) findViewById(co.adrianblan.fastbrush.R.id.frame);
         ButterKnife.bind(this);
 
         glSurfaceView = new MyGLSurfaceView(this);
-        frame.addView(glSurfaceView, 0);
+        mainView.addView(glSurfaceView, 0);
 
         settingsManager = SettingsManager.createInstance(this);
+
+        if(!Utils.isTablet()){
+            fabBrush.setSize(FloatingActionButton.SIZE_MINI);
+            fabInk.setSize(FloatingActionButton.SIZE_MINI);
+            fabSave.setSize(FloatingActionButton.SIZE_MINI);
+            fabDelete.setSize(FloatingActionButton.SIZE_MINI);
+        }
 
         hideSystemUi();
     }
@@ -80,6 +104,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    @OnClick(R.id.fab_save)
+    public void onClickFabSave() {
+        fabMenu.collapse();
+        Snackbar.make(mainView, "Saving image...", Snackbar.LENGTH_SHORT).show();
+        glSurfaceView.saveImage();
     }
 
     @OnClick(R.id.fab_delete)

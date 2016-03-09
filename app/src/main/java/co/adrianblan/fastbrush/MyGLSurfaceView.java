@@ -136,4 +136,13 @@ public class MyGLSurfaceView extends GLSurfaceView {
         });
         requestRender();
     }
+
+    public void saveImage() {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.saveImage();
+            }
+        });
+    }
 }
