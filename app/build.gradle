@@ -20,6 +20,10 @@ android {
     }
 }
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
@@ -29,4 +33,5 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'com.github.rey5137:material:1.2.2'
+    compile 'com.pes.materialcolorpicker:library:1.0.+'
 }

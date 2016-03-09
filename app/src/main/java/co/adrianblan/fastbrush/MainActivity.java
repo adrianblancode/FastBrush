@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

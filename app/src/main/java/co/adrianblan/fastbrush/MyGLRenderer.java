@@ -178,7 +178,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
             GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
         } else {
-            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE);
+            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
             GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
         }
 
@@ -211,7 +211,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            brush.draw(mBrushMVPMatrix, Utils.getColorWithAlpha(Utils.blackColor, settingsData.getOpacity()));
+            brush.draw(mBrushMVPMatrix, settingsData.getColorWrapper().toFloatArray());
         }
 
         // Bind default buffer

@@ -6,17 +6,23 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import co.adrianblan.fastbrush.MainActivity;
 import co.adrianblan.fastbrush.R;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.settings.SettingsManager;
@@ -40,6 +46,12 @@ public class InkDialogFragment extends DialogFragment {
 
     @Bind(R.id.radioButtonWet)
     RadioButton radioButtonWet;
+
+    @Bind(R.id.buttonSelectColor)
+    AppCompatButton buttonSelectColor;
+
+    @Bind(R.id.colorCircle)
+    ImageView colorCircle;
 
     private SettingsManager settingsManager;
     private SettingsData settingsData;
@@ -82,9 +94,10 @@ public class InkDialogFragment extends DialogFragment {
                         ContextCompat.getColor(getActivity(), R.color.colorAccent));
 
                 // Set default values, has no effect until dialog is shown
-                seekBarInkOpacity.setProgress((int) (settingsData.getOpacity() * 100));
+                seekBarInkOpacity.setProgress(settingsData.getColorWrapper().getAlpha());
                 radioButtonDry.setChecked(settingsData.isDry());
                 radioButtonWet.setChecked(!settingsData.isDry());
+                colorCircle.setColorFilter(settingsData.getColorWrapper().getColor());
             }
         });
 
@@ -92,23 +105,21 @@ public class InkDialogFragment extends DialogFragment {
         seekBarInkOpacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float result = progress / 100f;
+                float result = progress / 255f;
 
                 if(progress > 0) {
-                    settingsData.setOpacity(result);
-                    inkOpacitySubtitle.setText(String.valueOf(result));
+                    settingsData.getColorWrapper().setAlpha(progress);
+                    colorCircle.setColorFilter(settingsData.getColorWrapper().getColor());
+                    inkOpacitySubtitle.setText(String.format("%.2f", result));
                 }
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
 
         inkFluidity.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -118,6 +129,27 @@ public class InkDialogFragment extends DialogFragment {
                 } else if(checkedId == R.id.radioButtonWet){
                     settingsData.setIsDry(false);
                 }
+            }
+        });
+
+        buttonSelectColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final ColorPicker cp = new ColorPicker(getActivity(), settingsData.getColorWrapper().getRed(),
+                        settingsData.getColorWrapper().getGreen(), settingsData.getColorWrapper().getBlue());
+
+                cp.show();
+
+                Button b = (Button) cp.findViewById(R.id.okColorButton);
+
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        settingsData.getColorWrapper().setColorWithoutAlpha(cp.getColor());
+                        colorCircle.setColorFilter(settingsData.getColorWrapper().getColor());
+                        cp.dismiss();
+                    }
+                });
             }
         });
 

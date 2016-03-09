@@ -1,5 +1,7 @@
 package co.adrianblan.fastbrush.settings;
 
+import co.adrianblan.fastbrush.utils.ColorWrapper;
+
 /**
  * Data to store user settings.
  */
@@ -12,6 +14,7 @@ public class SettingsData {
 
     private boolean isDry;
     private float opacity;
+    private ColorWrapper colorWrapper;
 
     private boolean showBrushView;
 
@@ -23,6 +26,7 @@ public class SettingsData {
 
         isDry = true;
         opacity = 0.8f;
+        colorWrapper = new ColorWrapper(0, 0, 0, 150);
 
         showBrushView = true;
     }
@@ -73,6 +77,14 @@ public class SettingsData {
 
     public void setOpacity(float opacity) {
         this.opacity = opacity;
+    }
+
+    public ColorWrapper getColorWrapper() {
+        return colorWrapper;
+    }
+
+    public void setColorWrapper(ColorWrapper colorWrapper) {
+        this.colorWrapper = colorWrapper;
     }
 
     public boolean isShowBrushView() {
