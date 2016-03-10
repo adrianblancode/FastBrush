@@ -61,7 +61,7 @@ public class InkDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         settingsManager = SettingsManager.getInstance(getActivity());
-        settingsData = settingsManager.getSettingsData();
+        settingsData = settingsManager.getSettingsData().clone();
 
         mainView = getActivity().getLayoutInflater().inflate(R.layout.dialog_ink, null);
         ButterKnife.bind(this, mainView);

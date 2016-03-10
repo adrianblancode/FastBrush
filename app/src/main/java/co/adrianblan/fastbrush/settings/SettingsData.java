@@ -1,5 +1,7 @@
 package co.adrianblan.fastbrush.settings;
 
+import java.util.Set;
+
 import co.adrianblan.fastbrush.utils.ColorWrapper;
 
 /**
@@ -29,6 +31,23 @@ public class SettingsData {
         colorWrapper = new ColorWrapper(0, 0, 0, 150);
 
         showBrushView = true;
+    }
+
+    public SettingsData clone() {
+        SettingsData sd = new SettingsData();
+
+        sd.setSize(size);
+        sd.setNumBristles(numBristles);
+        sd.setPressureFactor(pressureFactor);
+        sd.setBristleThickness(bristleThickness);
+
+        sd.setIsDry(isDry);
+        sd.setOpacity(opacity);
+        sd.setColorWrapper(colorWrapper);
+
+        sd.setShowBrushView(showBrushView);
+
+        return sd;
     }
 
     public float getSize() {

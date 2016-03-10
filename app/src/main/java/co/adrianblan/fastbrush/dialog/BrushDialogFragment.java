@@ -57,7 +57,7 @@ public class BrushDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         settingsManager = SettingsManager.getInstance(getActivity());
-        settingsData = settingsManager.getSettingsData();
+        settingsData = settingsManager.getSettingsData().clone();
 
         mainView = getActivity().getLayoutInflater().inflate(R.layout.dialog_brush, null);
         ButterKnife.bind(this, mainView);

@@ -18,6 +18,7 @@ package co.adrianblan.fastbrush;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.os.Bundle;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -36,6 +37,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
     private VelocityTracker mVelocityTracker;
+    int[] savedPixelBuffer;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -146,5 +148,35 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 mRenderer.saveImage();
             }
         });
+    }
+
+    @Override
+    public void onPause(){
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                savedPixelBuffer = mRenderer.getPixelBufferFromScreen();
+            }
+        });
+
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(savedPixelBuffer != null && savedPixelBuffer.length > 0) {
+
+            System.err.println("PBL: " + savedPixelBuffer.length);
+
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    mRenderer.renderPixelBuffer(savedPixelBuffer);
+                    requestRender();
+                }
+            });
+        }
     }
 }

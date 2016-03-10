@@ -31,6 +31,7 @@ import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
@@ -89,7 +90,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] frameBufferArray = new int[1];
     private int[] depthBufferArray = new int[1];
     private int[] renderTextureArray = new int[1];
-    private int[] brushTextureArray = new int[1];
+    private int[] storedFrameArray = new int[1];
 
     private SettingsManager settingsManager;
     private SettingsData settingsData;
@@ -146,11 +147,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         Matrix.orthoM(mBrushProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
                 CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
-
-        // Generate and load textures
-        GLES30.glGenTextures(1, brushTextureArray, 0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, brushTextureArray[0]);
-        loadDrawableToTexture(R.drawable.brushdot2, context);
 
         // Bind standard buffer
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
@@ -389,31 +385,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Saves the image on the current screen */
     public void saveImage() {
-        ImageSaver.saveImageToStorage(createBitmapFromScreen(), context);
+        int[] pixelBuffer = getPixelBufferFromScreen();
+        convertRGBtoBGR(pixelBuffer);
+        Bitmap b = createBitmapFromPixelBuffer(pixelBuffer);
+        ImageSaver.saveImageToStorage(b, context);
     }
 
     /** Creates a bitmap from the current screen */
-    private Bitmap createBitmapFromScreen() {
-
-        // Bind default buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
-
-        int screenshotSize = mWidth * mHeight;
-
-        ByteBuffer bb = ByteBuffer.allocateDirect(screenshotSize * 4);
-        bb.order(ByteOrder.nativeOrder());
-
-        // Read the pixels from the default buffer
-        GLES30.glReadPixels(0, 0, mWidth, mHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, bb);
-
-        int pixelsBuffer[] = new int[screenshotSize];
-        bb.asIntBuffer().get(pixelsBuffer);
-        convertRGBtoBGR(pixelsBuffer);
+    private Bitmap createBitmapFromPixelBuffer(int[] pixelBuffer) {
 
         // Create bitmap of the default buffer
         Bitmap brushBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_4444);
-        brushBitmap.setPixels(pixelsBuffer, screenshotSize - mWidth, -mWidth, 0, 0, mWidth, mHeight);
+        brushBitmap.setPixels(pixelBuffer, (mWidth * mHeight) - mWidth, -mWidth, 0, 0, mWidth, mHeight);
 
         // Create bitmap of the background buffer
         Bitmap backgroundTexture = BitmapFactory.decodeResource(context.getResources(), R.drawable.paperbright);
@@ -424,6 +407,40 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         canvasImage.drawBitmap(brushBitmap, 0f, 0f, null);
 
         return backgroundTextureScaled;
+    }
+
+    /** Returns an int array with pixels from the current screen */
+    public int[] getPixelBufferFromScreen() {
+
+        // Bind default buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(mWidth * mHeight * 4);
+        bb.order(ByteOrder.nativeOrder());
+
+        // Read the pixels from the default buffer
+        GLES30.glReadPixels(0, 0, mWidth, mHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, bb);
+
+        int pixelBuffer[] = new int[mWidth * mHeight];
+        bb.asIntBuffer().get(pixelBuffer);
+
+        return pixelBuffer;
+    }
+
+    /** Renders an int buffer to screen */
+    public void renderPixelBuffer(int[] pixelBuffer) {
+        // Bind default buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
+
+        // Generate and load textures
+        GLES30.glGenTextures(1, storedFrameArray, 0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, storedFrameArray[0]);
+
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, IntBuffer.wrap(pixelBuffer));
+
+        backBufferSquare.draw(mMVPMatrix, storedFrameArray[0]);
     }
 
     /**
