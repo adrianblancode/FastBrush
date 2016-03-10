@@ -53,7 +53,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Size pressure factor"
+                android:text="Pressure depth factor"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
 
@@ -78,23 +78,37 @@
             android:max="100"
             android:progress="50" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Number of bristles"
-            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-            tools:targetApi="lollipop"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/editTextBrushBristles"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Number of bristles"
+                android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+                tools:targetApi="lollipop"/>
+
+            <TextView
+                android:id="@+id/bristleAmountSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="16dp"
+                android:text="100"
+                android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+                tools:targetApi="lollipop"/>
+
+        </RelativeLayout>
+
+        <SeekBar
+            android:id="@+id/seekBarBristleAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="16dp"
-            android:inputType="numberSigned"
-            android:cursorVisible="false"
-            android:windowSoftInputMode="stateHidden"
-            android:text="1000"/>
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="-16dp"
+            android:max="3000"
+            android:progress="100"/>
 
         <RelativeLayout
             android:layout_width="match_parent"

@@ -6,11 +6,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.CheckedTextView;
-import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -37,8 +34,11 @@ public class BrushDialogFragment extends DialogFragment {
     @Bind(R.id.brushSizePressureFactorSubtitle)
     TextView brushSizePressureFactorSubtitle;
 
-    @Bind(R.id.editTextBrushBristles)
-    EditText editTextBrushBristles;
+    @Bind(R.id.seekBarBristleAmount)
+    SeekBar seekBarBristleAmount;
+
+    @Bind(R.id.bristleAmountSubtitle)
+    TextView bristleAmountSubtitle;
 
     @Bind(R.id.seekBarBristleThickness)
     SeekBar seekBarBristleThickness;
@@ -92,7 +92,7 @@ public class BrushDialogFragment extends DialogFragment {
                 // Set default values, has no effect until dialog is shown
                 seekBarBrushSize.setProgress((int) (settingsData.getSize() * 100));
                 seekBarBrushSizePressureFactor.setProgress((int) (settingsData.getPressureFactor() * 100));
-                editTextBrushBristles.setText(String.valueOf(settingsData.getNumBristles()));
+                seekBarBristleAmount.setProgress(settingsData.getNumBristles());
                 seekBarBristleThickness.setProgress((int) (settingsData.getBristleThickness() * 100));
                 showBrushView.setChecked(settingsData.isShowBrushView());
             }
@@ -110,13 +110,8 @@ public class BrushDialogFragment extends DialogFragment {
                 }
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         seekBarBrushSizePressureFactor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -128,31 +123,24 @@ public class BrushDialogFragment extends DialogFragment {
                 brushSizePressureFactorSubtitle.setText(String.valueOf(result));
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        editTextBrushBristles.addTextChangedListener(new TextWatcher() {
+        seekBarBristleAmount.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    int result = Integer.parseInt(s.toString());
+                int result = Math.round(progress / 10) * 10;
+
+                if (result > 0) {
                     settingsData.setNumBristles(result);
+                    bristleAmountSubtitle.setText(String.valueOf(result));
                 }
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         seekBarBristleThickness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -166,13 +154,8 @@ public class BrushDialogFragment extends DialogFragment {
                 }
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         showBrushView.setOnClickListener(new View.OnClickListener() {

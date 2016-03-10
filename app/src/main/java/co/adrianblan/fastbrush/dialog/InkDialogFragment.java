@@ -126,13 +126,13 @@ public class InkDialogFragment extends DialogFragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioButtonDry) {
                     settingsData.setIsDry(true);
-                } else if(checkedId == R.id.radioButtonWet){
+                } else if (checkedId == R.id.radioButtonWet) {
                     settingsData.setIsDry(false);
                 }
             }
         });
 
-        buttonSelectColor.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final ColorPicker cp = new ColorPicker(getActivity(), settingsData.getColorWrapper().getRed(),
@@ -151,7 +151,10 @@ public class InkDialogFragment extends DialogFragment {
                     }
                 });
             }
-        });
+        };
+
+        buttonSelectColor.setOnClickListener(onClickListener);
+        colorCircle.setOnClickListener(onClickListener);
 
         return alertDialog;
     }
