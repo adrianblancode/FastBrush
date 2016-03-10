@@ -103,7 +103,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bristle ink absorption"
+                android:text="Bristle ink emission"
                 android:textAppearance="@android:style/TextAppearance.Material.Subhead"
                 tools:targetApi="lollipop"/>
 

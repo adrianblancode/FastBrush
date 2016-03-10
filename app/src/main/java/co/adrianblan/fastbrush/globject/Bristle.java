@@ -10,9 +10,9 @@ public class Bristle {
 
     public static final float BASE_LENGTH = 1.0f;
     public static final float BASE_TIP_LENGTH = 0.35f;
-    private static final float BRUSH_RADIUS_UPPER = 0.4f;
+    private static final float BRUSH_RADIUS_UPPER = 0.35f;
     private static final float BRUSH_RADIUS_LOWER = 0.2f;
-    private static final float MIN_SIZE_SCALE = 0.1f;
+    private static final float MIN_SIZE_SCALE = 0.2f;
 
     public static float length;
     public static float tipLength;
@@ -25,8 +25,8 @@ public class Bristle {
 
     public Bristle(SettingsData settingsData) {
 
-        length = BASE_LENGTH * (settingsData.getSize() + MIN_SIZE_SCALE);
-        tipLength = BASE_TIP_LENGTH * (settingsData.getSize() + MIN_SIZE_SCALE);
+        length = BASE_LENGTH;
+        tipLength = BASE_TIP_LENGTH;
         float radiusUpper = BRUSH_RADIUS_UPPER * (settingsData.getSize() + MIN_SIZE_SCALE);
         float radiusLower = BRUSH_RADIUS_LOWER * (settingsData.getSize() + MIN_SIZE_SCALE);
 

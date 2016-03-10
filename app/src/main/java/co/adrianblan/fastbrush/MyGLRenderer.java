@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.opengl.EGL14;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
@@ -57,7 +58,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.00005f;
+    private static final float IMPRINT_DEPTH = 0.0001f;
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
@@ -178,8 +179,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
             GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
         } else {
-            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-            GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
+            GLES30.glBlendFuncSeparate(GLES30.GL_SRC_ALPHA, GLES30.GL_DST_ALPHA, GLES20.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+            GLES30.glBlendEquation(GLES30.GL_MAX);
         }
 
         // Enable depth testing to slightly above paper
