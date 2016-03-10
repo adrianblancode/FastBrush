@@ -40,8 +40,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
     public MyGLSurfaceView(Context context) {
         super(context);
 
-        // Create an OpenGL ES 2.0 context.
-        setEGLContextClientVersion(2);
+        // Create an OpenGL ES 3.0 context.
+        setEGLContextClientVersion(3);
 
         // Sets a paper background to the scene
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -55,6 +55,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         // Render the view only when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+        setPreserveEGLContextOnPause(true);
     }
 
     @Override

@@ -409,9 +409,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         int pixelsBuffer[] = new int[screenshotSize];
         bb.asIntBuffer().get(pixelsBuffer);
+        convertRGBtoBGR(pixelsBuffer);
 
         // Create bitmap of the default buffer
-        Bitmap brushBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        Bitmap brushBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_4444);
         brushBitmap.setPixels(pixelsBuffer, screenshotSize - mWidth, -mWidth, 0, 0, mWidth, mHeight);
 
         // Create bitmap of the background buffer
@@ -423,6 +424,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         canvasImage.drawBitmap(brushBitmap, 0f, 0f, null);
 
         return backgroundTextureScaled;
+    }
+
+    /**
+     * Converts a pixelbuffer of ARGB format to ABGR format.
+     *
+     * This must be done because OpenGL stores colors in RGB format while BMP is in BGR format.
+     * If this conversion is not done, red and blue colors will be switched.
+     */
+    private void convertRGBtoBGR(int[] pixelBuffer) {
+
+        int bits;
+        int tempRed;
+        int tempBlue;
+
+        int firstByteMask = 0x00ff0000;
+        int secondByteMask = 0x000000ff;
+        int bitDistance = 16;
+
+        for (int i = 0; i < pixelBuffer.length; i++) {
+            bits = pixelBuffer[i];
+
+            // Clear first and third byte
+            pixelBuffer[i] &= ~firstByteMask;
+            pixelBuffer[i] &= ~secondByteMask;
+
+            // Isolate the color bytes, and switch position
+            tempRed = bits & firstByteMask;
+            tempRed >>= bitDistance;
+
+            tempBlue = bits & secondByteMask;
+            tempBlue <<= bitDistance;
+
+            // Place color into pixel
+            pixelBuffer[i] |= tempRed;
+            pixelBuffer[i] |= tempBlue;
+        }
     }
 
     private void reconfigureSettingsChanges() {
