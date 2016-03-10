@@ -428,21 +428,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         return pixelBuffer;
     }
 
-    /** Renders an int buffer to screen */
-    public void renderPixelBuffer(int[] pixelBuffer) {
-        // Bind default buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
-
-        // Generate and load textures
-        GLES30.glGenTextures(1, storedFrameArray, 0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, storedFrameArray[0]);
-
-        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, IntBuffer.wrap(pixelBuffer));
-
-        backBufferSquare.draw(mMVPMatrix, storedFrameArray[0]);
-    }
-
     /**
      * Converts a pixelbuffer of ARGB format to ABGR format.
      *
@@ -479,6 +464,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    /** Whenever new settings changes are made, this methods reconfigures the affected objects */
     private void reconfigureSettingsChanges() {
         settingsManager.setChangesRead();
         settingsData = settingsManager.getSettingsData();

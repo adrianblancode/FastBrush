@@ -37,7 +37,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
     private VelocityTracker mVelocityTracker;
-    int[] savedPixelBuffer;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -152,31 +151,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     @Override
     public void onPause(){
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                savedPixelBuffer = mRenderer.getPixelBufferFromScreen();
-            }
-        });
-
         super.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        if(savedPixelBuffer != null && savedPixelBuffer.length > 0) {
-
-            System.err.println("PBL: " + savedPixelBuffer.length);
-
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    mRenderer.renderPixelBuffer(savedPixelBuffer);
-                    requestRender();
-                }
-            });
-        }
     }
 }
