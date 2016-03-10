@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:id="@+id/frame"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="horizontal" >
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
-        android:layout_margin="16dp"
         fab:fab_addButtonColorNormal="@color/white"
         fab:fab_addButtonPlusIconColor="@android:color/background_dark"
         fab:fab_addButtonStrokeVisible="false"
@@ -40,6 +39,8 @@
             android:id="@+id/fab_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="-10dp"
+            android:padding="-10dp"
             fab:fab_icon="@drawable/ic_save_white_36dp"
             fab:fab_colorNormal="@color/colorAccent"
             fab:fab_title="Save"/>
@@ -51,6 +52,14 @@
             fab:fab_icon="@drawable/ic_delete_white_36dp"
             fab:fab_colorNormal="@color/colorAccent"
             fab:fab_title="Delete"/>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_undo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/ic_undo_white_36dp"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_title="Undo"/>
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </FrameLayout>

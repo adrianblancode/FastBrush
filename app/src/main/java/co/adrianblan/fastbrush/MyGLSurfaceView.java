@@ -130,6 +130,16 @@ public class MyGLSurfaceView extends GLSurfaceView {
         return true;
     }
 
+    public void undo() {
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                mRenderer.undo();
+            }
+        });
+        requestRender();
+    }
+
     public void clearScreen() {
         queueEvent(new Runnable() {
             @Override

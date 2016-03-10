@@ -5,11 +5,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
+import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -37,11 +40,13 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.fab_save)
     FloatingActionButton fabSave;
 
+    @Bind(R.id.fab_undo)
+    FloatingActionButton fabUndo;
+
     @Bind(R.id.fab_delete)
     FloatingActionButton fabDelete;
 
     private MyGLSurfaceView glSurfaceView;
-    private SettingsManager settingsManager;
 
     private FrameLayout mainView;
 
@@ -56,13 +61,22 @@ public class MainActivity extends AppCompatActivity {
         glSurfaceView = new MyGLSurfaceView(this);
         mainView.addView(glSurfaceView, 0);
 
-        settingsManager = SettingsManager.getInstance(this);
-
         if(!Utils.isTablet()){
             fabBrush.setSize(FloatingActionButton.SIZE_MINI);
             fabInk.setSize(FloatingActionButton.SIZE_MINI);
             fabSave.setSize(FloatingActionButton.SIZE_MINI);
+            fabUndo.setSize(FloatingActionButton.SIZE_MINI);
             fabDelete.setSize(FloatingActionButton.SIZE_MINI);
+
+            // Resize fab menu so all buttons fit on phones
+            fabMenu.setScaleX(0.9f);
+            fabMenu.setScaleY(0.9f);
+
+            // Decrease the bottom margin to reposition
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+            lp.bottomMargin = (int) -Utils.convertDpToPixel(16);
+            lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+            fabMenu.setLayoutParams(lp);
         }
 
         hideSystemUi();
@@ -94,9 +108,40 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.fab_delete)
     public void onClickFabDelete() {
         fabMenu.collapse();
-        glSurfaceView.clearScreen();
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Delete painting?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        glSurfaceView.clearScreen();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).create();
+
+        // Set color to accent color
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface arg0) {
+                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                        ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+
+                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                        ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+            }
+        });
+
+        alertDialog.show();
     }
 
+    @OnClick(R.id.fab_undo)
+    public void onClickFabUndo() {
+        fabMenu.collapse();
+        glSurfaceView.undo();
+    }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {

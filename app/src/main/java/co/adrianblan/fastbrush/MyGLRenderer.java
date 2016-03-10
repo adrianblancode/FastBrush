@@ -31,12 +31,12 @@ import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.data.TouchData;
 import co.adrianblan.fastbrush.data.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
+import co.adrianblan.fastbrush.globject.BackBufferManager;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
@@ -65,6 +65,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
     private static final float BRUSH_VIEW_SCALE = 0.3f;
 
+    private static final int NUM_BACK_BUFFERS = 4;
+
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
@@ -87,11 +89,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int mHeight;
     private float mRatio;
 
-    private int[] frameBufferArray = new int[1];
-    private int[] depthBufferArray = new int[1];
-    private int[] renderTextureArray = new int[1];
-    private int[] storedFrameArray = new int[1];
-
     private SettingsManager settingsManager;
     private SettingsData settingsData;
 
@@ -99,6 +96,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Line line;
     private TouchDataManager touchDataManager;
     private BackBufferSquare backBufferSquare;
+    private BackBufferManager backBufferManager;
 
     public MyGLRenderer(Context context) {
         this.context = context;
@@ -133,7 +131,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mRatio = (float) width / height;
 
         backBufferSquare = new BackBufferSquare(mRatio);
-        generateBackFramebuffer();
+        backBufferManager = new BackBufferManager(NUM_BACK_BUFFERS, mWidth, mHeight);
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method
         //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
@@ -165,8 +163,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glViewport(0, 0, mWidth, mHeight);
 
         // Bind back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
 
         // Enable blending
         GLES30.glEnable(GLES30.GL_BLEND);
@@ -223,7 +221,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         // Draw render texture to default buffer
-        backBufferSquare.draw(mMVPMatrix, renderTextureArray[0]);
+        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
 
         // Draw brush
         if(touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
@@ -280,59 +278,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         bitmap.recycle();
     }
 
-    /** Generates the framebuffer and texture necessary to render to a second screen */
-    private void generateBackFramebuffer() {
-
-        // Generate frame buffer and texture
-        GLES30.glGenFramebuffers(1, frameBufferArray, 0);
-        GLES30.glGenFramebuffers(1, depthBufferArray, 0);
-
-        GLES30.glGenTextures(1, renderTextureArray, 0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, renderTextureArray[0]);
-
-        // Clamp the render texture to the edges
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-
-        // Make sure that mWidth and mHeight have been set and are nonzero
-        if(mWidth == 0 || mHeight == 0) {
-            System.err.println("Height or width can not be zero");
-        }
-
-        int[] maxTextureSize = new int[1];
-        GLES30.glGetIntegerv(GLES30.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0);
-
-        if(maxTextureSize[0] < mWidth) {
-            System.err.println("Texture size not large enough! " + maxTextureSize[0] + " < " + mWidth);
-        }
-
-        // Depth buffer
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
-        GLES30.glRenderbufferStorage(GLES30.GL_RENDERBUFFER, GLES30.GL_DEPTH_COMPONENT16, mWidth, mHeight);
-
-        // Generate texture
-        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, null);
-
-        // Bind depth buffer and texture to back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, renderTextureArray[0], 0);
-        GLES30.glFramebufferRenderbuffer(GLES30.GL_FRAMEBUFFER, GLES30.GL_DEPTH_ATTACHMENT, GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
-
-        // Check status of framebuffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
-        int status = GLES30.glCheckFramebufferStatus(GLES30.GL_FRAMEBUFFER);
-
-        if (status != GLES30.GL_FRAMEBUFFER_COMPLETE) {
-            System.err.println("Framebuffer error: " + status);
-        }
-
-        // Clear back buffer
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
-    }
-
 
     /** Takes a list of TouchData and adds it to the container */
     public void addTouchData(ArrayList<TouchData> touchDataList) {
@@ -359,14 +304,58 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         touchDataManager.touchHasEnded();
+
+        // Bind next back buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getNextFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getNextDepthBuffer());
+
+        // Disable blending and depth test
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+
+        // Clear color and depth
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        // Draw current render texture to next back buffer
+        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+
+        backBufferManager.setNextBuffer();
+    }
+
+    public void undo() {
+
+        // Bind current back buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
+
+        // Clear color and depth
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        backBufferManager.rewindBuffer();
+
+        // Bind default buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
+
+        // Disable blending and depth test
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+
+        // Clear color and depth
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        // Draw current render texture to next back buffer
+        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
     }
 
     public void clearScreen() {
         touchHasEnded();
 
+        backBufferManager.resetBuffers();
+
         // Bind back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, frameBufferArray[0]);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, depthBufferArray[0]);
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
