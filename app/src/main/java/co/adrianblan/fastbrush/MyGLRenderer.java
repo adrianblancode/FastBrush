@@ -69,7 +69,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
     private static final float BRUSH_VIEW_SCALE = 0.3f;
 
-    private static final int NUM_BACK_BUFFERS = 10;
+    private static final int NUM_BACK_BUFFERS = 5;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
