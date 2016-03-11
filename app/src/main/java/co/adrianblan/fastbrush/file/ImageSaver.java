@@ -1,12 +1,16 @@
 package co.adrianblan.fastbrush.file;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -55,4 +59,6 @@ public class ImageSaver {
             e.printStackTrace();
         }
     }
+
+
 }

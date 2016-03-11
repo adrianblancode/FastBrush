@@ -18,7 +18,9 @@ package co.adrianblan.fastbrush;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -28,6 +30,8 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -65,7 +69,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
     private static final float BRUSH_VIEW_SCALE = 0.3f;
 
-    private static final int NUM_BACK_BUFFERS = 4;
+    private static final int NUM_BACK_BUFFERS = 10;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -286,6 +290,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    public void touchHasStarted() {
+
+        // Bind next back buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getNextFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getNextDepthBuffer());
+
+        // Disable blending and depth test
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+
+        // Clear color and depth
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        // Draw current render texture to next back buffer
+        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+        backBufferManager.setNextBuffer();
+    }
+
     /** Clears all the ArrayList of Point of all objects*/
     public void touchHasEnded() {
 
@@ -304,48 +326,37 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         touchDataManager.touchHasEnded();
-
-        // Bind next back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getNextFrameBuffer());
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getNextDepthBuffer());
-
-        // Disable blending and depth test
-        GLES30.glDisable(GLES30.GL_BLEND);
-        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
-
-        // Clear color and depth
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
-
-        // Draw current render texture to next back buffer
-        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
-
-        backBufferManager.setNextBuffer();
     }
 
     public void undo() {
 
-        // Bind current back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
+        if(backBufferManager.hasPreviousBuffers()) {
 
-        // Clear color and depth
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+            System.err.println("Numbfrs: " + backBufferManager.getNumPreviousBuffers());
 
-        backBufferManager.rewindBuffer();
+            // Bind current back buffer
+            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
+            GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
 
-        // Bind default buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
+            // Clear color and depth
+            GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        // Disable blending and depth test
-        GLES30.glDisable(GLES30.GL_BLEND);
-        GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+            backBufferManager.rewindBuffer();
 
-        // Clear color and depth
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+            // Bind default buffer
+            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
+            GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
 
-        // Draw current render texture to next back buffer
-        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+            // Disable blending and depth test
+            GLES30.glDisable(GLES30.GL_BLEND);
+            GLES30.glDisable(GLES30.GL_DEPTH_TEST);
+
+            // Clear color and depth
+            GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+            // Draw current render texture to next back buffer
+            backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+        }
     }
 
     public void clearScreen() {

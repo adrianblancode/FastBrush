@@ -18,6 +18,8 @@ public class BackBufferManager {
     private int width;
     private int height;
 
+    private boolean isEmpty;
+
     public BackBufferManager(int numBuffers, int width, int height) {
 
         if(numBuffers < 1) {
@@ -29,6 +31,7 @@ public class BackBufferManager {
 
         this.width = width;
         this.height = height;
+        this.isEmpty = true;
 
         frameBufferArray = new int[numBuffers];
         depthBufferArray = new int[numBuffers];
@@ -124,13 +127,15 @@ public class BackBufferManager {
 
     public void setNextBuffer() {
         currentBuffer = (currentBuffer + 1) % numBuffers;
-        numPreviousBuffers = Math.min(numPreviousBuffers + 1, numBuffers);
-
-        System.err.println("Next set, " + currentBuffer);
+        numPreviousBuffers = Math.min(numPreviousBuffers + 1, numBuffers - 1);
     }
 
     public boolean hasPreviousBuffers() {
         return (numPreviousBuffers > 0);
+    }
+
+    public int getNumPreviousBuffers() {
+        return numPreviousBuffers;
     }
 
     public void rewindBuffer() {
@@ -142,15 +147,19 @@ public class BackBufferManager {
             }
 
             numPreviousBuffers = Math.max(numPreviousBuffers - 1, 0);
-
-            System.err.println("Rewind set, " + currentBuffer);
         }
     }
 
     public void resetBuffers() {
         numPreviousBuffers = 0;
-        currentBuffer = 0;
+        isEmpty = true;
+    }
 
-        System.err.println("Reset set, " + currentBuffer);
+    public boolean isEmpty() {
+        return isEmpty;
+    }
+
+    public void setEmpty(boolean b) {
+        isEmpty = b;
     }
 }

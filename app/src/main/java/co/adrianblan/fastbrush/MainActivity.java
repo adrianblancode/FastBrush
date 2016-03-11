@@ -1,9 +1,12 @@
 package co.adrianblan.fastbrush;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
             // Decrease the bottom margin to reposition
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
             lp.bottomMargin = (int) -Utils.convertDpToPixel(16);
+            lp.leftMargin = (int) -Utils.convertDpToPixel(16);
             lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
             fabMenu.setLayoutParams(lp);
         }
@@ -101,8 +105,15 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.fab_save)
     public void onClickFabSave() {
         fabMenu.collapse();
-        Snackbar.make(mainView, "Saving image...", Snackbar.LENGTH_SHORT).show();
-        glSurfaceView.saveImage();
+
+        // Check that we have external storage write permission on Marshmallow devices
+        if (Build.VERSION.SDK_INT >= 23
+                && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        } else {
+            Snackbar.make(mainView, "Saving image...", Snackbar.LENGTH_SHORT).show();
+            glSurfaceView.saveImage();
+        }
     }
 
     @OnClick(R.id.fab_delete)
@@ -110,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         fabMenu.collapse();
 
         final AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setTitle("Delete painting?")
+                .setTitle("Delete canvas?")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         glSurfaceView.clearScreen();
@@ -164,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         glSurfaceView.onResume();
     }
-
+    
     /** Hides the system UI and enters immersive mode if available */
     private void hideSystemUi() {
 

@@ -16,7 +16,6 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Brush {
 
-    public static final float BRISTLE_THICKNESS = Utils.convertPixelsToDp(7f);
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.2f);
 
     private int numBristles;

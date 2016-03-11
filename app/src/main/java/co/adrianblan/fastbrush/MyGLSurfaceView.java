@@ -75,6 +75,13 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     mVelocityTracker.clear();
                 }
 
+                queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRenderer.touchHasStarted();
+                    }
+                });
+
                 // No break is intentional
 
             case MotionEvent.ACTION_MOVE:

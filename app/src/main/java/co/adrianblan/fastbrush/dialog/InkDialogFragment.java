@@ -1,6 +1,7 @@
 package co.adrianblan.fastbrush.dialog;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -10,6 +11,8 @@ import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -107,7 +110,7 @@ public class InkDialogFragment extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float result = progress / 255f;
 
-                if(progress > 0) {
+                if (progress > 0) {
                     settingsData.getColorWrapper().setAlpha(progress);
                     colorCircle.setColorFilter(settingsData.getColorWrapper().getColor());
                     inkOpacitySubtitle.setText(String.format("%.2f", result));
@@ -115,10 +118,12 @@ public class InkDialogFragment extends DialogFragment {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
 
         inkFluidity.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -140,8 +145,8 @@ public class InkDialogFragment extends DialogFragment {
 
                 cp.show();
 
+                // Make button click save color
                 Button b = (Button) cp.findViewById(R.id.okColorButton);
-
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -150,6 +155,8 @@ public class InkDialogFragment extends DialogFragment {
                         cp.dismiss();
                     }
                 });
+
+                cp.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             }
         };
 
