@@ -138,7 +138,20 @@ public class BackBufferManager {
         return numPreviousBuffers;
     }
 
+    /**
+     * Rewinds the current buffer to a previous one.
+     *
+     * Clears the current back buffer, and rewinds the current buffer index.
+     */
     public void rewindBuffer() {
+
+        // Bind current back buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, getDepthBuffer());
+
+        // Clear color and depth
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
         if(hasPreviousBuffers()) {
             currentBuffer = currentBuffer - 1;
 
@@ -150,9 +163,20 @@ public class BackBufferManager {
         }
     }
 
+    /**
+     * Resets all buffers.
+     *
+     * Sets the state to initial, and clears the current back buffer.
+     */
     public void resetBuffers() {
         numPreviousBuffers = 0;
         isEmpty = true;
+
+        // Bind back buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, getDepthBuffer());
+
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
     }
 
     public boolean isEmpty() {

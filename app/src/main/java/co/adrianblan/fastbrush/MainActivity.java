@@ -119,38 +119,12 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.fab_delete)
     public void onClickFabDelete() {
         fabMenu.collapse();
-
-        final AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setTitle("Delete canvas?")
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        glSurfaceView.clearScreen();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                }).create();
-
-        // Set color to accent color
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface arg0) {
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                        ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
-
-                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(
-                        ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
-            }
-        });
-
-        alertDialog.show();
+        glSurfaceView.clearScreen();
     }
+
 
     @OnClick(R.id.fab_undo)
     public void onClickFabUndo() {
-        fabMenu.collapse();
         glSurfaceView.undo();
     }
 
@@ -175,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         glSurfaceView.onResume();
     }
-    
+
     /** Hides the system UI and enters immersive mode if available */
     private void hideSystemUi() {
 

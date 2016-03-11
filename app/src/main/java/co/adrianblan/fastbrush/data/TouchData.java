@@ -106,8 +106,8 @@ public class TouchData {
         float TOUCH_SIZE_MAX; // The maximum touch size treshold
 
         if(Utils.isTablet()) {
-            TOUCH_SIZE_MIN = 0.1f;
-            TOUCH_SIZE_MAX = 0.25f;
+            TOUCH_SIZE_MIN = 0.10f;
+            TOUCH_SIZE_MAX = 0.20f;
         } else {
             TOUCH_SIZE_MIN = 0.2f;
             TOUCH_SIZE_MAX = 0.4f;

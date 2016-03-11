@@ -190,7 +190,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
-        // Imprint brush on paper
+        /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
             brush.update(td);
@@ -227,12 +227,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw render texture to default buffer
         backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
 
-        // Draw brush
+        /** Draw Brush Head **/
         if(touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
             GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
 
+        /** Draw Brush View **/
         if(settingsData.isShowBrushView() && !touchDataManager.hasTouchEnded()) {
 
             // Draw brush view line
@@ -290,6 +291,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    /**
+     * Renders the current back buffer to the next back buffer,
+     * and then iterates to the next back buffer.
+     */
     public void touchHasStarted() {
 
         // Bind next back buffer
@@ -328,19 +333,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         touchDataManager.touchHasEnded();
     }
 
+    /**
+     * If there are previous buffers, rewind to the previous buffer and draw it to the main buffer.
+     */
     public void undo() {
 
         if(backBufferManager.hasPreviousBuffers()) {
-
-            System.err.println("Numbfrs: " + backBufferManager.getNumPreviousBuffers());
-
-            // Bind current back buffer
-            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
-            GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
-
-            // Clear color and depth
-            GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
-
             backBufferManager.rewindBuffer();
 
             // Bind default buffer
@@ -354,25 +352,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             // Clear color and depth
             GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-            // Draw current render texture to next back buffer
+            // Draw current render texture to main buffer
             backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
         }
     }
 
+    /**
+     * Clears the screen, by deleting all it's content.
+     */
     public void clearScreen() {
         touchHasEnded();
-
         backBufferManager.resetBuffers();
-
-        // Bind back buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
-
-        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
-
-        // Bind default buffer
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
-        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
     }
 
     /** Translates a viewport vector to world vector */
@@ -386,7 +376,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     /** Saves the image on the current screen */
     public void saveImage() {
         int[] pixelBuffer = getPixelBufferFromScreen();
-        convertRGBtoBGR(pixelBuffer);
+        Utils.convertRGBtoBGR(pixelBuffer);
         Bitmap b = createBitmapFromPixelBuffer(pixelBuffer);
         ImageSaver.saveImageToStorage(b, context);
     }
@@ -426,42 +416,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         bb.asIntBuffer().get(pixelBuffer);
 
         return pixelBuffer;
-    }
-
-    /**
-     * Converts a pixelbuffer of ARGB format to ABGR format.
-     *
-     * This must be done because OpenGL stores colors in RGB format while BMP is in BGR format.
-     * If this conversion is not done, red and blue colors will be switched.
-     */
-    private void convertRGBtoBGR(int[] pixelBuffer) {
-
-        int bits;
-        int tempRed;
-        int tempBlue;
-
-        int firstByteMask = 0x00ff0000;
-        int secondByteMask = 0x000000ff;
-        int bitDistance = 16;
-
-        for (int i = 0; i < pixelBuffer.length; i++) {
-            bits = pixelBuffer[i];
-
-            // Clear first and third byte
-            pixelBuffer[i] &= ~firstByteMask;
-            pixelBuffer[i] &= ~secondByteMask;
-
-            // Isolate the color bytes, and switch position
-            tempRed = bits & firstByteMask;
-            tempRed >>= bitDistance;
-
-            tempBlue = bits & secondByteMask;
-            tempBlue <<= bitDistance;
-
-            // Place color into pixel
-            pixelBuffer[i] |= tempRed;
-            pixelBuffer[i] |= tempBlue;
-        }
     }
 
     /** Whenever new settings changes are made, this methods reconfigures the affected objects */

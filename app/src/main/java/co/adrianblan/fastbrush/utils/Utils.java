@@ -135,4 +135,40 @@ public class Utils {
             System.out.println("{" + m[i + 0] + ", " + m[i + 1] + ", " + m[i + 2] + ", " + m[i + 3] + "}");
         }
     }
+
+    /**
+     * Converts a pixelbuffer of ARGB format to ABGR format.
+     *
+     * This must be done because OpenGL stores colors in RGB format while BMP is in BGR format.
+     * If this conversion is not done, red and blue colors will be switched.
+     */
+    public static void convertRGBtoBGR(int[] pixelBuffer) {
+
+        int bits;
+        int tempRed;
+        int tempBlue;
+
+        int firstByteMask = 0x00ff0000;
+        int secondByteMask = 0x000000ff;
+        int bitDistance = 16;
+
+        for (int i = 0; i < pixelBuffer.length; i++) {
+            bits = pixelBuffer[i];
+
+            // Clear first and third byte
+            pixelBuffer[i] &= ~firstByteMask;
+            pixelBuffer[i] &= ~secondByteMask;
+
+            // Isolate the color bytes, and switch position
+            tempRed = bits & firstByteMask;
+            tempRed >>= bitDistance;
+
+            tempBlue = bits & secondByteMask;
+            tempBlue <<= bitDistance;
+
+            // Place color into pixel
+            pixelBuffer[i] |= tempRed;
+            pixelBuffer[i] |= tempBlue;
+        }
+    }
 }

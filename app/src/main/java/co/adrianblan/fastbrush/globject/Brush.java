@@ -59,7 +59,7 @@ public class Brush {
 
     public void update(TouchData touchData) {
         position.set(touchData.getPosition(), Bristle.length
-                - Bristle.tipLength * touchData.getNormalizedTouchSize() * touchData.getNormalizedPressure() * sizePressureFactor);
+                - Bristle.tipLength * touchData.getNormalizedTouchSize());
 
         float xTilt = touchData.getTiltX();
         float yTilt = touchData.getTiltY();
