@@ -18,14 +18,13 @@ package co.adrianblan.fastbrush;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.os.Bundle;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import java.util.ArrayList;
 
-import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
@@ -169,6 +168,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public void onPause(){
         super.onPause();
+        mRenderer.onPause();
     }
 
     @Override

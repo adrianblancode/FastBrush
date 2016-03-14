@@ -18,9 +18,8 @@ package co.adrianblan.fastbrush;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -30,15 +29,13 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import co.adrianblan.fastbrush.data.TouchData;
-import co.adrianblan.fastbrush.data.TouchDataManager;
+import co.adrianblan.fastbrush.touch.TouchData;
+import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
 import co.adrianblan.fastbrush.globject.BackBufferManager;
 import co.adrianblan.fastbrush.globject.BackBufferSquare;
@@ -113,9 +110,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
+        SharedPreferences sp = settingsManager.getSharedPreferences();
+
+        int numTouches = sp.getInt("numTouches", 0);
+        float averageTouchSize = sp.getFloat("averageTouchSize", 0);
+        float minTouchSize = sp.getFloat("minTouchSize", 99999);
+        float maxTouchSize = sp.getFloat("maxTouchSize", 0);
+
         brush = new Brush(settingsData);
         line = new Line();
-        touchDataManager = new TouchDataManager();
+        touchDataManager = new TouchDataManager(numTouches, averageTouchSize, minTouchSize, maxTouchSize);
 
         Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
         Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
@@ -423,5 +427,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         settingsManager.setChangesRead();
         settingsData = settingsManager.getSettingsData();
         brush = new Brush(settingsData);
+    }
+
+    public void onPause() {
+        if(settingsManager != null && touchDataManager != null) {
+            SharedPreferences.Editor editor = settingsManager.getSharedPreferences().edit();
+            editor.putInt("numTouches", touchDataManager.getNumTouches());
+            editor.putFloat("averageTouchSize", touchDataManager.getAverageTouchSize());
+            editor.putFloat("minTouchSize", touchDataManager.getMinTouchSize());
+            editor.putFloat("maxTouchSize", touchDataManager.getMaxTouchSize());
+
+            editor.apply();
+        }
+    }
+
+    public void onResume() {
+
     }
 }

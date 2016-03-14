@@ -21,10 +21,10 @@ public class SettingsData {
     private boolean showBrushView;
 
     public SettingsData(){
-        size = 1.0f;
-        numBristles = 500;
+        size = 0.5f;
+        numBristles = 300;
         pressureFactor = 1.0f;
-        bristleThickness = 7f;
+        bristleThickness = 0.3f;
 
         isDry = true;
         opacity = 0.8f;

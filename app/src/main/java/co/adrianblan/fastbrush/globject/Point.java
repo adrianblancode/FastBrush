@@ -21,7 +21,7 @@ import java.nio.ShortBuffer;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
@@ -101,10 +101,10 @@ public class Point {
         // Init properties for touch data
         vertexBuffer.clear();
         vertexBuffer.put(getTranslatedVertexCoords(TexturedSquare.DEFAULT_SQUARE_COORDS, touchData.getPosition(),
-                touchData.getNormalizedTouchSize() * 0.2f + 0.03f));
+                touchData.getNormalizedSize() * 0.2f + 0.03f));
         vertexBuffer.position(0);
 
-        mColor[3] = getAlpha(touchData.getNormalizedTouchSize());
+        mColor[3] = getAlpha(touchData.getNormalizedSize());
 
         // Shader code
 

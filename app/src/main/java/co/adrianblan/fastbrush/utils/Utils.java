@@ -22,17 +22,21 @@ public class Utils {
 
     /** Normalizes a value from [min, max] to [0, 1] */
     public static float normalize(float val, float min, float max) {
+
+        if(Math.abs(max - min) < 0.01f) {
+            return 0.5f;
+        }
+
         float clampedVal = clamp(val, min, max);
 
-        float offset = 0f - min;
-        float scale = 1f / (max + offset);
+        float scale = 1f / (max - min);
 
-        return (clampedVal + offset) * scale;
+        return (clampedVal - min) * scale;
     }
 
     /** Returns whether two floats are equivalent to each other within a treshold */
     public static boolean floatsAreEquivalent(float val1, float val2) {
-        float epsilon = 0.0001f;
+        float epsilon = 0.001f;
 
         return Math.abs(val1 - val2) < epsilon;
     }

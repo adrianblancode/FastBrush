@@ -10,8 +10,7 @@ import com.google.gson.Gson;
  * Class which manages settings.
  */
 public class SettingsManager {
-    private static String SETTINGS_NAME = "settings";
-    private static String PREFS_KEY = "settingsData";
+    private static String SETTINGS_DATA_KEY = "settingsData";
     private static SettingsManager instance;
 
     private SettingsData settingsData;
@@ -47,14 +46,14 @@ public class SettingsManager {
         this.settingsData = settingsData;
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PREFS_KEY, gson.toJson(settingsData));
+        editor.putString(SETTINGS_DATA_KEY, gson.toJson(settingsData));
         editor.apply();
 
         hasChanges = true;
     }
 
     private void loadSettingsData() {
-        String settingsDataString = sharedPreferences.getString(PREFS_KEY, null);
+        String settingsDataString = sharedPreferences.getString(SETTINGS_DATA_KEY, null);
 
         if(settingsDataString == null) {
             System.out.println("No settings data, creating new");
@@ -70,5 +69,9 @@ public class SettingsManager {
 
     public void setChangesRead() {
         hasChanges = false;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
     }
 }

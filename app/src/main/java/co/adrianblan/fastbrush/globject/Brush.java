@@ -5,7 +5,7 @@ import android.opengl.GLES30;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import co.adrianblan.fastbrush.data.TouchData;
+import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
@@ -59,7 +59,7 @@ public class Brush {
 
     public void update(TouchData touchData) {
         position.set(touchData.getPosition(), Bristle.length
-                - Bristle.tipLength * touchData.getNormalizedTouchSize());
+                - Bristle.tipLength * touchData.getNormalizedSize());
 
         float xTilt = touchData.getTiltX();
         float yTilt = touchData.getTiltY();

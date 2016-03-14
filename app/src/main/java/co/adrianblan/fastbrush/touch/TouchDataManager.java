@@ -1,4 +1,6 @@
-package co.adrianblan.fastbrush.data;
+package co.adrianblan.fastbrush.touch;
+
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -14,15 +16,31 @@ public class TouchDataManager {
     private boolean touchHasEnded;
     private boolean touchIsEnding;
 
+    private int numTouches;
+    private float averageTouchSize;
+    private float minTouchSize;
+    private float maxTouchSize;
+
     public TouchDataManager() {
         touchDataList = new ArrayList<>();
         touchHasEnded = true;
+        minTouchSize = 99999;
+    }
+
+    public TouchDataManager(int numTouches, float averageTouchSize, float minTouchSize, float maxTouchSize) {
+        this();
+        this.numTouches = numTouches;
+        this.averageTouchSize = averageTouchSize;
+        this.minTouchSize = minTouchSize;
+        this.maxTouchSize = maxTouchSize;
     }
 
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     public void addInterpolated(TouchData touchData){
 
         final float MIN_DISTANCE = 0.003f;
+
+        addTouchStatistics(touchData);
 
         if(prevTouchData == null) {
             add(touchData);
@@ -95,9 +113,22 @@ public class TouchDataManager {
 
     /** Adds a TouchData object to the list */
     private void add(TouchData touchData) {
+        normalizeTouchSize(touchData);
         touchDataList.add(touchData);
         prevTouchData = touchData;
         touchHasEnded = false;
+    }
+
+    private void addTouchStatistics(TouchData touchData) {
+        Log.d("FastBrush", "avg: " + averageTouchSize + ", nt: " + numTouches);
+
+        averageTouchSize = (averageTouchSize * (numTouches / (numTouches + 1f)))
+                + (touchData.getSize() / (numTouches + 1f));
+
+        numTouches++;
+
+        minTouchSize = Math.min(touchData.getSize(), minTouchSize);
+        maxTouchSize = Math.max(touchData.getSize(), maxTouchSize);
     }
 
     /** Returns the list of TouchData */
@@ -136,5 +167,33 @@ public class TouchDataManager {
 
     public boolean hasTouchEnded() {
         return touchHasEnded;
+    }
+
+    public int getNumTouches() {
+        return numTouches;
+    }
+
+    public float getAverageTouchSize() {
+        return averageTouchSize;
+    }
+
+    public float getMinTouchSize() {
+        return minTouchSize;
+    }
+
+    public float getMaxTouchSize() {
+        return maxTouchSize;
+    }
+
+    /** Takes a touch size sets it to the normalized size [0, 1] */
+    public void normalizeTouchSize(TouchData td) {
+
+        float minTouchSizeAvgDistance = averageTouchSize - minTouchSize;
+        float normalizedTouchSizeMax = Math.min(averageTouchSize + minTouchSizeAvgDistance * 2, maxTouchSize);
+
+        float normalizedSize = Utils.normalize(td.getSize(), minTouchSize,
+                normalizedTouchSizeMax);
+
+        td.setNormalizedSize(normalizedSize);
     }
 }
