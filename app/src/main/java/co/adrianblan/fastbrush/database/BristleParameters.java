@@ -35,15 +35,31 @@ public class BristleParameters {
         return spreadAngle;
     }
 
+    public void setSpreadAngle(float spreadAngle) {
+        this.spreadAngle = spreadAngle;
+    }
+
     public float getPlanarDistanceFromHandle() {
         return planarDistanceFromHandle;
+    }
+
+    public void setPlanarDistanceFromHandle(float planarDistanceFromHandle) {
+        this.planarDistanceFromHandle = planarDistanceFromHandle;
     }
 
     public float getUpperControlPointLength() {
         return upperControlPointLength;
     }
 
+    public void setUpperControlPointLength(float upperControlPointLength) {
+        this.upperControlPointLength = upperControlPointLength;
+    }
+
     public float getLowerControlPointLength() {
         return lowerControlPointLength;
+    }
+
+    public void setLowerControlPointLength(float lowerControlPointLength) {
+        this.lowerControlPointLength = lowerControlPointLength;
     }
 }

@@ -120,8 +120,6 @@ public class TouchDataManager {
     }
 
     private void addTouchStatistics(TouchData touchData) {
-        Log.d("FastBrush", "avg: " + averageTouchSize + ", nt: " + numTouches);
-
         averageTouchSize = (averageTouchSize * (numTouches / (numTouches + 1f)))
                 + (touchData.getSize() / (numTouches + 1f));
 

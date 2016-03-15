@@ -37,6 +37,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
     private final MyGLRenderer mRenderer;
     private VelocityTracker mVelocityTracker;
 
+    private int[] savedPixelBuffer;
+
     public MyGLSurfaceView(Context context) {
         super(context);
 
@@ -174,5 +176,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public void onResume() {
         super.onResume();
+        mRenderer.onResume();
     }
 }

@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.gson.Gson;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 
 import butterknife.Bind;
@@ -50,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fabDelete;
 
     private MyGLSurfaceView glSurfaceView;
-
     private FrameLayout mainView;
 
     @Override

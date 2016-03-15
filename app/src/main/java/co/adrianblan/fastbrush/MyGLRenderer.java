@@ -30,8 +30,11 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
+import com.google.gson.Gson;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.touch.TouchData;
@@ -90,9 +93,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int mHeight;
     private float mRatio;
 
+    private int[] savedPixelBuffer;
+    private int[] savedTextureArray;
     private SettingsManager settingsManager;
     private SettingsData settingsData;
 
+    private Gson gson;
     private Brush brush;
     private Line line;
     private TouchDataManager touchDataManager;
@@ -111,11 +117,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         SharedPreferences sp = settingsManager.getSharedPreferences();
+        gson = new Gson();
 
         int numTouches = sp.getInt("numTouches", 0);
         float averageTouchSize = sp.getFloat("averageTouchSize", 0);
         float minTouchSize = sp.getFloat("minTouchSize", 99999);
         float maxTouchSize = sp.getFloat("maxTouchSize", 0);
+
+        savedTextureArray = new int[1];
 
         brush = new Brush(settingsData);
         line = new Line();
@@ -163,6 +172,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
+
+        if(savedPixelBuffer != null) {
+            //renderPixelBuffer(savedPixelBuffer);
+            savedPixelBuffer = null;
+        }
 
         if(settingsManager.hasChanges()){
             reconfigureSettingsChanges();
@@ -422,6 +436,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         return pixelBuffer;
     }
 
+    /** Renders an int buffer to screen
+     * @param pixelBuffer*/
+    public void renderPixelBuffer(int[] pixelBuffer) {
+        // Bind default buffer
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
+        GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
+
+        // Generate and load textures
+        GLES30.glGenTextures(1, savedTextureArray, 0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, savedTextureArray[0]);
+
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, IntBuffer.wrap(pixelBuffer));
+
+        backBufferSquare.draw(mMVPMatrix, savedTextureArray[0]);
+    }
+
     /** Whenever new settings changes are made, this methods reconfigures the affected objects */
     private void reconfigureSettingsChanges() {
         settingsManager.setChangesRead();
@@ -431,12 +461,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void onPause() {
         if(settingsManager != null && touchDataManager != null) {
+            Gson gson = new Gson();
+
             SharedPreferences.Editor editor = settingsManager.getSharedPreferences().edit();
             editor.putInt("numTouches", touchDataManager.getNumTouches());
             editor.putFloat("averageTouchSize", touchDataManager.getAverageTouchSize());
             editor.putFloat("minTouchSize", touchDataManager.getMinTouchSize());
             editor.putFloat("maxTouchSize", touchDataManager.getMaxTouchSize());
-
             editor.apply();
         }
     }
