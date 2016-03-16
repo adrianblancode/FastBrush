@@ -33,7 +33,11 @@ public class BrushSnapshotDatabase {
         hashMap.put(brushKey, bristleParameters);
     }
 
-    public BristleParameters getBristleParameters(BrushKey sourceKey){
+    /**
+     * Takes a BrushKey (which may or may not exist in the HashMap), and returns an interpolated
+     * BristleParameter value based on the nearest values in the HashMap.
+     */
+    public BristleParameters getBristleParameter(BrushKey targetKey){
 
         if (hashMap.isEmpty()) {
             return null;
@@ -47,7 +51,7 @@ public class BrushSnapshotDatabase {
         BrushKey keyLowLow = null;
 
         // Go through all the keys, get the keys furthest in two dimensions
-        // This is to establish a large cover, in case our sourcekey is outside valid range
+        // This is to establish a large cover, in case our targetKey is outside valid range
         for(BrushKey tempKey : hashMap.keySet()) {
             keyHighHigh =
                     getFurthestKey(keyHighHigh, tempKey, KeyDirection.HIGH, KeyDirection.HIGH);
@@ -67,24 +71,25 @@ public class BrushSnapshotDatabase {
 
         if(hashSet.size() < 4) {
             System.err.println("Duplicate furthest keys");
+            return null;
         }
 
         // Go through all the keys, get the keys nearest in two dimensions
         for(BrushKey tempKey : hashMap.keySet()) {
             keyHighHigh =
-                    getNearestKey(sourceKey, keyHighHigh, tempKey, KeyDirection.HIGH, KeyDirection.HIGH);
+                    getNearestKey(targetKey, keyHighHigh, tempKey, KeyDirection.HIGH, KeyDirection.HIGH);
             keyHighLow =
-                    getNearestKey(sourceKey, keyHighLow, tempKey, KeyDirection.HIGH, KeyDirection.LOW);
+                    getNearestKey(targetKey, keyHighLow, tempKey, KeyDirection.HIGH, KeyDirection.LOW);
             keyLowHigh =
-                    getNearestKey(sourceKey, keyLowHigh, tempKey, KeyDirection.LOW, KeyDirection.HIGH);
+                    getNearestKey(targetKey, keyLowHigh, tempKey, KeyDirection.LOW, KeyDirection.HIGH);
             keyLowLow =
-                    getNearestKey(sourceKey, keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
+                    getNearestKey(targetKey, keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
         }
 
-        return interpolate(sourceKey, keyHighHigh, keyHighLow, keyLowHigh, keyLowLow);
+        return interpolate(targetKey, keyHighHigh, keyHighLow, keyLowHigh, keyLowLow);
     }
 
-    // Expands the key to the farthest range possible
+    /** Expands the key to the farthest range possible according to the KeyDirections */
     public BrushKey getFurthestKey(BrushKey currentKey, BrushKey newKey,
                                    KeyDirection angleDirection, KeyDirection heightDirection) {
 
@@ -114,7 +119,7 @@ public class BrushSnapshotDatabase {
         return currentKey;
     }
 
-    public BrushKey getNearestKey(BrushKey sourceKey, BrushKey currentKey, BrushKey newKey,
+    public BrushKey getNearestKey(BrushKey targetKey, BrushKey currentKey, BrushKey newKey,
                                   KeyDirection angleDirection, KeyDirection heightDirection) {
 
         boolean isHighAngle = angleDirection.equals(KeyDirection.HIGH);
@@ -122,9 +127,9 @@ public class BrushSnapshotDatabase {
 
         assert currentKey != null;
 
-        if((isHighAngle == sourceKey.getAngle() < newKey.getAngle())
+        if((isHighAngle == targetKey.getAngle() < newKey.getAngle())
                 && (isHighAngle == newKey.getAngle() < currentKey.getAngle())
-                && (isHighHeight == sourceKey.getHeight() < newKey.getHeight())
+                && (isHighHeight == targetKey.getHeight() < newKey.getHeight())
                 && (isHighHeight == newKey.getHeight() < currentKey.getHeight())
                 ) {
             return newKey;
@@ -133,7 +138,11 @@ public class BrushSnapshotDatabase {
         return currentKey;
     }
 
-    private BristleParameters interpolate(BrushKey sourceKey, BrushKey keyHighHigh, BrushKey keyHighLow,
+    /**
+     * Takes in a four keys of different directions, and one target key. The end result is the value
+     * from all four source keys intepolated with respect to the target key.
+     */
+    private BristleParameters interpolate(BrushKey targetKey, BrushKey keyHighHigh, BrushKey keyHighLow,
                                          BrushKey keyLowHigh, BrushKey keyLowLow) {
 
         BristleParameters valueHighHigh = hashMap.get(keyHighHigh);
@@ -141,16 +150,19 @@ public class BrushSnapshotDatabase {
         BristleParameters valueLowHigh = hashMap.get(keyLowHigh);
         BristleParameters valueLowLow = hashMap.get(keyLowLow);
 
-        // TODO make this work
-        float highAngleHeightPercent = (sourceKey.getHeight() - keyHighLow.getHeight()) / (keyHighHigh.getHeight() - keyHighLow.getHeight());
+        float highAngleHeightPercent = (targetKey.getHeight() - keyHighLow.getHeight()) / (keyHighHigh.getHeight() - keyHighLow.getHeight());
         BristleParameters interpolatedValueHighAngle = getInterpolatedValue(valueHighLow, valueHighHigh, highAngleHeightPercent);
+        BrushKey interpolatedKeyHighAngle = new BrushKey((keyHighHigh.getAngle() + keyHighLow.getAngle()) / 2f, targetKey.getHeight());
 
-        float lowAngleHeightPercent = (sourceKey.getHeight() - keyLowLow.getHeight()) / (keyLowHigh.getHeight() - keyLowLow.getHeight());
+        float lowAngleHeightPercent = (targetKey.getHeight() - keyLowLow.getHeight()) / (keyLowHigh.getHeight() - keyLowLow.getHeight());
         BristleParameters interpolatedValueLowAngle = getInterpolatedValue(valueLowLow, valueLowHigh, lowAngleHeightPercent);
+        BrushKey interpolatedKeyLowAngle = new BrushKey((keyLowHigh.getAngle() + keyLowLow.getAngle()) / 2f, targetKey.getHeight());
 
-        //float interpolatedHeightAnglePercent = (sourceKey.getAngle() - ) / (keyLowHigh.getHeight() - keyLowLow.getHeight());
+        float interpolatedAnglePercent = (targetKey.getAngle() -  (interpolatedKeyLowAngle.getAngle()))
+                / (interpolatedKeyHighAngle.getAngle() - interpolatedKeyLowAngle.getAngle());
+        BristleParameters finalInterpolatedValue = getInterpolatedValue(interpolatedValueLowAngle, interpolatedValueHighAngle, interpolatedAnglePercent);
 
-        return null;
+        return finalInterpolatedValue;
     }
 
     /**
