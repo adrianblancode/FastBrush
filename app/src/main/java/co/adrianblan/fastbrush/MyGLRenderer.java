@@ -188,23 +188,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
         GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, backBufferManager.getDepthBuffer());
 
-        // Enable blending
-        GLES30.glEnable(GLES30.GL_BLEND);
-
-        if(settingsData.isDry()) {
-            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-            GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
-        } else {
-            GLES30.glBlendFuncSeparate(GLES30.GL_SRC_ALPHA, GLES30.GL_DST_ALPHA, GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-            GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
-        }
-
         // Enable depth testing to slightly above paper
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glDepthFunc(GLES30.GL_LEQUAL);
         GLES30.glDepthMask(true);
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glClearDepthf(IMPRINT_DEPTH);
+
+        GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
@@ -228,15 +220,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            brush.draw(mBrushMVPMatrix, settingsData.getColorWrapper().toFloatArray());
+            brush.draw(mBrushMVPMatrix, settingsData.getColorWrapper().toFloatArray(), backBufferManager.getTextureBuffer());
         }
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
         GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
 
-        // Disable blending and depth test
-        GLES30.glDisable(GLES30.GL_BLEND);
+        // Disable depth test
         GLES30.glDisable(GLES30.GL_DEPTH_TEST);
 
         // Clear color and depth
@@ -248,7 +239,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         /** Draw Brush Head **/
         if(touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
             GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
-            brush.draw(mBrushMVPMatrix, Utils.brownColor);
+            brush.draw(mBrushMVPMatrix, Utils.brownColor, backBufferManager.getTextureBuffer());
         }
 
         /** Draw Brush View **/
@@ -277,7 +268,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
 
             GLES30.glLineWidth(Brush.BRUSH_VIEW_BRISTLE_THICKNESS);
-            brush.draw(mBrushMVPMatrix, Utils.brownColor);
+            brush.draw(mBrushMVPMatrix, Utils.brownColor, backBufferManager.getTextureBuffer());
 
         }
 
