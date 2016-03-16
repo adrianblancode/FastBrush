@@ -31,6 +31,7 @@ public class Brush {
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+    private int mTextureUniformHandle;
     private float[] vertexData;
 
     private final FloatBuffer vertexBuffer;
@@ -73,7 +74,7 @@ public class Brush {
 
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
-                GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
+                GLColorObject.COLOR_FRAGMENT_SHADER_CODE);
     }
 
     public void updateBrush(TouchData touchData) {
@@ -211,11 +212,11 @@ public class Brush {
         vertexBuffer.position(0);
     }
 
-    public void draw(float[] mvpMatrix) {
-        draw(mvpMatrix, Utils.blackColor);
+    public void draw(float[] mvpMatrix, int screenTexture) {
+        draw(mvpMatrix, Utils.blackColor, screenTexture);
     }
 
-    public void draw(float[] mvpMatrix, float[] color) {
+    public void draw(float[] mvpMatrix, float[] color, int screenTexture) {
 
         // Add program to OpenGL environment
         GLES30.glUseProgram(mProgram);
@@ -247,6 +248,20 @@ public class Brush {
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
         GLhelper.checkGlError("glUniformMatrix4fv");
 
+
+        /*  Textures */
+        mTextureUniformHandle = GLES30.glGetUniformLocation(mProgram, "u_Texture");
+
+        // Set the active texture unit to texture unit 0.
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+
+        // Bind the texture to this unit.
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, screenTexture);
+
+        // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
+        GLES30.glUniform1i(mTextureUniformHandle, 0);
+
+        // Draw line
         GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
         // Disable vertex array

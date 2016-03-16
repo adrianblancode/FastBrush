@@ -12,7 +12,8 @@ public class GLColorObject {
             "uniform sampler2D u_Texture;" +
             "void main() {" +
             "  vec2 texPosition = (gl_FragCoord.xy / resolution.xy);" +
-            "  gl_FragColor = texture2D(u_Texture, texPosition);" +
-            "  gl_FragColor = gl_FragColor + (vColor - gl_FragColor) * vColor.w;" +
+            "  vec4 texColor = texture2D(u_Texture, texPosition);" +
+            "  gl_FragColor = texColor + vColor;" +
+            "  gl_FragColor.r = texColor.g;" +
             "}";
 }
