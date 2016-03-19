@@ -32,6 +32,10 @@ public class BrushKey {
         return height;
     }
 
+    public float distance(BrushKey key) {
+        return (Math.abs(getAngle() - key.getAngle()) / 45f) + Math.abs(getHeight() - key.getHeight());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BrushKey)) {

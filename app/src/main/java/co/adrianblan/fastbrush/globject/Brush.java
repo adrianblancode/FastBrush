@@ -5,10 +5,14 @@ import android.opengl.GLES30;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import co.adrianblan.fastbrush.database.BristleParameters;
+import co.adrianblan.fastbrush.database.BrushKey;
+import co.adrianblan.fastbrush.database.BrushSnapshotDatabase;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
+import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
@@ -17,6 +21,7 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.2f);
+    private static final int SEGMENTS_PER_BRISTLE = 5;
 
     private int numBristles;
     private float sizePressureFactor;
@@ -29,10 +34,13 @@ public class Brush {
 
     private final FloatBuffer vertexBuffer;
 
+    private BrushSnapshotDatabase brushSnapshotDatabase;
+    private BrushKey brushKey;
+
     private ArrayList<Bristle> bristles;
     private Vector3 position;
     private Vector3 jitter;
-    private float angle;
+    private float verticalAngle;
 
     public Brush(SettingsData settingsData) {
 
@@ -42,6 +50,9 @@ public class Brush {
         position = new Vector3();
         resetPosition();
 
+        brushSnapshotDatabase = new BrushSnapshotDatabase();
+        brushKey = new BrushKey();
+
         bristles = new ArrayList<>();
         jitter = new Vector3();
 
@@ -49,29 +60,40 @@ public class Brush {
             bristles.add(new Bristle(settingsData));
         }
 
-        vertexData = new float[GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles];
-        vertexBuffer = GLhelper.initFloatBuffer(6 * numBristles);
+        vertexData = new float[GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE];
+        vertexBuffer = GLhelper.initFloatBuffer(6 * numBristles * SEGMENTS_PER_BRISTLE);
 
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
-    public void update(TouchData touchData) {
-        position.set(touchData.getPosition(), Bristle.length
-                - Bristle.tipLength * touchData.getNormalizedSize());
+    public void updateBrush(TouchData touchData) {
+        position.set(touchData.getPosition(), Bristle.BASE_LENGTH
+                - Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize());
 
         float xTilt = touchData.getTiltX();
         float yTilt = touchData.getTiltY();
 
-        angle = Utils.clamp((float) (Math.sqrt(xTilt * xTilt + yTilt * yTilt) / (Bristle.BASE_LENGTH)) * 90,
+        float tiltLength = (float) Math.sqrt(xTilt * xTilt + yTilt * yTilt);
+        float xAngle = (float) Math.toDegrees(Math.acos(xTilt / tiltLength));
+        float horizontalAngle = xAngle;
+
+        if(Math.asin(yTilt / tiltLength) < 0) {
+            horizontalAngle = 360 - horizontalAngle;
+        }
+
+        verticalAngle = Utils.clamp((tiltLength/ (Bristle.BASE_LENGTH)) * 90f,
                 0, 90);
 
-        update();
+        brushKey.set(verticalAngle, position.getZ());
+        BristleParameters bristleParameters = brushSnapshotDatabase.getNearestValue(brushKey);
+
+        updateBristles(bristleParameters);
     }
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
-    public void update() {
+    public void updateBristles(BristleParameters bristleParameters) {
         updateJitter();
         position.addFast(jitter);
 
@@ -83,19 +105,36 @@ public class Brush {
         for(Bristle bristle : bristles){
             bristle.update(position);
 
-            vector = bristle.absoluteTop.vector;
+            float interpolatedX = bristle.absoluteTop.vector[0];
+            float interpolatedY = bristle.absoluteTop.vector[1];
+            float interpolatedZ = bristle.absoluteTop.vector[2];
 
-            vertexData[index] = vector[0];
-            vertexData[index + 1] = vector[1];
-            vertexData[index + 2] = vector[2];
+            for(int i = 1; i <= SEGMENTS_PER_BRISTLE; i++) {
 
-            index += 3;
-            vector = bristle.absoluteBottom.vector;
+                float scale = ((float) i / SEGMENTS_PER_BRISTLE) * (bristle.getLength() / Bristle.BASE_LENGTH);
 
-            vertexData[index] = vector[0];
-            vertexData[index + 1] = vector[1];
-            vertexData[index + 2] = vector[2];
-            index += 3;
+                vertexData[index] = interpolatedX;
+                vertexData[index + 1] = interpolatedY;
+                vertexData[index + 2] = interpolatedZ;
+                index += 3;
+
+                interpolatedX = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[0]
+                        + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[0]
+                        + scale * scale * bristle.absoluteBottom.vector[0];
+
+                interpolatedY = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[1]
+                        + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[1]
+                        + scale * scale * (bristle.absoluteBottom.vector[1] + bristleParameters.getPlanarDistanceFromHandle());
+
+                interpolatedZ = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[2]
+                        + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[2]
+                        + scale * scale * bristle.absoluteBottom.vector[2];
+
+                vertexData[index] = interpolatedX;
+                vertexData[index + 1] = interpolatedY;
+                vertexData[index + 2] = interpolatedZ;
+                index += 3;
+            }
         }
 
         vertexBuffer.put(vertexData);
@@ -151,11 +190,11 @@ public class Brush {
 
     public void resetPosition() {
         position.set(0, 0, Bristle.BASE_LENGTH);
-        angle = 0;
+        verticalAngle = 0;
     }
 
-    public float getAngle() {
-        return angle;
+    public float getVerticalAngle() {
+        return verticalAngle;
     }
 
     private void updateJitter() {

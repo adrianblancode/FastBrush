@@ -17,18 +17,13 @@ public class BristleParameters {
 
     public BristleParameters() {}
 
-    public BristleParameters(float spreadAngle, float planarDistanceFromHandle,
-                             float upperControlPointLength, float lowerControlPointLength) {
-
-        set(spreadAngle, planarDistanceFromHandle, upperControlPointLength, lowerControlPointLength);
+    public BristleParameters(float planarDistanceFromHandle, float spreadAngle) {
+        set(planarDistanceFromHandle, spreadAngle);
     }
 
-    public void set(float spreadAngle, float planarDistanceFromHandle,
-               float upperControlPointLength, float lowerControlPointLength) {
+    public void set(float planarDistanceFromHandle, float spreadAngle) {
         this.spreadAngle = spreadAngle;
         this.planarDistanceFromHandle = planarDistanceFromHandle;
-        this.upperControlPointLength = upperControlPointLength;
-        this.lowerControlPointLength = lowerControlPointLength;
     }
 
     public float getSpreadAngle() {

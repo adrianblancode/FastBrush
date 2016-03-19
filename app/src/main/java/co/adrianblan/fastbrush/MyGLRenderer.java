@@ -24,7 +24,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.opengl.EGL14;
-import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
@@ -211,7 +210,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
-            brush.update(td);
+            brush.updateBrush(td);
 
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
@@ -219,7 +218,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(rotationMatrix, 0);
 
             Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(), 0);
-            Matrix.setRotateM(rotationMatrix, 0, brush.getAngle(), -td.getTiltY(), td.getTiltX(), 0);
+            Matrix.setRotateM(rotationMatrix, 0, brush.getVerticalAngle(), -td.getTiltY(), td.getTiltX(), 0);
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
             Matrix.multiplyMM(mBrushModelMatrix, 0, rotationMatrix, 0, translateToOrigin, 0);

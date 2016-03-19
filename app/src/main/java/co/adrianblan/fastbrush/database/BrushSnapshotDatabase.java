@@ -24,13 +24,43 @@ public class BrushSnapshotDatabase {
      * Initializes the database with default values
      */
     private void init() {
-        BrushKey brushKey = new BrushKey();
-        BristleParameters bristleParameters = new BristleParameters();
 
         // Neutral
-        brushKey.set(0, 1);
-        bristleParameters.set(0, 0, 1, 0);
-        hashMap.put(brushKey, bristleParameters);
+        hashMap.put(new BrushKey(0, 1), new BristleParameters(0, 0));
+
+        // Neutral pressure 1
+        hashMap.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0));
+
+        // Neutral pressure 2
+        hashMap.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0));
+
+        // Neutral pressure 3
+        hashMap.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0));
+
+        // Neutral pressure 4
+        hashMap.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0));
+
+        // Neutral pressure 5
+        hashMap.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0));
+
+
+        // Back neutral
+        hashMap.put(new BrushKey(45f, 1f), new BristleParameters(1f, 0));
+
+        // Back pressure 1
+        hashMap.put(new BrushKey(45f, 0.99f), new BristleParameters(0.03f, 0));
+
+        // Back pressure 2
+        hashMap.put(new BrushKey(45f, 0.96f), new BristleParameters(0.012f, 0));
+
+        // Back pressure 3
+        hashMap.put(new BrushKey(45f, 0.94f), new BristleParameters(0.26f, 0));
+
+        // Back pressure 4
+        hashMap.put(new BrushKey(45f, 0.91f), new BristleParameters(0.38f, 0));
+
+        // Back pressure 5
+        hashMap.put(new BrushKey(45f, 0.84f), new BristleParameters(0.52f, 0));
     }
 
     /**
@@ -114,6 +144,32 @@ public class BrushSnapshotDatabase {
                 )
                 ){
             return newKey;
+        }
+
+        return currentKey;
+    }
+
+    public BristleParameters getNearestValue(BrushKey targetKey) {
+        BrushKey currentKey = getNearestKey(targetKey);
+
+        if(currentKey != null) {
+            return hashMap.get(currentKey);
+        } else {
+            return null;
+        }
+    }
+
+    public BrushKey getNearestKey(BrushKey targetKey) {
+
+        final float epsilon = 0.0001f;
+        BrushKey currentKey = null;
+
+        for(BrushKey sourceKey : hashMap.keySet()) {
+            if(currentKey == null) {
+                currentKey = sourceKey;
+            } else if(targetKey.distance(sourceKey) < targetKey.distance(currentKey) + epsilon) {
+                currentKey = sourceKey;
+            }
         }
 
         return currentKey;
