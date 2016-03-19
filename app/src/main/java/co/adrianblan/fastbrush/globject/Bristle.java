@@ -44,6 +44,7 @@ public class Bristle {
 
         absoluteTop = new Vector3();
         absoluteBottom = new Vector3();
+        absoluteExtendedBottom = new Vector3();
     }
 
     public void update(Vector3 brushPosition) {

@@ -36,6 +36,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -218,7 +219,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(rotationMatrix, 0);
 
             Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(), 0);
-            Matrix.setRotateM(rotationMatrix, 0, brush.getVerticalAngle(), -td.getTiltY(), td.getTiltX(), 0);
+            Matrix.setRotateM(rotationMatrix, 0, brush.getHorizontalAngle(), 0, 0, 1);
+            Matrix.rotateM(rotationMatrix, 0, brush.getVerticalAngle(), -brush.getyTilt(), brush.getxTilt(), 0);
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
             Matrix.multiplyMM(mBrushModelMatrix, 0, rotationMatrix, 0, translateToOrigin, 0);

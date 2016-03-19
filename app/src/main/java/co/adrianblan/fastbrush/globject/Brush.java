@@ -40,7 +40,11 @@ public class Brush {
     private ArrayList<Bristle> bristles;
     private Vector3 position;
     private Vector3 jitter;
+
     private float verticalAngle;
+    private float horizontalAngle;
+    private float xTilt;
+    private float yTilt;
 
     public Brush(SettingsData settingsData) {
 
@@ -70,23 +74,30 @@ public class Brush {
 
     public void updateBrush(TouchData touchData) {
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH
-                - Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize());
+                - Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 2f);
 
-        float xTilt = touchData.getTiltX();
-        float yTilt = touchData.getTiltY();
+        float tiltLength = (float) Math.sqrt(touchData.getTiltX() * touchData.getTiltX()
+                + touchData.getTiltY() * touchData.getTiltY());
 
-        float tiltLength = (float) Math.sqrt(xTilt * xTilt + yTilt * yTilt);
-        float xAngle = (float) Math.toDegrees(Math.acos(xTilt / tiltLength));
-        float horizontalAngle = xAngle;
+        if(tiltLength > 0.01f) {
 
-        if(Math.asin(yTilt / tiltLength) < 0) {
-            horizontalAngle = 360 - horizontalAngle;
+            xTilt = touchData.getTiltX();
+            yTilt = touchData.getTiltY();
+
+            float xAngle = (float) Math.toDegrees(Math.acos(xTilt / tiltLength));
+            float tempHorizontalAngle = xAngle;
+
+            if (Math.asin(yTilt / tiltLength) < 0) {
+                tempHorizontalAngle = 360 - horizontalAngle;
+            }
+
+            horizontalAngle = tempHorizontalAngle;
+
+            verticalAngle = Utils.clamp((tiltLength / (Bristle.BASE_LENGTH)) * 90f,
+                    0, 90);
         }
 
-        verticalAngle = Utils.clamp((tiltLength/ (Bristle.BASE_LENGTH)) * 90f,
-                0, 90);
-
-        brushKey.set(verticalAngle, position.getZ());
+        brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
         BristleParameters bristleParameters = brushSnapshotDatabase.getNearestValue(brushKey);
 
         updateBristles(bristleParameters);
@@ -100,7 +111,6 @@ public class Brush {
         vertexBuffer.position(0);
 
         int index = 0;
-        float [] vector;
 
         for(Bristle bristle : bristles){
             bristle.update(position);
@@ -120,15 +130,15 @@ public class Brush {
 
                 interpolatedX = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[0]
                         + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[0]
-                        + scale * scale * bristle.absoluteBottom.vector[0];
+                        + scale * scale * (bristle.absoluteBottom.vector[0] - bristleParameters.getPlanarDistanceFromHandle());
 
                 interpolatedY = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[1]
                         + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[1]
-                        + scale * scale * (bristle.absoluteBottom.vector[1] + bristleParameters.getPlanarDistanceFromHandle());
+                        + scale * scale * bristle.absoluteBottom.vector[1];
 
                 interpolatedZ = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[2]
-                        + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[2]
-                        + scale * scale * bristle.absoluteBottom.vector[2];
+                        + 2 * (1f - scale) * scale * 0
+                        + scale * scale * 0;
 
                 vertexData[index] = interpolatedX;
                 vertexData[index + 1] = interpolatedY;
@@ -195,6 +205,18 @@ public class Brush {
 
     public float getVerticalAngle() {
         return verticalAngle;
+    }
+
+    public float getHorizontalAngle() {
+        return horizontalAngle;
+    }
+
+    public float getxTilt() {
+        return xTilt;
+    }
+
+    public float getyTilt() {
+        return yTilt;
     }
 
     private void updateJitter() {
