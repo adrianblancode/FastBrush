@@ -54,4 +54,9 @@ public class BrushKey {
     public int hashCode() {
         return Float.floatToIntBits(angle) ^ Float.floatToIntBits(height);
     }
+
+    @Override
+    public String toString() {
+        return "angle: " + angle + ", height:" + height;
+    }
 }

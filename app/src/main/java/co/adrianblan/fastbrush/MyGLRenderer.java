@@ -36,7 +36,6 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -85,7 +84,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private final float[] translateToOrigin = new float[16];
     private final float[] translateFromOrigin = new float[16];
-    private final float[] rotationMatrix = new float[16];
+    private final float[] translateToImprintCenter = new float[16];
+    private final float[] translateFromImprintCenter = new float[16];
+    private final float[] horizontalRotationMatrix = new float[16];
+    private final float[] verticalRotationMatrix = new float[16];
+
 
     private Context context;
 
@@ -216,14 +219,44 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
             Matrix.setIdentityM(translateFromOrigin, 0);
-            Matrix.setIdentityM(rotationMatrix, 0);
+            Matrix.setIdentityM(translateToImprintCenter, 0);
+            Matrix.setIdentityM(translateFromImprintCenter, 0);
+            Matrix.setIdentityM(horizontalRotationMatrix, 0);
+            Matrix.setIdentityM(verticalRotationMatrix, 0);
 
-            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(), -brush.getPosition().getY(), 0);
-            Matrix.setRotateM(rotationMatrix, 0, brush.getHorizontalAngle(), 0, 0, 1);
-            Matrix.rotateM(rotationMatrix, 0, brush.getVerticalAngle(), -brush.getyTilt(), brush.getxTilt(), 0);
-            Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
+            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX()
+                    + brush.getBristleParameters().getPlanarDistanceFromHandle()
+                    - brush.getBristleParameters().getPlanarImprintLength() / 2f,
+                    -brush.getPosition().getY(), 0);
 
-            Matrix.multiplyMM(mBrushModelMatrix, 0, rotationMatrix, 0, translateToOrigin, 0);
+            float angle = brush.getHorizontalAngle();
+            Matrix.setRotateM(horizontalRotationMatrix, 0, angle, 0, 0, 1);
+
+            Matrix.translateM(translateToImprintCenter, 0,
+                    (float) Math.cos(angle) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
+                            - brush.getBristleParameters().getPlanarImprintLength() / 2f),
+                    (float) Math.sin(angle) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
+                            - brush.getBristleParameters().getPlanarImprintLength() / 2f), 0);
+
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle(),
+                    -brush.getyTilt(), brush.getxTilt(), 0);
+
+            Matrix.translateM(translateFromImprintCenter, 0,
+                    (float) -Math.cos(angle) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
+                            - brush.getBristleParameters().getPlanarImprintLength() / 2f),
+                    (float) -Math.sin(angle) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
+                            - brush.getBristleParameters().getPlanarImprintLength() / 2f), 0);
+
+            Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX()
+                    - brush.getBristleParameters().getPlanarDistanceFromHandle()
+                    + brush.getBristleParameters().getPlanarImprintLength() / 2f,
+                    brush.getPosition().getY(), 0);
+
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToOrigin, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, horizontalRotationMatrix, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToImprintCenter, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, verticalRotationMatrix, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromImprintCenter, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromOrigin, 0, mBrushModelMatrix, 0);
 
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);

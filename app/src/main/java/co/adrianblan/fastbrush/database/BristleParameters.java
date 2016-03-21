@@ -5,11 +5,11 @@ package co.adrianblan.fastbrush.database;
  */
 public class BristleParameters {
 
-    // Angle of the bristle spread
-    private float spreadAngle;
-
     // The planar distance the bristle end is from the handle
     private float planarDistanceFromHandle;
+
+    // The length of the imprint on the plane
+    private float planarImprintLength;
 
     // Length of the control points of the bezier curves
     private float upperControlPointLength;
@@ -17,21 +17,29 @@ public class BristleParameters {
 
     public BristleParameters() {}
 
-    public BristleParameters(float planarDistanceFromHandle, float spreadAngle) {
-        set(planarDistanceFromHandle, spreadAngle);
+    public BristleParameters(float planarDistanceFromHandle, float planarImprintLength) {
+        set(planarDistanceFromHandle, planarImprintLength);
     }
 
-    public void set(float planarDistanceFromHandle, float spreadAngle) {
-        this.spreadAngle = spreadAngle;
+    public BristleParameters(BristleParameters b) {
+        set(b);
+    }
+
+    public void set(BristleParameters b) {
+        set(b.getPlanarDistanceFromHandle(), b.getPlanarImprintLength());
+    }
+
+    public void set(float planarDistanceFromHandle, float planarImprintLength) {
         this.planarDistanceFromHandle = planarDistanceFromHandle;
+        this.planarImprintLength = planarImprintLength;
     }
 
-    public float getSpreadAngle() {
-        return spreadAngle;
+    public float getPlanarImprintLength() {
+        return planarImprintLength;
     }
 
-    public void setSpreadAngle(float spreadAngle) {
-        this.spreadAngle = spreadAngle;
+    public void setPlanarImprintLength(float planarImprintLength) {
+        this.planarImprintLength = planarImprintLength;
     }
 
     public float getPlanarDistanceFromHandle() {
@@ -56,5 +64,10 @@ public class BristleParameters {
 
     public void setLowerControlPointLength(float lowerControlPointLength) {
         this.lowerControlPointLength = lowerControlPointLength;
+    }
+
+    @Override
+    public String toString(){
+        return "distance: " + planarDistanceFromHandle;
     }
 }

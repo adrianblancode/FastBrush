@@ -38,7 +38,7 @@ public class TouchDataManager {
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     public void addInterpolated(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.003f;
+        final float MIN_DISTANCE = 0.002f;
 
         addTouchStatistics(touchData);
 
@@ -68,7 +68,7 @@ public class TouchDataManager {
 
             if(distance < MIN_DISTANCE && !touchIsEnding) {
                 // Throttle values so that they do not increase too quickly
-                float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize());
+                float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize(), 0.01f);
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
 
                 TouchData td = new TouchData(touchData.getPosition(), touchData.getVelocity(), size, pressure);
@@ -103,7 +103,7 @@ public class TouchDataManager {
         float yv = parentTouchData.getVelocity().getY() + (touchData.getVelocity().getY() - parentTouchData.getVelocity().getY()) *
                 (interpolation + 1f) / ((float) maxInterpolations + 1f);
 
-        float size = Utils.getThrottledValue(prevSize, touchData.getSize());
+        float size = Utils.getThrottledValue(prevSize, touchData.getSize(), 0.01f);
         float pressure  = Utils.getThrottledValue(prevPressure, touchData.getPressure());
 
         TouchData interpolatedTouchData = new TouchData(x, y, xv, yv, size, pressure);
@@ -187,9 +187,10 @@ public class TouchDataManager {
     public void normalizeTouchSize(TouchData td) {
 
         float minTouchSizeAvgDistance = averageTouchSize - minTouchSize;
+        float normalizedTouchSizeMin = minTouchSize + minTouchSizeAvgDistance / 3f;
         float normalizedTouchSizeMax = Math.min(averageTouchSize + minTouchSizeAvgDistance * 2, maxTouchSize);
 
-        float normalizedSize = Utils.normalize(td.getSize(), minTouchSize,
+        float normalizedSize = Utils.normalize(td.getSize(), normalizedTouchSizeMin,
                 normalizedTouchSizeMax);
 
         td.setNormalizedSize(normalizedSize);

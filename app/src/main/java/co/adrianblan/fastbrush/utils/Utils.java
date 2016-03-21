@@ -80,10 +80,14 @@ public class Utils {
 
     /** Returns a throttled value that is a given percent from previousvalue towards targetValue */
     public static float getThrottledValue(float previousValue, float targetValue) {
-        final float VALUE_SCALE = 0.02f;
+        return getThrottledValue(previousValue, targetValue, 0.02f);
+    }
+
+    public static float getThrottledValue(float previousValue, float targetValue, float scale) {
+
         float difference = targetValue - previousValue;
 
-        return previousValue + difference * VALUE_SCALE;
+        return previousValue + difference * scale;
     }
 
     /**

@@ -1,13 +1,6 @@
 package co.adrianblan.fastbrush.database;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import co.adrianblan.fastbrush.globject.Bristle;
-import co.adrianblan.fastbrush.utils.Utils;
 
 /**
  * A database which details all parameters of the brush snapshots.
@@ -29,54 +22,55 @@ public class BrushSnapshotDatabase {
         hashMap.put(new BrushKey(0, 1), new BristleParameters(0, 0));
 
         // Neutral pressure 1
-        hashMap.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0));
+        hashMap.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f));
 
         // Neutral pressure 2
-        hashMap.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0));
+        hashMap.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f));
 
         // Neutral pressure 3
-        hashMap.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0));
+        hashMap.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f));
 
         // Neutral pressure 4
-        hashMap.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0));
+        hashMap.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f));
 
         // Neutral pressure 5
-        hashMap.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0));
+        hashMap.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f));
 
 
         // Front neutral
         hashMap.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0));
 
-        // Front pressure 1 (approximated)
-        hashMap.put(new BrushKey(45f, 0.70f), new BristleParameters(0.30f, 0));
+        // Front pressure 1
+        hashMap.put(new BrushKey(45f, 0.99f), new BristleParameters(0.03f, 0));
 
         // Front pressure 2
-        hashMap.put(new BrushKey(45f, 0.55f), new BristleParameters(0.60f, 0));
+        hashMap.put(new BrushKey(45f, 0.96f), new BristleParameters(0.012f, 0.01f));
 
         // Front pressure 3
-        hashMap.put(new BrushKey(45f, 0.34f), new BristleParameters(0.60f, 0));
+        hashMap.put(new BrushKey(45f, 0.94f), new BristleParameters(0.26f, 0.01f));
 
         // Front pressure 4
-        hashMap.put(new BrushKey(45f, 0.24f), new BristleParameters(0.66f, 0));
+        hashMap.put(new BrushKey(45f, 0.91f), new BristleParameters(0.38f, 0.01f));
 
+        // Front pressure 5
+        hashMap.put(new BrushKey(45f, 0.84f), new BristleParameters(0.52f, 0.01f));
 
+        /**
         // Back neutral
         hashMap.put(new BrushKey(-45f, 1f), new BristleParameters(0f, 0));
 
-        // Back pressure 1
-        hashMap.put(new BrushKey(-45f, 0.99f), new BristleParameters(0.03f, 0));
+        // Back pressure 1 (approximated)
+        hashMap.put(new BrushKey(-45f, 0.70f), new BristleParameters(0.30f, 0));
 
         // Back pressure 2
-        hashMap.put(new BrushKey(-45f, 0.96f), new BristleParameters(0.012f, 0));
+        hashMap.put(new BrushKey(-45f, 0.55f), new BristleParameters(0.60f, 0));
 
         // Back pressure 3
-        hashMap.put(new BrushKey(-45f, 0.94f), new BristleParameters(0.26f, 0));
+        hashMap.put(new BrushKey(-45f, 0.34f), new BristleParameters(0.60f, 0));
 
         // Back pressure 4
-        hashMap.put(new BrushKey(-45f, 0.91f), new BristleParameters(0.38f, 0));
-
-        // Back pressure 5
-        hashMap.put(new BrushKey(-45f, 0.84f), new BristleParameters(0.52f, 0));
+        hashMap.put(new BrushKey(-45f, 0.24f), new BristleParameters(0.66f, 0));
+         */
     }
 
     /**
@@ -109,17 +103,6 @@ public class BrushSnapshotDatabase {
                     getFurthestKey(keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
         }
 
-        Set<BrushKey> hashSet = new HashSet<>();
-        hashSet.add(keyHighHigh);
-        hashSet.add(keyHighLow);
-        hashSet.add(keyLowHigh);
-        hashSet.add(keyLowLow);
-
-        if(hashSet.size() < 4) {
-            System.err.println("Duplicate furthest keys");
-            return null;
-        }
-
         // Go through all the keys, get the keys nearest in two dimensions
         for(BrushKey tempKey : hashMap.keySet()) {
             keyHighHigh =
@@ -132,7 +115,8 @@ public class BrushSnapshotDatabase {
                     getNearestKey(targetKey, keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
         }
 
-        return interpolate(targetKey, keyHighHigh, keyHighLow, keyLowHigh, keyLowLow);
+        BristleParameters interpolatedBristleParameters =  interpolate(targetKey, keyHighHigh, keyHighLow, keyLowHigh, keyLowLow);
+        return interpolatedBristleParameters;
     }
 
     /** Expands the key to the farthest range possible according to the KeyDirections */
@@ -231,8 +215,10 @@ public class BrushSnapshotDatabase {
         BrushKey interpolatedKeyLowAngle = new BrushKey((keyLowHigh.getAngle() + keyLowLow.getAngle()) / 2f, targetKey.getHeight());
 
         float interpolatedAnglePercent = (targetKey.getAngle() -  (interpolatedKeyLowAngle.getAngle()))
-                / (interpolatedKeyHighAngle.getAngle() - interpolatedKeyLowAngle.getAngle());
-        BristleParameters finalInterpolatedValue = getInterpolatedValue(interpolatedValueLowAngle, interpolatedValueHighAngle, interpolatedAnglePercent);
+                / (interpolatedKeyLowAngle.getAngle() - interpolatedKeyHighAngle.getAngle());
+
+        BristleParameters finalInterpolatedValue
+                = getInterpolatedValue(interpolatedValueLowAngle, interpolatedValueHighAngle, interpolatedAnglePercent);
 
         return finalInterpolatedValue;
     }
@@ -243,10 +229,15 @@ public class BrushSnapshotDatabase {
     private BristleParameters getInterpolatedValue(BristleParameters first, BristleParameters second, float scale) {
         BristleParameters interpolatedValue = new BristleParameters();
 
-        interpolatedValue.setSpreadAngle(first.getSpreadAngle() + (second.getSpreadAngle() - first.getSpreadAngle()) * scale);
-        interpolatedValue.setPlanarDistanceFromHandle(first.getPlanarDistanceFromHandle() * scale + second.getPlanarDistanceFromHandle() * (1f - scale));
-        interpolatedValue.setUpperControlPointLength(first.getUpperControlPointLength() * scale + second.getUpperControlPointLength() * (1f - scale));
-        interpolatedValue.setLowerControlPointLength(first.getLowerControlPointLength() * scale + second.getLowerControlPointLength() * (1f - scale));
+        interpolatedValue.setPlanarDistanceFromHandle(first.getPlanarDistanceFromHandle()
+                + (second.getPlanarDistanceFromHandle() - first.getPlanarDistanceFromHandle()) * scale);
+        interpolatedValue.setPlanarImprintLength(first.getPlanarImprintLength()
+                + (second.getPlanarImprintLength() - first.getPlanarImprintLength()) * scale);
+
+        interpolatedValue.setUpperControlPointLength(first.getUpperControlPointLength()
+                + (second.getUpperControlPointLength() - first.getUpperControlPointLength()) * scale);
+        interpolatedValue.setLowerControlPointLength(first.getLowerControlPointLength()
+                + (second.getLowerControlPointLength() - first.getLowerControlPointLength()) * scale);
 
         return interpolatedValue;
     }
