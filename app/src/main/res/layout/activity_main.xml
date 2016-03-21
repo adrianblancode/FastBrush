@@ -1,67 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
-    <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/fab_menu"
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        fab:fab_addButtonColorNormal="@color/white"
-        fab:fab_addButtonPlusIconColor="@android:color/background_dark"
-        fab:fab_addButtonStrokeVisible="false"
-        fab:fab_expandDirection="up"
-        fab:fab_labelStyle="@style/menu_labels_style"
-        fab:fab_labelsPosition="left">
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:contentInsetLeft="0dp"
+        android:contentInsetStart="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetStart="0dp"
+        android:contentInsetRight="0dp"
+        android:contentInsetEnd="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetEnd="0dp"
+        android:padding="0dp"
+        android:layout_margin="0dp"
+        app:titleTextColor="@android:color/white"
+        android:background="?attr/colorPrimary">
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_brush"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_icon="@drawable/ic_brush_white_36dp"
-            fab:fab_title="Brush"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp">
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_ink"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_opacity_white_36dp"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_title="Ink"/>
+            <ImageButton
+                android:id="@+id/button_brush"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_horizontal"
+                android:background="@null"
+                android:src="@drawable/ic_brush_white_24dp"/>
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="-10dp"
-            android:padding="-10dp"
-            fab:fab_icon="@drawable/ic_save_white_36dp"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_title="Save"/>
+            <ImageButton
+                android:id="@+id/button_ink"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:src="@drawable/ic_opacity_white_24dp"/>
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_delete_white_36dp"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_title="Delete"/>
+            <ImageButton
+                android:id="@+id/button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:src="@drawable/ic_save_white_24dp"/>
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_undo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_icon="@drawable/ic_undo_white_36dp"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_title="Undo"/>
+            <ImageButton
+                android:id="@+id/button_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:src="@drawable/ic_delete_white_24dp"/>
 
-    </com.getbase.floatingactionbutton.FloatingActionsMenu>
-</FrameLayout>
+            <ImageButton
+                android:id="@+id/button_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:src="@drawable/ic_undo_white_24dp"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+</RelativeLayout>

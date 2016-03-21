@@ -22,7 +22,7 @@
         fab:fab_labelsPosition="left">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_brush"
+            android:id="@+id/button_brush"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@color/colorAccent"
@@ -30,7 +30,7 @@
             fab:fab_title="Brush"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_ink"
+            android:id="@+id/button_ink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_icon="@drawable/ic_opacity_white_36dp"
@@ -38,7 +38,7 @@
             fab:fab_title="Ink"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_save"
+            android:id="@+id/button_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="-10dp"
@@ -48,7 +48,7 @@
             fab:fab_title="Save"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_delete"
+            android:id="@+id/button_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_icon="@drawable/ic_delete_white_36dp"
@@ -56,7 +56,7 @@
             fab:fab_title="Delete"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_undo"
+            android:id="@+id/button_undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_icon="@drawable/ic_undo_white_36dp"
