@@ -187,7 +187,7 @@ public class TouchDataManager {
     public void normalizeTouchSize(TouchData td) {
 
         float minTouchSizeAvgDistance = averageTouchSize - minTouchSize;
-        float normalizedTouchSizeMin = minTouchSize + minTouchSizeAvgDistance / 3f;
+        float normalizedTouchSizeMin = minTouchSize + minTouchSizeAvgDistance / 2f;
         float normalizedTouchSizeMax = Math.min(averageTouchSize + minTouchSizeAvgDistance * 2, maxTouchSize);
 
         float normalizedSize = Utils.normalize(td.getSize(), normalizedTouchSizeMin,

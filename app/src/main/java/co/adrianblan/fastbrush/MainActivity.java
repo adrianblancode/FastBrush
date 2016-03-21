@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -18,8 +19,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import co.adrianblan.fastbrush.dialog.BrushDialogFragment;
 import co.adrianblan.fastbrush.dialog.InkDialogFragment;
+import co.adrianblan.fastbrush.utils.Utils;
 
 public class MainActivity extends AppCompatActivity {
+
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 
     private MyGLSurfaceView glSurfaceView;
     private RelativeLayout mainView;
@@ -33,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         glSurfaceView = new MyGLSurfaceView(this);
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT);
+        lp.setMarginEnd((int) Utils.convertDpToPixel(40));
+        glSurfaceView.setLayoutParams(lp);
+
         mainView.addView(glSurfaceView, 0);
 
         hideSystemUi();
