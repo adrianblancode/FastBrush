@@ -103,13 +103,13 @@ public class Brush {
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
         bristleParameters.set(brushSnapshotDatabase.getBristleParameter(brushKey));
 
-        updateBristles(bristleParameters);
+        updateBristles(horizontalAngle, bristleParameters);
     }
 
     /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
-    public void updateBristles(BristleParameters bristleParameters) {
+    public void updateBristles(float horizontalAngle, BristleParameters bristleParameters) {
         updateJitter();
-        position.addFast(jitter);
+        //position.addFast(jitter);
 
         vertexBuffer.position(0);
 
@@ -134,11 +134,13 @@ public class Brush {
 
                 interpolatedX = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[0]
                         + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[0]
-                        + scale * scale * (bristle.absoluteBottom.vector[0] - bristleParameters.getPlanarDistanceFromHandle());
+                        + scale * scale * (bristle.absoluteBottom.vector[0]
+                        - (float) Math.cos(Math.toRadians(horizontalAngle)) * bristleParameters.getPlanarDistanceFromHandle());
 
                 interpolatedY = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[1]
                         + 2 * (1f - scale) * scale * bristle.absoluteExtendedBottom.vector[1]
-                        + scale * scale * bristle.absoluteBottom.vector[1];
+                        + scale * scale * (bristle.absoluteBottom.vector[1]
+                        - (float) Math.sin(Math.toRadians(horizontalAngle)) * bristleParameters.getPlanarDistanceFromHandle());
 
                 interpolatedZ = (1f - scale) * (1f - scale) * bristle.absoluteTop.vector[2]
                         + 2 * (1f - scale) * scale * 0
@@ -205,6 +207,9 @@ public class Brush {
     public void resetPosition() {
         position.set(0, 0, Bristle.BASE_LENGTH);
         verticalAngle = 0;
+        horizontalAngle = 0;
+        xTilt = 0;
+        yTilt = 0;
     }
 
     public float getVerticalAngle() {
