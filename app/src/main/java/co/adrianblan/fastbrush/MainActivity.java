@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT);
-        lp.setMarginEnd((int) Utils.convertDpToPixel(40));
+        //lp.setMarginEnd((int) Utils.convertDpToPixel(40));
+        lp.addRule(RelativeLayout.LEFT_OF, toolbar.getId());
         glSurfaceView.setLayoutParams(lp);
 
         mainView.addView(glSurfaceView, 0);

@@ -84,8 +84,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private final float[] translateToOrigin = new float[16];
     private final float[] translateFromOrigin = new float[16];
+    private final float[] translateToBrushTip = new float[16];
     private final float[] translateToImprintCenter = new float[16];
-    private final float[] translateFromImprintCenter = new float[16];
     private final float[] verticalRotationMatrix = new float[16];
 
 
@@ -218,8 +218,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
             Matrix.setIdentityM(translateFromOrigin, 0);
+            Matrix.setIdentityM(translateToBrushTip, 0);
             Matrix.setIdentityM(translateToImprintCenter, 0);
-            Matrix.setIdentityM(translateFromImprintCenter, 0);
             Matrix.setIdentityM(verticalRotationMatrix, 0);
 
             Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(),
@@ -227,26 +227,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             float angle = brush.getHorizontalAngle();
 
-            Matrix.translateM(translateToImprintCenter, 0,
-                    (float) Math.cos(Math.toRadians(angle)) * (brush.getBristleParameters().getPlanarDistanceFromHandle()),
-                    (float) Math.sin(Math.toRadians(angle)) * (brush.getBristleParameters().getPlanarDistanceFromHandle()), 0);
+            Matrix.translateM(translateToBrushTip, 0,
+                    (float) Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
+                    (float) Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
 
             Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle(),
                     (float) Math.cos(Math.toRadians(brush.getHorizontalAngle() + 90)),
                     (float) Math.sin(Math.toRadians(brush.getHorizontalAngle() + 90)), 0);
 
-            Matrix.translateM(translateFromImprintCenter, 0,
-                    (float) -Math.cos(Math.toRadians(angle)) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
-                            - brush.getBristleParameters().getPlanarImprintLength() / 2f),
-                    (float) -Math.sin(Math.toRadians(angle)) * (brush.getBristleParameters().getPlanarDistanceFromHandle()
-                            - brush.getBristleParameters().getPlanarImprintLength() / 2f), 0);
+            Matrix.translateM(translateToImprintCenter, 0,
+                    (float) -Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f,
+                    (float) -Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f, 0f);
 
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
+            // Translate the brush to origin, then imprint center so we can rotate around it
+            // Lastly translate back to origin with imprint center still as center
             Matrix.multiplyMM(mBrushModelMatrix, 0, translateToOrigin, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToImprintCenter, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToBrushTip, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushModelMatrix, 0, verticalRotationMatrix, 0, mBrushModelMatrix, 0);
-            //Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromImprintCenter, 0, mBrushModelMatrix, 0);
+            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToImprintCenter, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromOrigin, 0, mBrushModelMatrix, 0);
 
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
@@ -280,8 +280,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             // Draw brush view line
             Matrix.setLookAtM(mBrushViewMatrix, 0,
-                    0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
-                    0 + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
+                    0 - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
+                    0 - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
             Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelOffsetMatrix, 0);
@@ -292,8 +292,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             // Draw brush view brush
             Matrix.setLookAtM(mBrushViewMatrix, 0,
-                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, -CAMERA_DISTANCE - 1.0f, 0f,
-                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) + mRatio - BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
             Matrix.multiplyMM(mBrushModelMatrix, 0, mBrushModelOffsetMatrix, 0, mBrushModelMatrix, 0);
