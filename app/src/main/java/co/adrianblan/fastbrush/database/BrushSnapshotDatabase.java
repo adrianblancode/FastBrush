@@ -19,41 +19,42 @@ public class BrushSnapshotDatabase {
     private void init() {
 
         // Neutral
-        hashMap.put(new BrushKey(0, 1), new BristleParameters(0, 0));
+        hashMap.put(new BrushKey(0, 1), new BristleParameters(0f, 0f, 1f, 0f));
 
         // Neutral pressure 1
-        hashMap.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f));
+        hashMap.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f, 0.98f, 0.1f));
 
         // Neutral pressure 2
-        hashMap.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f));
+        hashMap.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f, 0.60f, 0.42f));
 
         // Neutral pressure 3
-        hashMap.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f));
+        hashMap.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f, 0.41f, 0.71f));
 
         // Neutral pressure 4
-        hashMap.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f));
+        hashMap.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f));
 
         // Neutral pressure 5
-        hashMap.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f));
+        hashMap.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f));
 
 
         // Front neutral
-        hashMap.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0));
+        hashMap.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0f, 1f, 0f));
 
         // Front pressure 1
-        hashMap.put(new BrushKey(45f, 0.99f), new BristleParameters(0.03f, 0));
+        hashMap.put(new BrushKey(45f, 0.99f), new BristleParameters(0.03f, 0f, 1f, 0f));
 
         // Front pressure 2
-        hashMap.put(new BrushKey(45f, 0.96f), new BristleParameters(0.012f, 0.01f));
+        hashMap.put(new BrushKey(45f, 0.96f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f));
 
         // Front pressure 3
-        hashMap.put(new BrushKey(45f, 0.94f), new BristleParameters(0.26f, 0.01f));
+        hashMap.put(new BrushKey(45f, 0.94f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f));
 
         // Front pressure 4
-        hashMap.put(new BrushKey(45f, 0.91f), new BristleParameters(0.38f, 0.01f));
+        hashMap.put(new BrushKey(45f, 0.91f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f));
 
         // Front pressure 5
-        hashMap.put(new BrushKey(45f, 0.84f), new BristleParameters(0.52f, 0.01f));
+        hashMap.put(new BrushKey(45f, 0.84f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f));
+
 
         /**
         // Back neutral

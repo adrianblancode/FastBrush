@@ -17,8 +17,10 @@ public class BristleParameters {
 
     public BristleParameters() {}
 
-    public BristleParameters(float planarDistanceFromHandle, float planarImprintLength) {
-        set(planarDistanceFromHandle, planarImprintLength);
+    public BristleParameters(float planarDistanceFromHandle, float planarImprintLength,
+                             float upperControlPointLength, float lowerControlPointLength) {
+        set(planarDistanceFromHandle, planarImprintLength,
+                upperControlPointLength, lowerControlPointLength);
     }
 
     public BristleParameters(BristleParameters b) {
@@ -26,12 +28,16 @@ public class BristleParameters {
     }
 
     public void set(BristleParameters b) {
-        set(b.getPlanarDistanceFromHandle(), b.getPlanarImprintLength());
+        set(b.getPlanarDistanceFromHandle(), b.getPlanarImprintLength(),
+                b.getUpperControlPointLength(), b.getLowerControlPointLength());
     }
 
-    public void set(float planarDistanceFromHandle, float planarImprintLength) {
+    public void set(float planarDistanceFromHandle, float planarImprintLength,
+                    float upperControlPointLength, float lowerControlPointLength) {
         this.planarDistanceFromHandle = planarDistanceFromHandle;
         this.planarImprintLength = planarImprintLength;
+        this.upperControlPointLength = upperControlPointLength;
+        this.lowerControlPointLength = lowerControlPointLength;
     }
 
     public float getPlanarImprintLength() {

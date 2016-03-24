@@ -207,6 +207,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glDepthMask(true);
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glClearDepthf(IMPRINT_DEPTH);
+        GLES30.glDepthFunc(GLES30.GL_LEQUAL);
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
@@ -228,16 +229,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float angle = brush.getHorizontalAngle();
 
             Matrix.translateM(translateToBrushTip, 0,
-                    (float) Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
-                    (float) Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
+                    (float) -Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
+                    (float) -Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
 
             Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle(),
-                    (float) Math.cos(Math.toRadians(brush.getHorizontalAngle() + 90)),
-                    (float) Math.sin(Math.toRadians(brush.getHorizontalAngle() + 90)), 0);
+                    (float) Math.cos(Math.toRadians(brush.getHorizontalAngle() - 90)),
+                    (float) Math.sin(Math.toRadians(brush.getHorizontalAngle() - 90)), 0);
 
             Matrix.translateM(translateToImprintCenter, 0,
-                    (float) -Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f,
-                    (float) -Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f, 0f);
+                    (float) Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f,
+                    (float) Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f, 0f);
 
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
