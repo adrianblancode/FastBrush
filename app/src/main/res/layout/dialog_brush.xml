@@ -148,7 +148,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="16dp"
             android:gravity="center"
-            android:text="Show brush side view"
+            android:text="Show brush"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
             tools:targetApi="lollipop"
             android:checkMark="?android:attr/listChoiceIndicatorMultiple"

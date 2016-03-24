@@ -207,7 +207,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glDepthMask(true);
         GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glClearDepthf(IMPRINT_DEPTH);
-        GLES30.glDepthFunc(GLES30.GL_LEQUAL);
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
@@ -271,7 +270,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
 
         /** Draw Brush Head **/
-        if(touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
+        if(settingsData.isShowBrushView()
+                && touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
             GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
             brush.draw(mBrushMVPMatrix, Utils.brownColor);
         }
