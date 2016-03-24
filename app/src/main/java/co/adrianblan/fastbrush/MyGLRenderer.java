@@ -62,7 +62,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final float CAMERA_DISTANCE = 50;
     private static final float CAMERA_DISTANCE_FAR_SCALE = 5f;
 
-    private static final float IMPRINT_DEPTH = 0.0001f;
+    private static final float IMPRINT_DEPTH = 0.0002f;
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;

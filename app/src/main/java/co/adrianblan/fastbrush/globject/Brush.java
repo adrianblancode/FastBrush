@@ -21,8 +21,8 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.2f);
-    private static final int SEGMENTS_PER_BRISTLE = 8;
-    private static final float MAX_TILT_VERTICAL = 20f;
+    private static final int SEGMENTS_PER_BRISTLE = 5;
+    private static final float MAX_TILT_VERTICAL = 22f;
 
     private int numBristles;
     private float sizePressureFactor;
@@ -47,6 +47,7 @@ public class Brush {
     private float horizontalAngle;
     private float xTilt;
     private float yTilt;
+    private float dip;
 
     public Brush(SettingsData settingsData) {
 
@@ -77,7 +78,8 @@ public class Brush {
 
     public void updateBrush(TouchData touchData) {
 
-        float dip = Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * sizePressureFactor + 0.001f;
+        dip = Utils.getThrottledValue(dip,
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 
@@ -165,10 +167,12 @@ public class Brush {
                         (1f - scale) * (1f - scale) * (1f - scale)
                             * bristle.absoluteTop.vector[2]
                         + 3 * (1f - scale) * (1f - scale) * scale
-                            * (bristle.absoluteTop.vector[2] - (bristle.absoluteTop.vector[2] - bristle.absoluteExtendedBottom.vector[2])
+                            * (bristle.absoluteTop.vector[2] - (bristle.absoluteTop.vector[2] - bristle.absoluteBottom.vector[2])
                             * bristleParameters.getUpperControlPointLength())
-                        + 0f
-                        + 0f;
+                        + 3 * (1f - scale) * scale * scale
+                            * Math.max(bristle.absoluteBottom.vector[2], 0)
+                        + scale * scale * scale
+                            * Math.max(bristle.absoluteBottom.vector[2], 0);
 
                 vertexData[index] = interpolatedX;
                 vertexData[index + 1] = interpolatedY;
@@ -233,6 +237,7 @@ public class Brush {
         horizontalAngle = 0;
         xTilt = 0;
         yTilt = 0;
+        dip = 0;
     }
 
     public float getVerticalAngle() {
