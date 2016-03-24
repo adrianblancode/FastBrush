@@ -6,14 +6,14 @@ package co.adrianblan.fastbrush.database;
 public class BristleParameters {
 
     // The planar distance the bristle end is from the handle
-    private float planarDistanceFromHandle;
+    public float planarDistanceFromHandle;
 
     // The length of the imprint on the plane
-    private float planarImprintLength;
+    public float planarImprintLength;
 
     // Length of the control points of the bezier curves
-    private float upperControlPointLength;
-    private float lowerControlPointLength;
+    public float upperControlPointLength;
+    public float lowerControlPointLength;
 
     public BristleParameters() {}
 

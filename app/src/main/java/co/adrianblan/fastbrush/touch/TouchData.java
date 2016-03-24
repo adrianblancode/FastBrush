@@ -11,8 +11,8 @@ public class TouchData {
     private static final float MAX_TILT = 0.5f;
     private static final float TILT_SCALE = 0.3f;
 
-    private Vector2 position;
-    private Vector2 velocity;
+    public Vector2 position;
+    public Vector2 velocity;
     private float size;
     private float pressure;
 

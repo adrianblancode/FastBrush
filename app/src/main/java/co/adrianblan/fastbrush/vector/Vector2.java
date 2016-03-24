@@ -3,8 +3,8 @@ package co.adrianblan.fastbrush.vector;
 /** Defines a vector in 2D space */
 public class Vector2 {
 
-    private float x;
-    private float y;
+    public float x;
+    public float y;
 
     public Vector2(){}
 

@@ -93,15 +93,18 @@ public class TouchDataManager {
                                           float prevSize, float prevPressure,
                                           int interpolation, int maxInterpolations) {
 
-        float x = parentTouchData.getX() + (touchData.getX() - parentTouchData.getX()) *
-                (interpolation + 1f) / ((float) maxInterpolations + 1f);
-        float y = parentTouchData.getY() + (touchData.getY() - parentTouchData.getY()) *
-                (interpolation + 1f) / ((float) maxInterpolations + 1f);
+        float interpolationScale = (interpolation + 1f) / ((float) maxInterpolations + 1f);
 
-        float xv = parentTouchData.getVelocity().getX() + (touchData.getVelocity().getX() - parentTouchData.getVelocity().getX()) *
-                (interpolation + 1f) / ((float) maxInterpolations + 1f);
-        float yv = parentTouchData.getVelocity().getY() + (touchData.getVelocity().getY() - parentTouchData.getVelocity().getY()) *
-                (interpolation + 1f) / ((float) maxInterpolations + 1f);
+        float x = parentTouchData.position.x + (touchData.position.x - parentTouchData.position.x)
+                * interpolationScale;
+
+        float y = parentTouchData.position.y + (touchData.position.y - parentTouchData.position.y)
+                * interpolationScale;
+
+        float xv = parentTouchData.velocity.x + (touchData.velocity.x - parentTouchData.velocity.x)
+                * interpolationScale;
+        float yv = parentTouchData.velocity.y + (touchData.velocity.y - parentTouchData.velocity.y) *
+                interpolationScale;
 
         float size = Utils.getThrottledValue(prevSize, touchData.getSize(), 0.01f);
         float pressure  = Utils.getThrottledValue(prevPressure, touchData.getPressure());

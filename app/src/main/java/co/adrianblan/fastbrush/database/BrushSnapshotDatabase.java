@@ -41,20 +41,26 @@ public class BrushSnapshotDatabase {
         hashMap.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0f, 1f, 0f));
 
         // Front pressure 1
-        hashMap.put(new BrushKey(45f, 0.99f), new BristleParameters(0.03f, 0f, 1f, 0f));
+        hashMap.put(new BrushKey(45f, 0.97f), new BristleParameters(0.03f, 0f, 1f, 0f));
 
         // Front pressure 2
-        hashMap.put(new BrushKey(45f, 0.96f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f));
+        hashMap.put(new BrushKey(45f, 0.85f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f));
 
         // Front pressure 3
-        hashMap.put(new BrushKey(45f, 0.94f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f));
+        hashMap.put(new BrushKey(45f, 0.68f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f));
 
         // Front pressure 4
-        hashMap.put(new BrushKey(45f, 0.91f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f));
+        hashMap.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f));
 
         // Front pressure 5
-        hashMap.put(new BrushKey(45f, 0.84f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f));
+        hashMap.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f));
 
+
+        // Front pressure extreme 1
+        hashMap.put(new BrushKey(90f, 1f), new BristleParameters(0f, 0f, 1f, 0f));
+
+        // Front pressure extreme 2
+        hashMap.put(new BrushKey(90f, 0f), new BristleParameters(0f, 0f, 1f, 0f));
 
         /**
         // Back neutral
@@ -95,25 +101,25 @@ public class BrushSnapshotDatabase {
         // This is to establish a large cover, in case our targetKey is outside valid range
         for(BrushKey tempKey : hashMap.keySet()) {
             keyHighHigh =
-                    getFurthestKey(keyHighHigh, tempKey, KeyDirection.HIGH, KeyDirection.HIGH);
+                    getFurthestKey(keyHighHigh, tempKey, true, true);
             keyHighLow =
-                    getFurthestKey(keyHighLow, tempKey, KeyDirection.HIGH, KeyDirection.LOW);
+                    getFurthestKey(keyHighLow, tempKey, true, false);
             keyLowHigh =
-                    getFurthestKey(keyLowHigh, tempKey, KeyDirection.LOW, KeyDirection.HIGH);
+                    getFurthestKey(keyLowHigh, tempKey, false, true);
             keyLowLow =
-                    getFurthestKey(keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
+                    getFurthestKey(keyLowLow, tempKey, false, false);
         }
 
         // Go through all the keys, get the keys nearest in two dimensions
         for(BrushKey tempKey : hashMap.keySet()) {
             keyHighHigh =
-                    getNearestKey(targetKey, keyHighHigh, tempKey, KeyDirection.HIGH, KeyDirection.HIGH);
+                    getNearestKey(targetKey, keyHighHigh, tempKey, true, true);
             keyHighLow =
-                    getNearestKey(targetKey, keyHighLow, tempKey, KeyDirection.HIGH, KeyDirection.LOW);
+                    getNearestKey(targetKey, keyHighLow, tempKey, true, false);
             keyLowHigh =
-                    getNearestKey(targetKey, keyLowHigh, tempKey, KeyDirection.LOW, KeyDirection.HIGH);
+                    getNearestKey(targetKey, keyLowHigh, tempKey, false, true);
             keyLowLow =
-                    getNearestKey(targetKey, keyLowLow, tempKey, KeyDirection.LOW, KeyDirection.LOW);
+                    getNearestKey(targetKey, keyLowLow, tempKey, false, false);
         }
 
         BristleParameters interpolatedBristleParameters =  interpolate(targetKey, keyHighHigh, keyHighLow, keyLowHigh, keyLowLow);
@@ -122,11 +128,9 @@ public class BrushSnapshotDatabase {
 
     /** Expands the key to the farthest range possible according to the KeyDirections */
     public BrushKey getFurthestKey(BrushKey currentKey, BrushKey newKey,
-                                   KeyDirection angleDirection, KeyDirection heightDirection) {
+                                   boolean isHighAngle, boolean isHighHeight) {
 
         float epsilon = 0.0001f;
-        boolean isHighAngle = angleDirection.equals(KeyDirection.HIGH);
-        boolean isHighHeight = heightDirection.equals(KeyDirection.HIGH);
 
         if(currentKey == null) {
             return newKey;
@@ -134,13 +138,13 @@ public class BrushSnapshotDatabase {
 
         if(
                 (
-                        isHighAngle && (currentKey.getAngle() < newKey.getAngle() + epsilon)
+                        isHighAngle && (currentKey.angle < newKey.angle + epsilon)
                         ||
-                        (!isHighAngle && (newKey.getAngle() < currentKey.getAngle() + epsilon))
+                        (!isHighAngle && (newKey.angle < currentKey.angle + epsilon))
                 ) && (
-                        isHighHeight && (currentKey.getHeight() < newKey.getHeight() + epsilon)
+                        isHighHeight && (currentKey.height < newKey.height + epsilon)
                         ||
-                        (!isHighHeight && (newKey.getHeight() < currentKey.getHeight() + epsilon))
+                        (!isHighHeight && (newKey.height < currentKey.height + epsilon))
 
                 )
                 ){
@@ -177,17 +181,14 @@ public class BrushSnapshotDatabase {
     }
 
     public BrushKey getNearestKey(BrushKey targetKey, BrushKey currentKey, BrushKey newKey,
-                                  KeyDirection angleDirection, KeyDirection heightDirection) {
-
-        boolean isHighAngle = angleDirection.equals(KeyDirection.HIGH);
-        boolean isHighHeight = heightDirection.equals(KeyDirection.HIGH);
+                                  boolean isHighAngle, boolean isHighHeight) {
 
         assert currentKey != null;
 
-        if((isHighAngle == targetKey.getAngle() < newKey.getAngle())
-                && (isHighAngle == newKey.getAngle() < currentKey.getAngle())
-                && (isHighHeight == targetKey.getHeight() < newKey.getHeight())
-                && (isHighHeight == newKey.getHeight() < currentKey.getHeight())
+        if((isHighAngle == targetKey.angle < newKey.angle)
+                && (isHighAngle == newKey.angle < currentKey.angle)
+                && (isHighHeight == targetKey.height < newKey.height)
+                && (isHighHeight == newKey.height < currentKey.height)
                 ) {
             return newKey;
         }
@@ -207,16 +208,16 @@ public class BrushSnapshotDatabase {
         BristleParameters valueLowHigh = hashMap.get(keyLowHigh);
         BristleParameters valueLowLow = hashMap.get(keyLowLow);
 
-        float highAngleHeightPercent = (targetKey.getHeight() - keyHighLow.getHeight()) / (keyHighHigh.getHeight() - keyHighLow.getHeight());
+        float highAngleHeightPercent = (targetKey.height - keyHighLow.height) / (keyHighHigh.height - keyHighLow.height);
         BristleParameters interpolatedValueHighAngle = getInterpolatedValue(valueHighLow, valueHighHigh, highAngleHeightPercent);
-        BrushKey interpolatedKeyHighAngle = new BrushKey((keyHighHigh.getAngle() + keyHighLow.getAngle()) / 2f, targetKey.getHeight());
+        BrushKey interpolatedKeyHighAngle = new BrushKey((keyHighHigh.angle + keyHighLow.angle) / 2f, targetKey.height);
 
-        float lowAngleHeightPercent = (targetKey.getHeight() - keyLowLow.getHeight()) / (keyLowHigh.getHeight() - keyLowLow.getHeight());
+        float lowAngleHeightPercent = (targetKey.height - keyLowLow.height) / (keyLowHigh.height - keyLowLow.height);
         BristleParameters interpolatedValueLowAngle = getInterpolatedValue(valueLowLow, valueLowHigh, lowAngleHeightPercent);
-        BrushKey interpolatedKeyLowAngle = new BrushKey((keyLowHigh.getAngle() + keyLowLow.getAngle()) / 2f, targetKey.getHeight());
+        BrushKey interpolatedKeyLowAngle = new BrushKey((keyLowHigh.angle + keyLowLow.angle) / 2f, targetKey.height);
 
-        float interpolatedAnglePercent = (targetKey.getAngle() -  (interpolatedKeyLowAngle.getAngle()))
-                / (interpolatedKeyLowAngle.getAngle() - interpolatedKeyHighAngle.getAngle());
+        float interpolatedAnglePercent = (targetKey.angle -  (interpolatedKeyLowAngle.angle))
+                / (interpolatedKeyLowAngle.angle - interpolatedKeyHighAngle.angle);
 
         BristleParameters finalInterpolatedValue
                 = getInterpolatedValue(interpolatedValueLowAngle, interpolatedValueHighAngle, interpolatedAnglePercent);
@@ -230,15 +231,15 @@ public class BrushSnapshotDatabase {
     private BristleParameters getInterpolatedValue(BristleParameters first, BristleParameters second, float scale) {
         BristleParameters interpolatedValue = new BristleParameters();
 
-        interpolatedValue.setPlanarDistanceFromHandle(first.getPlanarDistanceFromHandle()
-                + (second.getPlanarDistanceFromHandle() - first.getPlanarDistanceFromHandle()) * scale);
-        interpolatedValue.setPlanarImprintLength(first.getPlanarImprintLength()
-                + (second.getPlanarImprintLength() - first.getPlanarImprintLength()) * scale);
+        interpolatedValue.setPlanarDistanceFromHandle(first.planarDistanceFromHandle
+                + (second.planarDistanceFromHandle - first.planarDistanceFromHandle) * scale);
+        interpolatedValue.setPlanarImprintLength(first.planarImprintLength
+                + (second.planarImprintLength - first.planarImprintLength) * scale);
 
-        interpolatedValue.setUpperControlPointLength(first.getUpperControlPointLength()
-                + (second.getUpperControlPointLength() - first.getUpperControlPointLength()) * scale);
-        interpolatedValue.setLowerControlPointLength(first.getLowerControlPointLength()
-                + (second.getLowerControlPointLength() - first.getLowerControlPointLength()) * scale);
+        interpolatedValue.setUpperControlPointLength(first.upperControlPointLength
+                + (second.upperControlPointLength - first.upperControlPointLength) * scale);
+        interpolatedValue.setLowerControlPointLength(first.lowerControlPointLength
+                + (second.lowerControlPointLength - first.lowerControlPointLength) * scale);
 
         return interpolatedValue;
     }

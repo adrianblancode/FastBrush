@@ -14,9 +14,9 @@ public class Bristle {
     private static final float BRUSH_RADIUS_LOWER = 0.25f;
     private static final float MIN_SIZE_SCALE = 0.2f;
 
-    private float length;
-    private Vector3 top;
-    private Vector3 bottom;
+    public float length;
+    public Vector3 top;
+    public Vector3 bottom;
     public Vector3 extendedBottom;
 
     public Vector3 absoluteTop;

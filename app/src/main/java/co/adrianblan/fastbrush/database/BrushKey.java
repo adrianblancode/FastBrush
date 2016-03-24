@@ -8,10 +8,10 @@ package co.adrianblan.fastbrush.database;
 public class BrushKey {
 
     // Angle of the brush in degrees
-    private float angle;
+    public float angle;
 
     // Height of the brush handle, normalized to [0, 1]
-    private float height;
+    public float height;
 
     public BrushKey() {}
 
