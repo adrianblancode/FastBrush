@@ -203,10 +203,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Enable depth testing to slightly above paper
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glClearDepthf(IMPRINT_DEPTH);
+        GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glDepthFunc(GLES30.GL_LEQUAL);
         GLES30.glDepthMask(true);
-        GLES30.glClear(GLES30.GL_DEPTH_BUFFER_BIT);
-        GLES30.glClearDepthf(IMPRINT_DEPTH);
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
