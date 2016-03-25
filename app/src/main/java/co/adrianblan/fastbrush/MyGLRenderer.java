@@ -197,9 +197,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glDepthFunc(GLES30.GL_LEQUAL);
         GLES30.glDepthMask(true);
 
-        GLES30.glEnable(GLES30.GL_BLEND);
-        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-
+        GLES30.glDisable(GLES30.GL_BLEND);
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
         /** Imprint brush on paper **/

@@ -13,7 +13,7 @@ public class GLColorObject {
             "void main() {" +
             "  vec2 texPosition = (gl_FragCoord.xy / resolution.xy);" +
             "  vec4 texColor = texture2D(u_Texture, texPosition);" +
-            "  gl_FragColor = texColor + vColor;" +
-            "  gl_FragColor.r = texColor.g;" +
+            "  gl_FragColor = texColor + (vColor - texColor) * vColor.w;" +
+            "  gl_FragColor.w = texColor.w + (1.0 - texColor.w) * vColor.w;" +
             "}";
 }
