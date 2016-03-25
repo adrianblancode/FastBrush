@@ -5,6 +5,8 @@ import android.opengl.GLES30;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+import co.adrianblan.fastbrush.MyGLRenderer;
+import co.adrianblan.fastbrush.MyGLSurfaceView;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
@@ -54,7 +56,7 @@ public class Brush {
         vertexBuffer = GLhelper.initFloatBuffer(6 * numBristles);
 
         mProgram = GLES30.glCreateProgram();
-        GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
+        GLhelper.loadShaders(mProgram, TexturedSquare.DEFAULT_VERTEX_SHADER_CODE,
                 GLColorObject.COLOR_FRAGMENT_SHADER_CODE);
     }
 
@@ -141,6 +143,14 @@ public class Brush {
 
         /*  Textures */
         mTextureUniformHandle = GLES30.glGetUniformLocation(mProgram, "u_Texture");
+        GLhelper.checkGlError("glGetUniformLocation");
+
+        int resolutionHandle = GLES30.glGetUniformLocation(mProgram, "resolution");
+        GLhelper.checkGlError("glGetUniformLocation");
+
+        // TODO proper
+        GLES30.glUniform2f(resolutionHandle, 1920, 1080);
+
 
         // Set the active texture unit to texture unit 0.
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);

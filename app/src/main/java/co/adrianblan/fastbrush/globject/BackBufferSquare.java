@@ -83,7 +83,10 @@ public class BackBufferSquare {
 
         /*  Textures */
         mTextureUniformHandle = GLES30.glGetUniformLocation(mProgram, "u_Texture");
+        GLhelper.checkGlError("glGetUniformLocation");
+
         mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgram, "a_TexCoordinate");
+        GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the triangle vertices
         GLES30.glEnableVertexAttribArray(mTextureCoordinateHandle);
