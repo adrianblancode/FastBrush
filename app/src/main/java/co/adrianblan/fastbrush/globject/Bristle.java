@@ -9,9 +9,9 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Bristle {
 
     public static final float BASE_LENGTH = 1.0f;
-    public static final float BASE_TIP_LENGTH = 0.25f;
-    private static final float BRUSH_RADIUS_UPPER = 0.35f;
-    private static final float BRUSH_RADIUS_LOWER = 0.25f;
+    public static final float BASE_TIP_LENGTH = 0.40f;
+    private static final float BRUSH_RADIUS_UPPER = 0.25f;
+    private static final float BRUSH_RADIUS_LOWER = 0.27f;
     private static final float MIN_SIZE_SCALE = 0.2f;
 
     public float length;
