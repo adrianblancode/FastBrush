@@ -35,8 +35,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
                 android:layout_gravity="center_horizontal"
                 android:background="@null"
                 android:src="@drawable/ic_brush_white_24dp"/>
@@ -46,8 +46,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
                 android:background="@null"
                 android:src="@drawable/ic_opacity_white_24dp"/>
 
@@ -56,8 +56,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
                 android:background="@null"
                 android:src="@drawable/ic_save_white_24dp"/>
 
@@ -66,8 +66,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
                 android:background="@null"
                 android:src="@drawable/ic_delete_white_24dp"/>
 
@@ -76,8 +76,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
                 android:background="@null"
                 android:src="@drawable/ic_undo_white_24dp"/>
 

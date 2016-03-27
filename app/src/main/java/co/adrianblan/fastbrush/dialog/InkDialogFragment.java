@@ -41,15 +41,6 @@ public class InkDialogFragment extends DialogFragment {
     @Bind(R.id.inkBarOpacitySubtitle)
     TextView inkOpacitySubtitle;
 
-    @Bind(R.id.inkFluidity)
-    RadioGroup inkFluidity;
-
-    @Bind(R.id.radioButtonDry)
-    RadioButton radioButtonDry;
-
-    @Bind(R.id.radioButtonWet)
-    RadioButton radioButtonWet;
-
     @Bind(R.id.buttonSelectColor)
     AppCompatButton buttonSelectColor;
 
@@ -98,8 +89,6 @@ public class InkDialogFragment extends DialogFragment {
 
                 // Set default values, has no effect until dialog is shown
                 seekBarInkOpacity.setProgress(settingsData.getColorWrapper().getAlpha());
-                radioButtonDry.setChecked(settingsData.isDry());
-                radioButtonWet.setChecked(!settingsData.isDry());
                 colorCircle.setColorFilter(settingsData.getColorWrapper().getColor());
             }
         });
@@ -123,17 +112,6 @@ public class InkDialogFragment extends DialogFragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        inkFluidity.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.radioButtonDry) {
-                    settingsData.setIsDry(true);
-                } else if (checkedId == R.id.radioButtonWet) {
-                    settingsData.setIsDry(false);
-                }
             }
         });
 

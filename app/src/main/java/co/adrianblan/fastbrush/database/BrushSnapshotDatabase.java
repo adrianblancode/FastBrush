@@ -210,11 +210,11 @@ public class BrushSnapshotDatabase {
 
         float highAngleHeightPercent = (targetKey.height - keyHighLow.height) / (keyHighHigh.height - keyHighLow.height);
         BristleParameters interpolatedValueHighAngle = getInterpolatedValue(valueHighLow, valueHighHigh, highAngleHeightPercent);
-        BrushKey interpolatedKeyHighAngle = new BrushKey((keyHighHigh.angle + keyHighLow.angle) / 2f, targetKey.height);
+        BrushKey interpolatedKeyHighAngle = new BrushKey(keyHighHigh.angle, targetKey.height);
 
         float lowAngleHeightPercent = (targetKey.height - keyLowLow.height) / (keyLowHigh.height - keyLowLow.height);
         BristleParameters interpolatedValueLowAngle = getInterpolatedValue(valueLowLow, valueLowHigh, lowAngleHeightPercent);
-        BrushKey interpolatedKeyLowAngle = new BrushKey((keyLowHigh.angle + keyLowLow.angle) / 2f, targetKey.height);
+        BrushKey interpolatedKeyLowAngle = new BrushKey(keyLowHigh.angle, targetKey.height);
 
         float interpolatedAnglePercent = (targetKey.angle -  (interpolatedKeyLowAngle.angle))
                 / (interpolatedKeyLowAngle.angle - interpolatedKeyHighAngle.angle);

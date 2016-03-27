@@ -8,37 +8,6 @@
     android:paddingRight="@dimen/dialog_margin"
     android:paddingTop="8dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Fluidity"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        tools:targetApi="lollipop"/>
-
-    <RadioGroup
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/inkFluidity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginBottom="8dp">
-
-        <RadioButton
-            android:id="@+id/radioButtonDry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dry"
-            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-            tools:targetApi="lollipop" />
-        <RadioButton
-            android:id="@+id/radioButtonWet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-            android:text="Wet"
-            tools:targetApi="lollipop" />
-    </RadioGroup>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -88,6 +57,7 @@
             android:id="@+id/colorCircle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
             android:layout_alignParentRight="true"
             android:layout_marginTop="4dp"
             android:src="@drawable/circle"/>

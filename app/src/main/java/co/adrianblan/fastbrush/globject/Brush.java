@@ -193,7 +193,7 @@ public class Brush {
                         firstFactor
                             * bristle.absoluteTop.vector[2]
                         + secondFactor
-                            * (bristle.absoluteTop.vector[2] - (bristle.absoluteTop.vector[2] - bristle.absoluteBottom.vector[2])
+                            * (bristle.absoluteTop.vector[2] - (bristle.absoluteTop.vector[2] - bottom)
                             * bristleParameters.upperControlPointLength)
                         + thirdFactor
                             * bottom

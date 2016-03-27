@@ -192,14 +192,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Enable blending
         GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
 
-        if(settingsData.isDry()) {
-            GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-            GLES30.glBlendEquation(GLES30.GL_FUNC_ADD);
-        } else {
-            GLES30.glBlendFuncSeparate(GLES30.GL_SRC_ALPHA, GLES30.GL_DST_ALPHA, GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-            GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
-        }
+        //GLES30.glBlendFuncSeparate(GLES30.GL_SRC_ALPHA, GLES30.GL_DST_ALPHA, GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        //GLES30.glBlendEquationSeparate(GLES30.GL_FUNC_ADD, GLES30.GL_MAX);
+
 
         // Enable depth testing to slightly above paper
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
