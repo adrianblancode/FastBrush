@@ -13,6 +13,8 @@ public class TouchDataManager {
 
     private ArrayList<TouchData> touchDataList;
     private TouchData prevTouchData;
+
+    private boolean touchHasStarted;
     private boolean touchHasEnded;
     private boolean touchIsEnding;
 
@@ -38,24 +40,29 @@ public class TouchDataManager {
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     public void addInterpolated(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.002f;
+        final float MIN_DISTANCE = 0.005f;
 
         addTouchStatistics(touchData);
 
-        if(prevTouchData == null) {
+
+        if(!touchHasStarted && (prevTouchData == null
+                || touchData.getPosition().distance(prevTouchData.getPosition()) > MIN_DISTANCE)) {
             add(touchData);
-        } else {
+            prevTouchData = touchData;
+            touchHasStarted = true;
+        } else if(touchHasStarted && prevTouchData != null) {
 
             float distance = touchData.getPosition().distance(prevTouchData.getPosition());
+
             TouchData parentTouchData = prevTouchData;
-            TouchData prevInterpolatedTouchData = parentTouchData;
+            TouchData prevInterpolatedTouchData = prevTouchData;
 
             int maxInterpolations = (int) (distance / MIN_DISTANCE);
 
             // Interpolate so that there are no gaps larger than MIN_DISTANCE
             if (maxInterpolations > 0) {
 
-                for (int i = 0; i < maxInterpolations; i++) {
+                for (int i = 1; i <= maxInterpolations; i++) {
 
                     prevInterpolatedTouchData = getInterpolatedTouchData(touchData, parentTouchData,
                             prevInterpolatedTouchData.getSize(), prevInterpolatedTouchData.getPressure(),
@@ -66,7 +73,7 @@ public class TouchDataManager {
             }
 
 
-            if(distance < MIN_DISTANCE && !touchIsEnding) {
+            if(distance > MIN_DISTANCE && !touchIsEnding) {
                 // Throttle values so that they do not increase too quickly
                 float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize(), 0.01f);
                 float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
@@ -93,7 +100,7 @@ public class TouchDataManager {
                                           float prevSize, float prevPressure,
                                           int interpolation, int maxInterpolations) {
 
-        float interpolationScale = (interpolation + 1f) / ((float) maxInterpolations + 1f);
+        float interpolationScale = (interpolation) / ((float) maxInterpolations);
 
         float x = parentTouchData.position.x + (touchData.position.x - parentTouchData.position.x)
                 * interpolationScale;
@@ -161,9 +168,9 @@ public class TouchDataManager {
     }
 
     public void touchHasEnded() {
-        prevTouchData = null;
         touchHasEnded = true;
         touchIsEnding = false;
+        touchHasStarted = false;
     }
 
     public boolean hasTouchEnded() {

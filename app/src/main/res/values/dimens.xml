@@ -4,4 +4,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="dialog_margin">24dp</dimen>
+    <dimen name="icon_padding">9dp</dimen>
 </resources>

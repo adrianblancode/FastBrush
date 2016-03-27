@@ -46,13 +46,19 @@ public class Brush {
     private Vector3 position;
     private Vector3 jitter;
 
+    private int width;
+    private int height;
+
     private float verticalAngle;
     private float horizontalAngle;
     private float xTilt;
     private float yTilt;
     private float dip;
 
-    public Brush(SettingsData settingsData) {
+    public Brush(SettingsData settingsData, int width, int height) {
+
+        this.width = width;
+        this.height = height;
 
         numBristles = settingsData.getNumBristles();
         sizePressureFactor = settingsData.getPressureFactor();
@@ -258,9 +264,7 @@ public class Brush {
         int resolutionHandle = GLES30.glGetUniformLocation(mProgram, "resolution");
         GLhelper.checkGlError("glGetUniformLocation");
 
-        // TODO proper
-        GLES30.glUniform2f(resolutionHandle, 1920, 1080);
-
+        GLES30.glUniform2f(resolutionHandle, width, height);
 
         // Set the active texture unit to texture unit 0.
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);

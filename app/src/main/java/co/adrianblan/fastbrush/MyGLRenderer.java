@@ -128,7 +128,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         savedTextureArray = new int[1];
 
-        brush = new Brush(settingsData);
         line = new Line();
         touchDataManager = new TouchDataManager(numTouches, averageTouchSize, minTouchSize, maxTouchSize);
 
@@ -148,6 +147,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mWidth = width;
         mHeight = height;
         mRatio = (float) width / height;
+
+        brush = new Brush(settingsData, width, height);
 
         backBufferSquare = new BackBufferSquare(mRatio);
         backBufferManager = new BackBufferManager(NUM_BACK_BUFFERS, mWidth, mHeight);
@@ -471,7 +472,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private void reconfigureSettingsChanges() {
         settingsManager.setChangesRead();
         settingsData = settingsManager.getSettingsData();
-        brush = new Brush(settingsData);
+        brush = new Brush(settingsData, mWidth, mHeight);
     }
 
     public void onPause() {
