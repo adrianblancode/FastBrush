@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v7.widget.Toolbar;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT);
-        //lp.setMarginEnd((int) Utils.convertDpToPixel(40));
+
         lp.addRule(RelativeLayout.LEFT_OF, toolbar.getId());
         glSurfaceView.setLayoutParams(lp);
 
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public void onClickFabSave() {
         // Check that we have external storage write permission on Marshmallow devices
         if (Build.VERSION.SDK_INT >= 23
-                && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         } else {
             Snackbar.make(mainView, "Saving image...", Snackbar.LENGTH_SHORT).show();

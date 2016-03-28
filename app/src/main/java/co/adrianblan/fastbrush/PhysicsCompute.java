@@ -1,10 +1,9 @@
 package co.adrianblan.fastbrush;
 
 import android.content.Context;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-
+import android.support.v8.renderscript.Allocation;
+import android.support.v8.renderscript.Element;
+import android.support.v8.renderscript.RenderScript;
 
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.globject.Bristle;

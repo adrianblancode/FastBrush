@@ -37,6 +37,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -236,19 +237,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(),
                     -brush.getPosition().getY(), 0);
 
-            float angle = brush.getHorizontalAngle();
+            float horizontalAngle = brush.getHorizontalAngle();
 
             Matrix.translateM(translateToBrushTip, 0,
-                    (float) -Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
-                    (float) -Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
+                    (float) -Math.cos(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
+                    (float) -Math.sin(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle(),
-                    (float) Math.cos(Math.toRadians(brush.getHorizontalAngle() - 90)),
-                    (float) Math.sin(Math.toRadians(brush.getHorizontalAngle() - 90)), 0);
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.5f,
+                    (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
+                    (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
             Matrix.translateM(translateToImprintCenter, 0,
-                    (float) Math.cos(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f,
-                    (float) Math.sin(Math.toRadians(angle)) * brush.getBristleParameters().getPlanarImprintLength() / 2f, 0f);
+                    (float) Math.cos(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarImprintLength(),
+                    (float) Math.sin(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarImprintLength(), 0f);
 
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 

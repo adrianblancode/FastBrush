@@ -19,7 +19,7 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.5f);
-    public static final int SEGMENTS_PER_BRISTLE = 5;
+    public static final int SEGMENTS_PER_BRISTLE = 4;
     private static final float MAX_TILT_VERTICAL = 20f;
 
     private int numBristles;

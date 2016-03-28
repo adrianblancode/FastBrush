@@ -1,6 +1,6 @@
 package co.adrianblan.fastbrush.vector;
 
-import android.renderscript.Float3;
+import android.support.v8.renderscript.Float3;
 
 /** Defines a vector in 3D space */
 public class Vector3 {
