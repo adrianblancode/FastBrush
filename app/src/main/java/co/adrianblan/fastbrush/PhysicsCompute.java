@@ -1,11 +1,14 @@
 package co.adrianblan.fastbrush;
 
 import android.content.Context;
-import android.support.v8.renderscript.Allocation;
-import android.support.v8.renderscript.Element;
-import android.support.v8.renderscript.RenderScript;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
 
+
+import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.globject.Bristle;
+import co.adrianblan.fastbrush.globject.Brush;
 
 
 /**
@@ -13,36 +16,95 @@ import co.adrianblan.fastbrush.globject.Bristle;
  */
 public class PhysicsCompute {
 
-    private RenderScript mRenderScript;
-    private Allocation mInAllocationTop;
-    private Allocation mInAllocationBottom;
-    private Allocation mOutAllocation;
+    private RenderScript renderScript;
     private ScriptC_physics script;
 
+    private Allocation inBristleIndices;
+    private Allocation inAllocationTop;
+    private Allocation inAllocationBottom;
+    private Allocation outAllocation;
+
+    private Brush brush;
+
     float [] out;
+    float [] inTop;
+    float [] inBottom;
 
-    private void createScript(Context context, int numBristles, int numSegments) {
-        mRenderScript = RenderScript.create(context);
-        script = new ScriptC_physics(mRenderScript);
+    public PhysicsCompute(Context context, Brush brush) {
 
-        mInAllocationTop = Allocation.createSized(mRenderScript, Element.F32_3(mRenderScript), 2 * numBristles, Allocation.USAGE_SCRIPT);
-        mInAllocationBottom = Allocation.createSized(mRenderScript, Element.F32_3(mRenderScript), 2 * numBristles, Allocation.USAGE_SCRIPT);
-        mOutAllocation = Allocation.createSized(mRenderScript, Element.F32_3(mRenderScript), 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT);
+        this.brush = brush;
+        Bristle[] bristleArray = brush.getBristles();
 
-        out = new float[3 * 2 * numSegments * numBristles];
-    }
+        renderScript = RenderScript.create(context);
+        script = new ScriptC_physics(renderScript);
 
-    public float[] compute(Bristle[] bristleArray) {
+        script.set_BRUSH_BASE_LENGTH(Bristle.BASE_LENGTH);
+        script.set_SEGMENTS_PER_BRISTLE(Brush.SEGMENTS_PER_BRISTLE);
+        script.set_script(script);
 
-        for(int i = 0; i < bristleArray.length; i++) {
-            mInAllocationTop.copy1DRangeFrom(0, 3, bristleArray[i].absoluteTop.vector);
-            mInAllocationBottom.copy1DRangeFrom(0, 3, bristleArray[i].absoluteBottom.vector);
+        int numBristles = brush.getBristles().length;
+        int numSegments = Brush.SEGMENTS_PER_BRISTLE;
+
+        int[] bristleIndices = new int[numBristles];
+        for ( int i = 0; i < numBristles; i++) {
+            bristleIndices[i] = i * 3;
         }
 
-        script.forEach_root(mOutAllocation);
-        mRenderScript.finish();
+        inBristleIndices = Allocation.createSized(renderScript, Element.I32(renderScript), numBristles, Allocation.USAGE_SCRIPT);
+        inBristleIndices.copyFrom(bristleIndices);
 
-        mOutAllocation.copyTo(out);
+        inTop = new float[3 * numBristles];
+        inBottom  = new float[3 * numBristles];
+
+        for(int i = 0; i < bristleArray.length; i++) {
+            inTop[i * 3] = bristleArray[i].top.vector[0];
+            inTop[i * 3 + 1] = bristleArray[i].top.vector[1];
+            inTop[i * 3 + 2] = bristleArray[i].top.vector[2];
+
+            inBottom[i * 3] = bristleArray[i].bottom.vector[0];
+            inBottom[i * 3 + 1] = bristleArray[i].bottom.vector[1];
+            inBottom[i * 3 + 2] = bristleArray[i].bottom.vector[2];
+        }
+
+        inAllocationTop = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
+        inAllocationBottom = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
+
+        inAllocationTop.copyFrom(inTop);
+        inAllocationBottom.copyFrom(inBottom);
+
+        outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT);
+        out = new float[3 * 2 * numSegments * numBristles];
+
+        script.set_inBristlePositionTop(inAllocationTop);
+        script.set_inBristlePositionBottom(inAllocationBottom);
+        script.set_outBristlePosition(outAllocation);
+    }
+
+    public float[] computeVertexData() {
+        //Float3()
+        script.set_brushPosition(brush.getPosition().getFloat3());
+
+        BristleParameters bristleParameters = brush.getBristleParameters();
+
+        script.set_planarDistanceFromHandle(bristleParameters.planarDistanceFromHandle);
+        script.set_upperControlPointLength(bristleParameters.upperControlPointLength);
+        script.set_lowerControlPointLength(bristleParameters.lowerControlPointLength);
+
+        script.set_sinHorizontalAngle((float) Math.sin(brush.getHorizontalAngle()));
+        script.set_cosHorizontalAngle((float) Math.cos(brush.getHorizontalAngle()));
+
+        script.invoke_compute(inBristleIndices);
+        renderScript.finish();
+
+        outAllocation.copyTo(out);
         return out;
+    }
+
+    public void destroy() {
+        inAllocationTop.destroy();
+        inAllocationBottom.destroy();
+        outAllocation.destroy();
+        script.destroy();
+        renderScript.destroy();
     }
 }

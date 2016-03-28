@@ -99,6 +99,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private int[] savedTextureArray;
     private SettingsManager settingsManager;
     private SettingsData settingsData;
+    private PhysicsCompute physicsCompute;
 
     private Gson gson;
     private Brush brush;
@@ -131,6 +132,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         brush = new Brush(settingsData);
         line = new Line();
         touchDataManager = new TouchDataManager(numTouches, averageTouchSize, minTouchSize, maxTouchSize);
+
+        physicsCompute = new PhysicsCompute(context, brush);
 
         Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
         Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
@@ -212,6 +215,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         for(TouchData td : touchDataManager.get()) {
 
             brush.updateBrush(td);
+            brush.putVertexData(physicsCompute.computeVertexData());
 
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
@@ -481,11 +485,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         settingsManager.setChangesRead();
         settingsData = settingsManager.getSettingsData();
         brush = new Brush(settingsData);
+        physicsCompute.destroy();
+        physicsCompute = new PhysicsCompute(context, brush);
     }
 
     public void onPause() {
         if(settingsManager != null && touchDataManager != null) {
-            Gson gson = new Gson();
 
             SharedPreferences.Editor editor = settingsManager.getSharedPreferences().edit();
             editor.putInt("numTouches", touchDataManager.getNumTouches());
@@ -496,7 +501,5 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void onResume() {
-
-    }
+    public void onResume() {}
 }

@@ -19,10 +19,6 @@ public class Bristle {
     public Vector3 bottom;
     public Vector3 extendedBottom;
 
-    public Vector3 absoluteTop;
-    public Vector3 absoluteBottom;
-    public Vector3 absoluteExtendedBottom;
-
     public Bristle(SettingsData settingsData) {
 
         float radiusUpper = BRUSH_RADIUS_UPPER * (settingsData.getSize() + MIN_SIZE_SCALE);
@@ -40,16 +36,6 @@ public class Bristle {
         bottom = new Vector3(radiusLower * horizontal, radiusLower * vertical, -length);
         extendedBottom = new Vector3(bottom);
         extendedBottom.setZ(-BASE_LENGTH);
-
-        absoluteTop = new Vector3();
-        absoluteBottom = new Vector3();
-        absoluteExtendedBottom = new Vector3();
-    }
-
-    public void update(Vector3 brushPosition) {
-        absoluteTop.addFast(top, brushPosition);
-        absoluteBottom.addFast(bottom, brushPosition);
-        absoluteExtendedBottom.addFast(extendedBottom, brushPosition);
     }
 
     public float getLength() {

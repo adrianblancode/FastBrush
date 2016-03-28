@@ -1,8 +1,11 @@
 package co.adrianblan.fastbrush.vector;
 
+import android.renderscript.Float3;
+
 /** Defines a vector in 3D space */
 public class Vector3 {
 
+    private Float3 f3 = new Float3();
     public float[] vector = {0f, 0f, 0f, 1f};
 
     public Vector3(){}
@@ -33,10 +36,12 @@ public class Vector3 {
 
     public void setX(float x) {
         vector[0] = x;
+        f3.x = x;
     }
 
     public void addX(float x) {
         vector[0] += x;
+        f3.x += x;
     }
 
     public float getY() {
@@ -45,10 +50,12 @@ public class Vector3 {
 
     public void setY(float y) {
         vector[1] = y;
+        f3.y = y;
     }
 
     public void addY(float y) {
         vector[1] += y;
+        f3.y += y;
     }
 
     public float getZ() {
@@ -57,14 +64,16 @@ public class Vector3 {
 
     public void setZ(float z) {
         vector[2] = z;
-    }
-
-    public float getW(){
-        return vector[3];
+        f3.z = z;
     }
 
     public void addZ(float z) {
         vector[2] += z;
+        f3.z += z;
+    }
+
+    public float getW(){
+        return vector[3];
     }
 
     /** Returns a new object with the same member variables as the current object */
@@ -118,6 +127,10 @@ public class Vector3 {
     /** Returns a new vector that is the current vector scaled to a factor */
     public Vector3 scale(float scale) {
         return new Vector3(getX() * scale, getY() * scale, getZ() * scale);
+    }
+
+    public Float3 getFloat3() {
+        return f3;
     }
 
     public String toString() {

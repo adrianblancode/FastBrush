@@ -3,7 +3,6 @@ package co.adrianblan.fastbrush.globject;
 import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.database.BrushKey;
@@ -12,7 +11,6 @@ import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
 import co.adrianblan.fastbrush.utils.Utils;
-import co.adrianblan.fastbrush.vector.Vector2;
 import co.adrianblan.fastbrush.vector.Vector3;
 
 /**
@@ -21,7 +19,7 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.5f);
-    private static final int SEGMENTS_PER_BRISTLE = 4;
+    public static final int SEGMENTS_PER_BRISTLE = 4;
     private static final float MAX_TILT_VERTICAL = 20f;
 
     private int numBristles;
@@ -31,7 +29,6 @@ public class Brush {
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
-    private float[] vertexData;
 
     private final FloatBuffer vertexBuffer;
 
@@ -68,7 +65,6 @@ public class Brush {
             bristles[i] = new Bristle(settingsData);
         }
 
-        vertexData = new float[GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE];
         vertexBuffer = GLhelper.initFloatBuffer(GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
         mProgram = GLES30.glCreateProgram();
@@ -105,114 +101,12 @@ public class Brush {
 
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
         bristleParameters.set(brushSnapshotDatabase.getBristleParameter(brushKey));
-
-        updateBristles(horizontalAngle, bristleParameters);
     }
 
-    /** Updates the positions of the brush and all bristles, and puts the data inside the vertexBuffer*/
-    public void updateBristles(float horizontalAngle, BristleParameters bristleParameters) {
-        updateJitter();
-        //position.addFast(jitter);
-
+    public void putVertexData(float[] bristlePositions) {
         vertexBuffer.position(0);
-
-        int index = 0;
-
-        float cosHorizontalAngle = (float) Math.cos(Math.toRadians(horizontalAngle));
-        float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
-
-        // TODO multithread
-        for(Bristle bristle : bristles){
-            //bristle.update(position);
-
-            // Update bristle position
-            bristle.absoluteTop.vector[0] = bristle.top.vector[0] +  position.vector[0];
-            bristle.absoluteTop.vector[1] = bristle.top.vector[1] +  position.vector[1];
-            bristle.absoluteTop.vector[2] = bristle.top.vector[2] +  position.vector[2];
-
-            bristle.absoluteBottom.vector[0] = bristle.bottom.vector[0] +  position.vector[0];
-            bristle.absoluteBottom.vector[1] = bristle.bottom.vector[1] +  position.vector[1];
-            bristle.absoluteBottom.vector[2] = bristle.bottom.vector[2] +  position.vector[2];
-
-            bristle.absoluteExtendedBottom.vector[0] = bristle.extendedBottom.vector[0] +  position.vector[0];
-            bristle.absoluteExtendedBottom.vector[1] = bristle.extendedBottom.vector[1] +  position.vector[1];
-            bristle.absoluteExtendedBottom.vector[2] = bristle.extendedBottom.vector[2] +  position.vector[2];
-
-            float interpolatedX = bristle.absoluteTop.vector[0];
-            float interpolatedY = bristle.absoluteTop.vector[1];
-            float interpolatedZ = bristle.absoluteTop.vector[2];
-
-            for(int i = 1; i <= SEGMENTS_PER_BRISTLE; i++) {
-
-                vertexData[index] = interpolatedX;
-                vertexData[index + 1] = interpolatedY;
-                vertexData[index + 2] = interpolatedZ;
-                index += 3;
-
-                float scale = ((float) i / SEGMENTS_PER_BRISTLE) * (bristle.length / Bristle.BASE_LENGTH);
-                float firstFactor = (1f - scale) * (1f - scale) * (1f - scale);
-                float secondFactor = 3 * (1f - scale) * (1f - scale) * scale;
-                float thirdFactor = 3 * (1f - scale) * scale * scale;
-                float fourthFactor = scale * scale * scale;
-
-                float bottom = bristle.absoluteBottom.vector[2];
-
-                if(bottom < 0) {
-                    bottom = 0;
-                }
-
-                interpolatedX =
-                        firstFactor
-                                * bristle.absoluteTop.vector[0]
-                        + secondFactor
-                                * (bristle.absoluteTop.vector[0] - (bristle.absoluteTop.vector[0] - bristle.absoluteBottom.vector[0])
-                                * bristleParameters.upperControlPointLength)
-                        + thirdFactor
-                                * (bristle.absoluteBottom.vector[0]
-                                + cosHorizontalAngle * bristleParameters.planarDistanceFromHandle
-                                - cosHorizontalAngle * bristleParameters.lowerControlPointLength)
-                        + fourthFactor
-                                * (bristle.absoluteBottom.vector[0]
-                                + cosHorizontalAngle * bristleParameters.planarDistanceFromHandle);
-
-                interpolatedY =
-                        firstFactor
-                            * bristle.absoluteTop.vector[1]
-                        + secondFactor
-                            * (bristle.absoluteTop.vector[1] - (bristle.absoluteTop.vector[1] - bristle.absoluteBottom.vector[1])
-                            * bristleParameters.upperControlPointLength)
-                        + thirdFactor
-                            * (bristle.absoluteBottom.vector[1]
-                            + sinHorizontalAngle * bristleParameters.planarDistanceFromHandle
-                            - sinHorizontalAngle * bristleParameters.lowerControlPointLength)
-                        + fourthFactor
-                            * (bristle.absoluteBottom.vector[1]
-                            + sinHorizontalAngle * bristleParameters.planarDistanceFromHandle);
-
-                interpolatedZ =
-                        firstFactor
-                            * bristle.absoluteTop.vector[2]
-                        + secondFactor
-                            * (bristle.absoluteTop.vector[2] - (bristle.absoluteTop.vector[2] - bottom)
-                            * bristleParameters.upperControlPointLength)
-                        + thirdFactor
-                            * bottom
-                        + fourthFactor
-                            * bottom;
-
-                vertexData[index] = interpolatedX;
-                vertexData[index + 1] = interpolatedY;
-                vertexData[index + 2] = interpolatedZ;
-                index += 3;
-            }
-        }
-
-        vertexBuffer.put(vertexData);
+        vertexBuffer.put(bristlePositions);
         vertexBuffer.position(0);
-    }
-
-    public void draw(float[] mvpMatrix) {
-        draw(mvpMatrix, Utils.blackColor);
     }
 
     public void draw(float[] mvpMatrix, float[] color) {
@@ -264,6 +158,10 @@ public class Brush {
         xTilt = 0;
         yTilt = 0;
         dip = 0;
+    }
+
+    public Bristle[] getBristles() {
+        return bristles;
     }
 
     public float getVerticalAngle() {
