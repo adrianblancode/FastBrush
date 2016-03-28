@@ -50,7 +50,7 @@ public class PhysicsCompute {
             bristleIndices[i] = i * 3;
         }
 
-        inBristleIndices = Allocation.createSized(renderScript, Element.I32(renderScript), numBristles, Allocation.USAGE_SCRIPT);
+        inBristleIndices = Allocation.createSized(renderScript, Element.I32(renderScript), numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
         inBristleIndices.copyFrom(bristleIndices);
 
         inTop = new float[3 * numBristles];
@@ -66,13 +66,13 @@ public class PhysicsCompute {
             inBottom[i * 3 + 2] = bristleArray[i].bottom.vector[2];
         }
 
-        inAllocationTop = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
-        inAllocationBottom = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
+        inAllocationTop = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
+        inAllocationBottom = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
 
         inAllocationTop.copyFrom(inTop);
         inAllocationBottom.copyFrom(inBottom);
 
-        outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT);
+        outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
         out = new float[3 * 2 * numSegments * numBristles];
 
         script.set_inBristlePositionTop(inAllocationTop);
@@ -90,8 +90,8 @@ public class PhysicsCompute {
         script.set_upperControlPointLength(bristleParameters.upperControlPointLength);
         script.set_lowerControlPointLength(bristleParameters.lowerControlPointLength);
 
-        script.set_sinHorizontalAngle((float) Math.sin(brush.getHorizontalAngle()));
-        script.set_cosHorizontalAngle((float) Math.cos(brush.getHorizontalAngle()));
+        script.set_sinHorizontalAngle((float) Math.sin(Math.toRadians(brush.getHorizontalAngle())));
+        script.set_cosHorizontalAngle((float) Math.cos(Math.toRadians(brush.getHorizontalAngle())));
 
         script.invoke_compute(inBristleIndices);
         renderScript.finish();

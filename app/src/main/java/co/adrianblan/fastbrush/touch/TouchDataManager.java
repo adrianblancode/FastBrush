@@ -38,7 +38,7 @@ public class TouchDataManager {
     /** Takes touch data information, and interpolates objects based on a distance to the previous object */
     public void addInterpolated(TouchData touchData){
 
-        final float MIN_DISTANCE = 0.002f;
+        final float MIN_DISTANCE = 0.004f;
 
         addTouchStatistics(touchData);
 

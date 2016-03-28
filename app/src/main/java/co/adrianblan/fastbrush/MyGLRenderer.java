@@ -28,6 +28,7 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -45,6 +46,7 @@ import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.settings.SettingsManager;
+import co.adrianblan.fastbrush.utils.TimeProfilerHelper;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
 
@@ -88,7 +90,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] translateToImprintCenter = new float[16];
     private final float[] verticalRotationMatrix = new float[16];
 
-
     private Context context;
 
     private int mWidth;
@@ -100,8 +101,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private SettingsManager settingsManager;
     private SettingsData settingsData;
     private PhysicsCompute physicsCompute;
+    private TimeProfilerHelper timeProfilerHelper;
 
-    private Gson gson;
     private Brush brush;
     private Line line;
     private TouchDataManager touchDataManager;
@@ -120,7 +121,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         SharedPreferences sp = settingsManager.getSharedPreferences();
-        gson = new Gson();
 
         int numTouches = sp.getInt("numTouches", 0);
         float averageTouchSize = sp.getFloat("averageTouchSize", 0);
@@ -134,6 +134,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         touchDataManager = new TouchDataManager(numTouches, averageTouchSize, minTouchSize, maxTouchSize);
 
         physicsCompute = new PhysicsCompute(context, brush);
+        timeProfilerHelper = new TimeProfilerHelper();
 
         Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
         Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
@@ -211,11 +212,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
+        System.err.println(touchDataManager.get().size());
+
         /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
+            long startTime = System.nanoTime();
+
             brush.updateBrush(td);
             brush.putVertexData(physicsCompute.computeVertexData());
+
+            long endTime = System.nanoTime();
+            float newTime = (endTime - startTime) / 1000000f;
+            timeProfilerHelper.add(newTime);
 
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
@@ -256,6 +265,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             brush.draw(mBrushMVPMatrix, settingsData.getColorWrapper().toFloatArray());
         }
+
+        Log.d("FastBrush time: ", (timeProfilerHelper.getAverage()) + "ms");
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
