@@ -219,7 +219,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         for(TouchData td : touchDataManager.get()) {
 
             long startTime = System.nanoTime();
-
             brush.updateBrush(td);
             brush.putVertexData(physicsCompute.computeVertexData());
 

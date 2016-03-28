@@ -74,13 +74,14 @@ public class PhysicsCompute {
         outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
         out = new float[3 * 2 * numSegments * numBristles];
 
-        script.set_inBristlePositionTop(inAllocationTop);
-        script.set_inBristlePositionBottom(inAllocationBottom);
-        script.set_outBristlePosition(outAllocation);
+        script.bind_inBristlePositionTop(inAllocationTop);
+        script.bind_inBristlePositionBottom(inAllocationBottom);
+        script.bind_outBristlePosition(outAllocation);
     }
 
     public float[] computeVertexData() {
-        //Float3()
+
+        //Set all parameters for compute script
         script.set_brushPosition(brush.getPosition().getFloat3());
 
         BristleParameters bristleParameters = brush.getBristleParameters();
@@ -92,7 +93,10 @@ public class PhysicsCompute {
         script.set_sinHorizontalAngle((float) Math.sin(Math.toRadians(brush.getHorizontalAngle())));
         script.set_cosHorizontalAngle((float) Math.cos(Math.toRadians(brush.getHorizontalAngle())));
 
+        // Computes all positions
         script.invoke_compute(inBristleIndices);
+
+        // Wait for script to complete before continuing
         renderScript.finish();
 
         outAllocation.copyTo(out);

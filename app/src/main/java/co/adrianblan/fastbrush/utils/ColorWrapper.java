@@ -11,6 +11,7 @@ public class ColorWrapper {
     private int green;
     private int blue;
     private int alpha;
+    float[] temp = new float[4];
 
     public ColorWrapper() {
         this.red = 0;
@@ -88,7 +89,6 @@ public class ColorWrapper {
     }
 
     public float[] toFloatArray() {
-        float[] temp = new float[4];
 
         temp[0] = Utils.normalize(red, 0, 255);
         temp[1] = Utils.normalize(green, 0, 255);

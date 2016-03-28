@@ -15,10 +15,9 @@ float lowerControlPointLength;
 float cosHorizontalAngle;
 float sinHorizontalAngle;
 
-rs_allocation inBristlePositionTop;
-rs_allocation inBristlePositionBottom;
-
-rs_allocation outBristlePosition;
+float* inBristlePositionTop;
+float* inBristlePositionBottom;
+float* outBristlePosition;
 
 rs_script script;
 
@@ -30,15 +29,15 @@ void root(uchar4 *in, uint32_t x) {
     int outIndex = x * 2 * 3 * SEGMENTS_PER_BRISTLE;
 
     float3 bristlePositionTop;
-    bristlePositionTop.x = rsGetElementAt_float(inBristlePositionTop, x * 3);
-    bristlePositionTop.y = rsGetElementAt_float(inBristlePositionTop, x * 3 + 1);
-    bristlePositionTop.z = rsGetElementAt_float(inBristlePositionTop, x * 3 + 2);
+    bristlePositionTop.x = inBristlePositionTop[x * 3];
+    bristlePositionTop.y = inBristlePositionTop[x * 3 + 1];
+    bristlePositionTop.z = inBristlePositionTop[x * 3 + 2];
     bristlePositionTop += brushPosition;
 
     float3 bristlePositionBottom;
-    bristlePositionBottom.x = rsGetElementAt_float(inBristlePositionBottom, x * 3);
-    bristlePositionBottom.y = rsGetElementAt_float(inBristlePositionBottom, x * 3 + 1);
-    bristlePositionBottom.z = rsGetElementAt_float(inBristlePositionBottom, x * 3 + 2);
+    bristlePositionBottom.x = inBristlePositionBottom[x * 3];
+    bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1];
+    bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2];
     bristlePositionBottom += brushPosition;
 
     float bottom = bristlePositionBottom.z;
@@ -54,14 +53,14 @@ void root(uchar4 *in, uint32_t x) {
     float thirdFactor;
     float fourthFactor;
 
+    float length = distance(bristlePositionTop, bristlePositionBottom);
+
     for(int i = 1; i <= SEGMENTS_PER_BRISTLE; i++) {
 
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.x, outIndex);
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.y, outIndex + 1);
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.z, outIndex + 2);
+        outBristlePosition[outIndex] = interpolatedPosition.x;
+        outBristlePosition[outIndex + 1] = interpolatedPosition.y;
+        outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
-
-        float length = distance(bristlePositionTop, bristlePositionBottom);
 
         scale = ((float) i / SEGMENTS_PER_BRISTLE) * (length / BRUSH_BASE_LENGTH);
         firstFactor = (1 - scale) * (1 - scale) * (1 - scale);
@@ -108,9 +107,9 @@ void root(uchar4 *in, uint32_t x) {
                 + fourthFactor
                     * bottom;
 
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.x, outIndex);
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.y, outIndex + 1);
-        rsSetElementAt_float(outBristlePosition, interpolatedPosition.z, outIndex + 2);
+        outBristlePosition[outIndex] = interpolatedPosition.x;
+        outBristlePosition[outIndex + 1] = interpolatedPosition.y;
+        outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
     }
 }
