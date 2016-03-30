@@ -21,7 +21,7 @@ public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.5f);
     public static final int SEGMENTS_PER_BRISTLE = 4;
-    private static final float MAX_TILT_VERTICAL = 20f;
+    private static final float MAX_TILT_VERTICAL = 40f;
 
     private int numBristles;
     private float sizePressureFactor;
@@ -76,7 +76,7 @@ public class Brush {
     public void updateBrush(TouchData touchData) {
 
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1f * sizePressureFactor + 0.005f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 

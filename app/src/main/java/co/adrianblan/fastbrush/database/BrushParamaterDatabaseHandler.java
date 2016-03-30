@@ -146,11 +146,13 @@ public class BrushParamaterDatabaseHandler {
 
         float highAngleHeightPercent = (targetKey.height - keyHighLow.height) / (keyHighHigh.height - keyHighLow.height);
         BristleParameters interpolatedValueHighAngle = getInterpolatedValue(valueHighLow, valueHighHigh, highAngleHeightPercent);
-        BrushKey interpolatedKeyHighAngle = new BrushKey(keyHighHigh.angle, targetKey.height);
+        BrushKey interpolatedKeyHighAngle = new BrushKey(keyHighLow.angle * (1 - highAngleHeightPercent) +
+                keyHighHigh.angle * highAngleHeightPercent, targetKey.height);
 
         float lowAngleHeightPercent = (targetKey.height - keyLowLow.height) / (keyLowHigh.height - keyLowLow.height);
         BristleParameters interpolatedValueLowAngle = getInterpolatedValue(valueLowLow, valueLowHigh, lowAngleHeightPercent);
-        BrushKey interpolatedKeyLowAngle = new BrushKey(keyLowHigh.angle, targetKey.height);
+        BrushKey interpolatedKeyLowAngle = new BrushKey(keyLowLow.angle * (1 - lowAngleHeightPercent) +
+                keyLowHigh.angle * lowAngleHeightPercent, targetKey.height);
 
         float interpolatedAnglePercent = (targetKey.angle -  (interpolatedKeyLowAngle.angle))
                 / (interpolatedKeyLowAngle.angle - interpolatedKeyHighAngle.angle);

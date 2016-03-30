@@ -39,7 +39,7 @@ import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
 import co.adrianblan.fastbrush.buffer.BackBufferManager;
-import co.adrianblan.fastbrush.buffer.BackBufferSquare;
+import co.adrianblan.fastbrush.globject.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.settings.SettingsData;
@@ -240,9 +240,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             Matrix.translateM(translateToBrushTip, 0,
                     -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
-                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0);
+                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0.03f);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.5f,
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.35f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
