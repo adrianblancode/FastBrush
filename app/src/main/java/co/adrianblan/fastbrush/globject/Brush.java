@@ -30,7 +30,7 @@ public class Brush {
     private int mColorHandle;
     private int mMVPMatrixHandle;
 
-    private final FloatBuffer vertexBuffer;
+    private VertexBufferManager vertexBufferManager;
 
     private BrushParamaterDatabaseHandler brushParamaterDatabaseHandler;
     private BrushKey brushKey;
@@ -65,7 +65,7 @@ public class Brush {
             bristles[i] = new Bristle(settingsData);
         }
 
-        vertexBuffer = GLhelper.initFloatBuffer(GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE);
+        vertexBufferManager = new VertexBufferManager(3, GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
         mProgram = GLES30.glCreateProgram();
         GLhelper.loadShaders(mProgram, GLobject.DEFAULT_VERTEX_SHADER_CODE,
@@ -75,7 +75,7 @@ public class Brush {
     public void updateBrush(TouchData touchData) {
 
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.2f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1f * sizePressureFactor + 0.005f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 
@@ -104,6 +104,10 @@ public class Brush {
     }
 
     public void putVertexData(float[] bristlePositions) {
+
+        vertexBufferManager.setNextBuffer();
+        FloatBuffer vertexBuffer = vertexBufferManager.getCurrentBuffer();
+
         vertexBuffer.position(0);
         vertexBuffer.put(bristlePositions);
         vertexBuffer.position(0);
@@ -125,7 +129,7 @@ public class Brush {
         GLES30.glVertexAttribPointer(
                 mPositionHandle, GLobject.DEFAULT_COORDS_PER_VERTEX,
                 GLES30.GL_FLOAT, false,
-                GLobject.DEFAULT_VERTEX_STRIDE, vertexBuffer);
+                GLobject.DEFAULT_VERTEX_STRIDE, vertexBufferManager.getCurrentBuffer());
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
