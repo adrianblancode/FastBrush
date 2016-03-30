@@ -101,7 +101,7 @@ public class Brush {
         //System.out.println("hAngle: " + horizontalAngle + ", vAngle: " + verticalAngle);
 
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
-        bristleParameters.set(brushParamaterDatabaseHandler.getBristleParameter(brushKey));
+        bristleParameters = brushParamaterDatabaseHandler.getBristleParameter(brushKey);
     }
 
     public void putVertexData(float[] bristlePositions) {
