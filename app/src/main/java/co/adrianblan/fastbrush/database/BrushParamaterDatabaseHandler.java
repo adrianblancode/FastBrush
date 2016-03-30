@@ -134,15 +134,15 @@ public class BrushParamaterDatabaseHandler {
     private BristleParameters interpolate(BrushKey targetKey, int indexHighHigh, int indexHighLow,
                                          int indexLowHigh, int indexLowLow) {
 
-        BrushKey keyHighHigh = brushParameterDatabase.getKey(indexHighHigh);
-        BrushKey keyHighLow = brushParameterDatabase.getKey(indexHighLow);
-        BrushKey keyLowHigh = brushParameterDatabase.getKey(indexLowHigh);
-        BrushKey keyLowLow = brushParameterDatabase.getKey(indexLowLow);
+        BrushKey keyHighHigh = brushParameterDatabase.brushKeys[indexHighHigh];
+        BrushKey keyHighLow = brushParameterDatabase.brushKeys[indexHighLow];
+        BrushKey keyLowHigh = brushParameterDatabase.brushKeys[indexLowHigh];
+        BrushKey keyLowLow = brushParameterDatabase.brushKeys[indexLowLow];
 
-        BristleParameters valueHighHigh = brushParameterDatabase.get(keyHighHigh);
-        BristleParameters valueHighLow = brushParameterDatabase.get(keyHighLow);
-        BristleParameters valueLowHigh = brushParameterDatabase.get(keyLowHigh);
-        BristleParameters valueLowLow = brushParameterDatabase.get(keyLowLow);
+        BristleParameters valueHighHigh = brushParameterDatabase.bristleParameters[indexHighHigh];
+        BristleParameters valueHighLow = brushParameterDatabase.bristleParameters[indexHighLow];
+        BristleParameters valueLowHigh = brushParameterDatabase.bristleParameters[indexLowHigh];
+        BristleParameters valueLowLow = brushParameterDatabase.bristleParameters[indexLowLow];
 
         float highAngleHeightPercent = (targetKey.height - keyHighLow.height) / (keyHighHigh.height - keyHighLow.height);
         BristleParameters interpolatedValueHighAngle = getInterpolatedValue(valueHighLow, valueHighHigh, highAngleHeightPercent);
@@ -167,14 +167,14 @@ public class BrushParamaterDatabaseHandler {
     private BristleParameters getInterpolatedValue(BristleParameters first, BristleParameters second, float scale) {
         BristleParameters interpolatedValue = new BristleParameters();
 
-        interpolatedValue.setPlanarDistanceFromHandle(first.planarDistanceFromHandle
+        interpolatedValue.planarDistanceFromHandle = (first.planarDistanceFromHandle
                 + (second.planarDistanceFromHandle - first.planarDistanceFromHandle) * scale);
-        interpolatedValue.setPlanarImprintLength(first.planarImprintLength
+        interpolatedValue.planarImprintLength = (first.planarImprintLength
                 + (second.planarImprintLength - first.planarImprintLength) * scale);
 
-        interpolatedValue.setUpperControlPointLength(first.upperControlPointLength
+        interpolatedValue.upperControlPointLength = (first.upperControlPointLength
                 + (second.upperControlPointLength - first.upperControlPointLength) * scale);
-        interpolatedValue.setLowerControlPointLength(first.lowerControlPointLength
+        interpolatedValue.lowerControlPointLength = (first.lowerControlPointLength
                 + (second.lowerControlPointLength - first.lowerControlPointLength) * scale);
 
         return interpolatedValue;

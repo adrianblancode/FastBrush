@@ -104,6 +104,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private PhysicsCompute physicsCompute;
     private TimeProfilerHelper timeProfilerHelper;
 
+    private float[] color;
     private Brush brush;
     private Line line;
     private TouchDataManager touchDataManager;
@@ -122,6 +123,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         SharedPreferences sp = settingsManager.getSharedPreferences();
+        color = settingsData.getColorWrapper().toFloatArray();
 
         int numTouches = sp.getInt("numTouches", 0);
         float averageTouchSize = sp.getFloat("averageTouchSize", 0);
@@ -213,8 +215,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         GLES30.glLineWidth(settingsData.getBristleThickness() * 10f);
 
-        System.err.println(touchDataManager.get().size());
-
         /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
@@ -233,22 +233,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(translateToImprintCenter, 0);
             Matrix.setIdentityM(verticalRotationMatrix, 0);
 
-            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().getX(),
-                    -brush.getPosition().getY(), 0);
+            Matrix.translateM(translateToOrigin, 0, -brush.getPosition().vector[0],
+                    -brush.getPosition().vector[1], 0);
 
             float horizontalAngle = brush.getHorizontalAngle();
+            float cosHorizontalAngle = (float) Math.cos(Math.toRadians(horizontalAngle));
+            float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
+
 
             Matrix.translateM(translateToBrushTip, 0,
-                    (float) -Math.cos(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(),
-                    (float) -Math.sin(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarDistanceFromHandle(), 0);
+                    -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
+                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0);
 
             Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.5f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
             Matrix.translateM(translateToImprintCenter, 0,
-                    (float) Math.cos(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarImprintLength(),
-                    (float) Math.sin(Math.toRadians(horizontalAngle)) * brush.getBristleParameters().getPlanarImprintLength(), 0f);
+                    cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
+                    sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
 
@@ -263,10 +266,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            brush.draw(mBrushMVPMatrix, settingsData.getColorWrapper().toFloatArray());
+            brush.draw(mBrushMVPMatrix, color);
         }
 
-        Log.d("FastBrush time: ", (timeProfilerHelper.getAverage()) + "ms");
+        //Log.d("FastBrush time: ", (timeProfilerHelper.getAverage()) + "ms");
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
@@ -301,7 +304,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelOffsetMatrix, 0);
             Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
 
-            GLES30.glLineWidth(Utils.convertPixelsToDp(15f));
+            GLES30.glLineWidth(Utils.convertPixelsToDp(30f));
             line.draw(mBrushMVPMatrix, Utils.brownColor);
 
             // Draw brush view brush
@@ -498,6 +501,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         brush = new Brush(settingsData);
         physicsCompute.destroy();
         physicsCompute = new PhysicsCompute(context, brush);
+        color = settingsData.getColorWrapper().toFloatArray();
     }
 
     public void onPause() {
