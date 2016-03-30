@@ -23,6 +23,8 @@ public class PhysicsCompute {
     private Allocation inAllocationBottom;
     private Allocation outAllocation;
 
+    ScriptField_ComputeParameters computeParameters;
+
     private Brush brush;
 
     float [] out;
@@ -74,24 +76,33 @@ public class PhysicsCompute {
         outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
         out = new float[3 * 2 * numSegments * numBristles];
 
+        computeParameters = new ScriptField_ComputeParameters(renderScript, 1);
+
         script.bind_inBristlePositionTop(inAllocationTop);
         script.bind_inBristlePositionBottom(inAllocationBottom);
         script.bind_outBristlePosition(outAllocation);
+        script.bind_computeParameters(computeParameters);
     }
 
     public float[] computeVertexData() {
 
         //Set all parameters for compute script
-        script.set_brushPosition(brush.getPosition().getFloat3());
+        computeParameters.set_brushPositionx(0, brush.getPosition().vector[0], false);
+        computeParameters.set_brushPositiony(0, brush.getPosition().vector[1], false);
+        computeParameters.set_brushPositionz(0, brush.getPosition().vector[2], false);
 
         BristleParameters bristleParameters = brush.getBristleParameters();
 
-        script.set_planarDistanceFromHandle(bristleParameters.planarDistanceFromHandle);
-        script.set_upperControlPointLength(bristleParameters.upperControlPointLength);
-        script.set_lowerControlPointLength(bristleParameters.lowerControlPointLength);
+        computeParameters.set_planarDistanceFromHandle(0, bristleParameters.planarDistanceFromHandle, false);
 
-        script.set_sinHorizontalAngle((float) Math.sin(Math.toRadians(brush.getHorizontalAngle())));
-        script.set_cosHorizontalAngle((float) Math.cos(Math.toRadians(brush.getHorizontalAngle())));
+        computeParameters.set_planarDistanceFromHandle(0, bristleParameters.planarDistanceFromHandle, false);
+        computeParameters.set_upperControlPointLength(0, bristleParameters.upperControlPointLength, false);
+        computeParameters.set_lowerControlPointLength(0, bristleParameters.lowerControlPointLength, false);
+
+        computeParameters.set_sinHorizontalAngle(0, (float) Math.sin(Math.toRadians(brush.getHorizontalAngle())), false);
+        computeParameters.set_cosHorizontalAngle(0, (float) Math.cos(Math.toRadians(brush.getHorizontalAngle())), false);
+
+        computeParameters.copyAll();
 
         // Computes all positions
         script.invoke_compute(inBristleIndices);

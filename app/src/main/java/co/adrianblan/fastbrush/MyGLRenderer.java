@@ -218,13 +218,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
-            long startTime = System.nanoTime();
             brush.updateBrush(td);
             brush.putVertexData(physicsCompute.computeVertexData());
-
-            long endTime = System.nanoTime();
-            float newTime = (endTime - startTime) / 1000000f;
-            timeProfilerHelper.add(newTime);
 
             Matrix.setIdentityM(mBrushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
@@ -239,7 +234,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float horizontalAngle = brush.getHorizontalAngle();
             float cosHorizontalAngle = (float) Math.cos(Math.toRadians(horizontalAngle));
             float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
-
 
             Matrix.translateM(translateToBrushTip, 0,
                     -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,

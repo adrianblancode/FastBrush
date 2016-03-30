@@ -77,7 +77,7 @@ public class Brush {
         dip = Utils.getThrottledValue(dip,
                 Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1f * sizePressureFactor + 0.005f);
 
-        position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
+        position.set(touchData.position, Bristle.BASE_LENGTH - dip);
 
         xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -2f, 2f);
         yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -2f, 2f);
@@ -99,7 +99,7 @@ public class Brush {
 
         //System.out.println("hAngle: " + horizontalAngle + ", vAngle: " + verticalAngle);
 
-        brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
+        brushKey.set(verticalAngle, position.vector[3] / Bristle.BASE_LENGTH);
         bristleParameters.set(brushParamaterDatabaseHandler.getBristleParameter(brushKey));
     }
 

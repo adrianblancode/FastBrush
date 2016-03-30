@@ -6,18 +6,24 @@
 float BRUSH_BASE_LENGTH;
 float SEGMENTS_PER_BRISTLE;
 
-float3 brushPosition;
-
-float planarDistanceFromHandle;
-float upperControlPointLength;
-float lowerControlPointLength;
-
-float cosHorizontalAngle;
-float sinHorizontalAngle;
-
 float* inBristlePositionTop;
 float* inBristlePositionBottom;
 float* outBristlePosition;
+
+typedef struct ComputeParameters {
+    float brushPositionx;
+    float brushPositiony;
+    float brushPositionz;
+
+    float planarDistanceFromHandle;
+    float upperControlPointLength;
+    float lowerControlPointLength;
+
+    float cosHorizontalAngle;
+    float sinHorizontalAngle;
+} ComputeParameters_t;
+
+ComputeParameters_t* computeParameters;
 
 rs_script script;
 
@@ -29,16 +35,14 @@ void root(uchar4 *in, uint32_t x) {
     int outIndex = x * 2 * 3 * SEGMENTS_PER_BRISTLE;
 
     float3 bristlePositionTop;
-    bristlePositionTop.x = inBristlePositionTop[x * 3];
-    bristlePositionTop.y = inBristlePositionTop[x * 3 + 1];
-    bristlePositionTop.z = inBristlePositionTop[x * 3 + 2];
-    bristlePositionTop += brushPosition;
+    bristlePositionTop.x = inBristlePositionTop[x * 3] + computeParameters->brushPositionx;
+    bristlePositionTop.y = inBristlePositionTop[x * 3 + 1] + computeParameters->brushPositiony;
+    bristlePositionTop.z = inBristlePositionTop[x * 3 + 2] + computeParameters->brushPositionz;
 
     float3 bristlePositionBottom;
-    bristlePositionBottom.x = inBristlePositionBottom[x * 3];
-    bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1];
-    bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2];
-    bristlePositionBottom += brushPosition;
+    bristlePositionBottom.x = inBristlePositionBottom[x * 3] + computeParameters->brushPositionx;
+    bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1] + computeParameters->brushPositiony;
+    bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2] + computeParameters->brushPositionz;
 
     float bottom = bristlePositionBottom.z;
 
@@ -73,35 +77,35 @@ void root(uchar4 *in, uint32_t x) {
                         * bristlePositionTop.x
                 + secondFactor
                         * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
-                        * upperControlPointLength)
+                        * computeParameters->upperControlPointLength)
                 + thirdFactor
                         * (bristlePositionBottom.x
-                        + cosHorizontalAngle * planarDistanceFromHandle
-                        - cosHorizontalAngle * lowerControlPointLength)
+                        + computeParameters->cosHorizontalAngle * computeParameters->planarDistanceFromHandle
+                        - computeParameters->cosHorizontalAngle * computeParameters->lowerControlPointLength)
                 + fourthFactor
                         * (bristlePositionBottom.x
-                        + cosHorizontalAngle * planarDistanceFromHandle);
+                        + computeParameters->cosHorizontalAngle * computeParameters->planarDistanceFromHandle);
 
         interpolatedPosition.y =
                 firstFactor
                     * bristlePositionTop.y
                 + secondFactor
                     * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
-                    * upperControlPointLength)
+                    * computeParameters->upperControlPointLength)
                 + thirdFactor
                     * (bristlePositionBottom.y
-                    + sinHorizontalAngle * planarDistanceFromHandle
-                    - sinHorizontalAngle * lowerControlPointLength)
+                    + computeParameters->sinHorizontalAngle * computeParameters->planarDistanceFromHandle
+                    - computeParameters->sinHorizontalAngle * computeParameters->lowerControlPointLength)
                 + fourthFactor
                     * (bristlePositionBottom.y
-                    + sinHorizontalAngle * planarDistanceFromHandle);
+                    + computeParameters->sinHorizontalAngle * computeParameters->planarDistanceFromHandle);
 
         interpolatedPosition.z =
                 firstFactor
                     * bristlePositionTop.z
                 + secondFactor
                     * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
-                    * upperControlPointLength)
+                    * computeParameters->upperControlPointLength)
                 + thirdFactor
                     * bottom
                 + fourthFactor
