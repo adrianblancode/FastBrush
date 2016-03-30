@@ -4,6 +4,7 @@ import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
 
+import co.adrianblan.fastbrush.buffer.VertexBufferManager;
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.database.BrushKey;
 import co.adrianblan.fastbrush.database.BrushParamaterDatabaseHandler;

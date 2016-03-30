@@ -1,4 +1,4 @@
-package co.adrianblan.fastbrush.globject;
+package co.adrianblan.fastbrush.buffer;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;

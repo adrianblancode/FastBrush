@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.adrianblan.fastbrush.globject;
+package co.adrianblan.fastbrush.buffer;
 
 import android.opengl.GLES30;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import co.adrianblan.fastbrush.globject.GLobject;
+import co.adrianblan.fastbrush.globject.TexturedSquare;
 import co.adrianblan.fastbrush.utils.GLhelper;
 
 /**

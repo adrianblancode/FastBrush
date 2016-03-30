@@ -28,21 +28,18 @@ import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
-import android.util.Log;
-
-import com.google.gson.Gson;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-import co.adrianblan.fastbrush.globject.Bristle;
+import co.adrianblan.fastbrush.compute.PhysicsCompute;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
-import co.adrianblan.fastbrush.globject.BackBufferManager;
-import co.adrianblan.fastbrush.globject.BackBufferSquare;
+import co.adrianblan.fastbrush.buffer.BackBufferManager;
+import co.adrianblan.fastbrush.buffer.BackBufferSquare;
 import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.settings.SettingsData;
