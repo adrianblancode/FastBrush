@@ -35,14 +35,14 @@ void root(uchar4 *in, uint32_t x) {
     int outIndex = x * 2 * 3 * SEGMENTS_PER_BRISTLE;
 
     float3 bristlePositionTop;
-    bristlePositionTop.x = inBristlePositionTop[x * 3] + computeParameters->brushPositionx;
-    bristlePositionTop.y = inBristlePositionTop[x * 3 + 1] + computeParameters->brushPositiony;
-    bristlePositionTop.z = inBristlePositionTop[x * 3 + 2] + computeParameters->brushPositionz;
+    bristlePositionTop.x = inBristlePositionTop[x * 3] + computeParameters[0].brushPositionx;
+    bristlePositionTop.y = inBristlePositionTop[x * 3 + 1] + computeParameters[0].brushPositiony;
+    bristlePositionTop.z = inBristlePositionTop[x * 3 + 2] + computeParameters[0].brushPositionz;
 
     float3 bristlePositionBottom;
-    bristlePositionBottom.x = inBristlePositionBottom[x * 3] + computeParameters->brushPositionx;
-    bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1] + computeParameters->brushPositiony;
-    bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2] + computeParameters->brushPositionz;
+    bristlePositionBottom.x = inBristlePositionBottom[x * 3] + computeParameters[0].brushPositionx;
+    bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1] + computeParameters[0].brushPositiony;
+    bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2] + computeParameters[0].brushPositionz;
 
     float bottom = bristlePositionBottom.z;
 
@@ -77,35 +77,35 @@ void root(uchar4 *in, uint32_t x) {
                         * bristlePositionTop.x
                 + secondFactor
                         * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
-                        * computeParameters->upperControlPointLength)
+                        * computeParameters[0].upperControlPointLength)
                 + thirdFactor
                         * (bristlePositionBottom.x
-                        + computeParameters->cosHorizontalAngle * computeParameters->planarDistanceFromHandle
-                        - computeParameters->cosHorizontalAngle * computeParameters->lowerControlPointLength)
+                        + computeParameters[0].cosHorizontalAngle * computeParameters[0].planarDistanceFromHandle
+                        - computeParameters[0].cosHorizontalAngle * computeParameters[0].lowerControlPointLength)
                 + fourthFactor
                         * (bristlePositionBottom.x
-                        + computeParameters->cosHorizontalAngle * computeParameters->planarDistanceFromHandle);
+                        + computeParameters[0].cosHorizontalAngle * computeParameters[0].planarDistanceFromHandle);
 
         interpolatedPosition.y =
                 firstFactor
                     * bristlePositionTop.y
                 + secondFactor
                     * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
-                    * computeParameters->upperControlPointLength)
+                    * computeParameters[0].upperControlPointLength)
                 + thirdFactor
                     * (bristlePositionBottom.y
-                    + computeParameters->sinHorizontalAngle * computeParameters->planarDistanceFromHandle
-                    - computeParameters->sinHorizontalAngle * computeParameters->lowerControlPointLength)
+                    + computeParameters[0].sinHorizontalAngle * computeParameters[0].planarDistanceFromHandle
+                    - computeParameters[0].sinHorizontalAngle * computeParameters[0].lowerControlPointLength)
                 + fourthFactor
                     * (bristlePositionBottom.y
-                    + computeParameters->sinHorizontalAngle * computeParameters->planarDistanceFromHandle);
+                    + computeParameters[0].sinHorizontalAngle * computeParameters[0].planarDistanceFromHandle);
 
         interpolatedPosition.z =
                 firstFactor
                     * bristlePositionTop.z
                 + secondFactor
                     * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
-                    * computeParameters->upperControlPointLength)
+                    * computeParameters[0].upperControlPointLength)
                 + thirdFactor
                     * bottom
                 + fourthFactor

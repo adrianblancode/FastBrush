@@ -1,9 +1,9 @@
 package co.adrianblan.fastbrush;
 
 import android.content.Context;
-import android.support.v8.renderscript.Allocation;
-import android.support.v8.renderscript.Element;
-import android.support.v8.renderscript.RenderScript;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
 
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.globject.Bristle;
@@ -23,7 +23,9 @@ public class PhysicsCompute {
     private Allocation inAllocationBottom;
     private Allocation outAllocation;
 
-    ScriptField_ComputeParameters computeParameters;
+    private ScriptField_ComputeParameters computeParameters;
+    private ScriptField_ComputeParameters.Item computeParameterItem;
+
 
     private Brush brush;
 
@@ -67,16 +69,17 @@ public class PhysicsCompute {
             inBottom[i * 3 + 2] = bristleArray[i].bottom.vector[2];
         }
 
-        inAllocationTop = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
-        inAllocationBottom = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
+        inAllocationTop = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
+        inAllocationBottom = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * numBristles, Allocation.USAGE_SCRIPT);
 
         inAllocationTop.copyFrom(inTop);
         inAllocationBottom.copyFrom(inBottom);
 
-        outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT | Allocation.USAGE_SHARED);
+        outAllocation = Allocation.createSized(renderScript, Element.F32(renderScript), 3 * 2 * numSegments * numBristles, Allocation.USAGE_SCRIPT);
         out = new float[3 * 2 * numSegments * numBristles];
 
         computeParameters = new ScriptField_ComputeParameters(renderScript, 1);
+        computeParameterItem = new ScriptField_ComputeParameters.Item();
 
         script.bind_inBristlePositionTop(inAllocationTop);
         script.bind_inBristlePositionBottom(inAllocationBottom);
@@ -87,20 +90,20 @@ public class PhysicsCompute {
     public float[] computeVertexData() {
 
         //Set all parameters for compute script
-        computeParameters.set_brushPositionx(0, brush.getPosition().vector[0], false);
-        computeParameters.set_brushPositiony(0, brush.getPosition().vector[1], false);
-        computeParameters.set_brushPositionz(0, brush.getPosition().vector[2], false);
+        computeParameterItem.brushPositionx = brush.getPosition().vector[0];
+        computeParameterItem.brushPositiony = brush.getPosition().vector[1];
+        computeParameterItem.brushPositionz = brush.getPosition().vector[2];
 
         BristleParameters bristleParameters = brush.getBristleParameters();
 
-        computeParameters.set_planarDistanceFromHandle(0, bristleParameters.planarDistanceFromHandle, false);
+        computeParameterItem.planarDistanceFromHandle = bristleParameters.planarDistanceFromHandle;
+        computeParameterItem.upperControlPointLength = bristleParameters.upperControlPointLength;
+        computeParameterItem.lowerControlPointLength = bristleParameters.lowerControlPointLength;
 
-        computeParameters.set_planarDistanceFromHandle(0, bristleParameters.planarDistanceFromHandle, false);
-        computeParameters.set_upperControlPointLength(0, bristleParameters.upperControlPointLength, false);
-        computeParameters.set_lowerControlPointLength(0, bristleParameters.lowerControlPointLength, false);
+        computeParameterItem.cosHorizontalAngle = (float) Math.cos(Math.toRadians(brush.getHorizontalAngle()));
+        computeParameterItem.sinHorizontalAngle = (float) Math.sin(Math.toRadians(brush.getHorizontalAngle()));
 
-        computeParameters.set_sinHorizontalAngle(0, (float) Math.sin(Math.toRadians(brush.getHorizontalAngle())), false);
-        computeParameters.set_cosHorizontalAngle(0, (float) Math.cos(Math.toRadians(brush.getHorizontalAngle())), false);
+        computeParameters.set(computeParameterItem, 0, true);
 
         computeParameters.copyAll();
 
