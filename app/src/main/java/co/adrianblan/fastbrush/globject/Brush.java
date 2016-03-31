@@ -19,9 +19,9 @@ import co.adrianblan.fastbrush.vector.Vector3;
  */
 public class Brush {
 
-    public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(0.5f);
+    public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(3f);
     public static final int SEGMENTS_PER_BRISTLE = 4;
-    private static final float MAX_TILT_VERTICAL = 40f;
+    private static final float MAX_TILT_VERTICAL = 35f;
 
     private int numBristles;
     private float sizePressureFactor;
@@ -62,10 +62,12 @@ public class Brush {
         bristles = new Bristle[numBristles];
         jitter = new Vector3();
 
+        // Adds the bristles
         for(int i = 0; i < numBristles; i++){
             bristles[i] = new Bristle(settingsData);
         }
 
+        // Manages multiple vertex buffers for us
         vertexBufferManager = new VertexBufferManager(3, GLobject.DEFAULT_COORDS_PER_VERTEX * 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
         mProgram = GLES30.glCreateProgram();
@@ -73,37 +75,54 @@ public class Brush {
                 GLobject.DEFAULT_FRAGMENT_SHADER_CODE);
     }
 
+    /**
+     * Takes a TouchData object and updates the brush accordingly
+     */
     public void updateBrush(TouchData touchData) {
 
+        // How far the brush is to dip down from the highest position
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.2f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 
-        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -2f, 2f);
-        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -2f, 2f);
+        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
+        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
 
         float tiltLength = (float) Math.sqrt(xTilt * xTilt + yTilt * yTilt);
 
-        float xAngle = (float) Math.toDegrees(Math.acos(xTilt / tiltLength));
+        // Calculates the current brush angles
+        float xAngle = (float) Math.toDegrees(Math.acos(xTilt / (tiltLength + Utils.EPSILON)));
         float tempHorizontalAngle = xAngle;
 
-        if (Math.asin(yTilt / tiltLength) < 0) {
+        if (Math.asin(yTilt / (tiltLength + Utils.EPSILON)) < 0) {
             tempHorizontalAngle = Math.abs(360 - tempHorizontalAngle);
         }
 
-        horizontalAngle = tempHorizontalAngle;
+        float difference = tempHorizontalAngle - horizontalAngle;
 
+        // Make sure we wrap around 360 > 0 (and vice versa correctly)
+        if(difference < -180f) {
+            difference = 360f + difference;
+        } else if(difference > 180f) {
+            difference = difference - 360f;
+        }
+
+        horizontalAngle = ((horizontalAngle + (difference / 4f)) + 360) % 360;
+
+        // Clamp the vertical angle
         verticalAngle = Utils.clamp(
                 Utils.getThrottledValue(verticalAngle, (tiltLength / Bristle.BASE_LENGTH) * 90f, 0.01f),
                 0, MAX_TILT_VERTICAL);
 
-        //System.out.println("hAngle: " + horizontalAngle + ", vAngle: " + verticalAngle);
-
+        // Get the bristle parameters associated with the current brush state
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
         bristleParameters = brushParamaterDatabaseHandler.getBristleParameter(brushKey);
     }
 
+    /**
+     * Takes a float array and puts the vertex positions inside our vertex buffer.
+     */
     public void putVertexData(float[] bristlePositions) {
 
         vertexBufferManager.setNextBuffer();
@@ -114,6 +133,9 @@ public class Brush {
         vertexBuffer.position(0);
     }
 
+    /**
+     * Takes a mvpMatrix and a color, and draws the brush vertexes currently in our vertex buffer.
+     */
     public void draw(float[] mvpMatrix, float[] color) {
 
         // Add program to OpenGL environment

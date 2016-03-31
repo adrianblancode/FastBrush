@@ -32,7 +32,7 @@ public class Line {
     }
 
     public void draw(float[] mvpMatrix) {
-        draw(mvpMatrix, Utils.blackColor);
+        draw(mvpMatrix, Utils.BLACK_COLOR);
     }
 
     public void draw(float[] mvpMatrix, float[] color) {

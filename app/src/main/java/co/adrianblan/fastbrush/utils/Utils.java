@@ -6,8 +6,10 @@ import android.util.DisplayMetrics;
 /** Utility functions */
 public class Utils {
 
-    public static final float blackColor[] = {0f, 0f, 0f, 0.6f};
-    public static final float brownColor[] = {0.26f, 0.18f, 0.14f, 0.85f};
+    public static final float EPSILON = 0.00001f;
+
+    public static final float BLACK_COLOR[] = {0f, 0f, 0f, 0.6f};
+    public static final float BROWN_COLOR[] = {0.26f, 0.18f, 0.14f, 0.85f};
 
     public static float[] getColorWithAlpha(float[] color, float alpha) {
         float[] copy = color.clone();

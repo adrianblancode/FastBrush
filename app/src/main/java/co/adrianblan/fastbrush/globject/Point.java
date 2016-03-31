@@ -85,7 +85,7 @@ public class Point {
         mProgram = GLES20.glCreateProgram();
         GLhelper.loadShaders(mProgram, vertexShaderCode, fragmentShaderCode);
 
-        mColor = Utils.blackColor;
+        mColor = Utils.BLACK_COLOR;
     }
 
     /**

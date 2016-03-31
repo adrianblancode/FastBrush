@@ -70,58 +70,67 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final int NUM_BACK_BUFFERS = 5;
 
-    // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private final float[] mMVPMatrix = new float[16];
-    private final float[] mViewMatrix = new float[16];
-    private final float[] mProjectionMatrix = new float[16];
+    // Matrices for the camera
+    private final float[] mvpMatrix = new float[16];
+    private final float[] viewMatrix = new float[16];
+    private final float[] projectionMatrix = new float[16];
 
-    private final float[] mBrushModelMatrix = new float[16];
-    private final float[] mBrushModelOffsetMatrix = new float[16];
-    private final float[] mBrushProjectionMatrix = new float[16];
-    private final float[] mBrushViewMatrix = new float[16];
-    private final float[] mBrushMVMatrix = new float[16];
-    private final float[] mBrushMVPMatrix = new float[16];
+    // Matrices for displaying the brush
+    private final float[] brushModelMatrix = new float[16];
+    private final float[] brushModelOffsetMatrix = new float[16];
+    private final float[] brushProjectionMatrix = new float[16];
+    private final float[] brushViewMatrix = new float[16];
+    private final float[] brushMVMatrix = new float[16];
+    private final float[] brushMVPMatrix = new float[16];
 
+    // Matrices for transforming the brush
     private final float[] translateToOrigin = new float[16];
     private final float[] translateFromOrigin = new float[16];
     private final float[] translateToBrushTip = new float[16];
     private final float[] translateToImprintCenter = new float[16];
     private final float[] verticalRotationMatrix = new float[16];
 
-    private Context context;
-
-    private int mWidth;
-    private int mHeight;
-    private float mRatio;
-
-    private int[] savedPixelBuffer;
-    private int[] savedTextureArray;
+    private TouchDataManager touchDataManager;
     private SettingsManager settingsManager;
     private SettingsData settingsData;
     private PhysicsCompute physicsCompute;
     private TimeProfilerHelper timeProfilerHelper;
 
+    // Buffers
+    private BackBufferSquare backBufferSquare;
+    private BackBufferManager backBufferManager;
+    private int[] savedPixelBuffer;
+    private int[] savedTextureArray;
+
+    // Drawing objects
     private float[] color;
     private Brush brush;
     private Line line;
-    private TouchDataManager touchDataManager;
-    private BackBufferSquare backBufferSquare;
-    private BackBufferManager backBufferManager;
+
+    private Context context;
+
+    private int width;
+    private int height;
+    private float screenRatio;
+
 
     public MyGLRenderer(Context context) {
         this.context = context;
+
+        // Initialize settings
         settingsManager = SettingsManager.getInstance(context);
         settingsData = settingsManager.getSettingsData();
     }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        // Set the background frame color
+        // Clear the background
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         SharedPreferences sp = settingsManager.getSharedPreferences();
         color = settingsData.getColorWrapper().toFloatArray();
 
+        // Get touch variables
         int numTouches = sp.getInt("numTouches", 0);
         float averageTouchSize = sp.getFloat("averageTouchSize", 0);
         float minTouchSize = sp.getFloat("minTouchSize", 99999);
@@ -136,9 +145,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         physicsCompute = new PhysicsCompute(context, brush);
         timeProfilerHelper = new TimeProfilerHelper();
 
-        Matrix.setIdentityM(mBrushModelOffsetMatrix, 0);
-        Matrix.translateM(mBrushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
-        Matrix.scaleM(mBrushModelOffsetMatrix, 0, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE);
+
+        // Set the brush offset matrix for the brush side view
+        Matrix.setIdentityM(brushModelOffsetMatrix, 0);
+        Matrix.translateM(brushModelOffsetMatrix, 0, 0f, 0f, -1f + BRUSH_VIEW_PADDING_VERTICAL);
+        Matrix.scaleM(brushModelOffsetMatrix, 0, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE, BRUSH_VIEW_SCALE);
     }
 
     @Override
@@ -149,24 +160,24 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         EGL14.eglSurfaceAttrib(EGL14.eglGetCurrentDisplay(), EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW), EGL14.EGL_SWAP_BEHAVIOR, EGL14.EGL_BUFFER_PRESERVED);
 
-        mWidth = width;
-        mHeight = height;
-        mRatio = (float) width / height;
+        this.width = width;
+        this.height = height;
+        screenRatio = (float) width / height;
 
-        backBufferSquare = new BackBufferSquare(mRatio);
-        backBufferManager = new BackBufferManager(NUM_BACK_BUFFERS, mWidth, mHeight);
+        backBufferSquare = new BackBufferSquare(screenRatio);
+        backBufferManager = new BackBufferManager(NUM_BACK_BUFFERS, this.width, this.height);
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method
-        //Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
-        Matrix.orthoM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+        //Matrix.frustumM(projectionMatrix, 0, -screenRatio, screenRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
+        Matrix.orthoM(projectionMatrix, 0, -screenRatio, screenRatio, -1, 1, CAMERA_DISTANCE, CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -CAMERA_DISTANCE, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 
-        Matrix.orthoM(mBrushProjectionMatrix, 0, -mRatio, mRatio, -1, 1, CAMERA_DISTANCE,
+        Matrix.orthoM(brushProjectionMatrix, 0, -screenRatio, screenRatio, -1, 1, CAMERA_DISTANCE,
                 CAMERA_DISTANCE * CAMERA_DISTANCE_FAR_SCALE);
 
         // Bind standard buffer
@@ -188,7 +199,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             reconfigureSettingsChanges();
         }
 
-        GLES30.glViewport(0, 0, mWidth, mHeight);
+        GLES30.glViewport(0, 0, width, height);
 
         // Bind back buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, backBufferManager.getFrameBuffer());
@@ -223,20 +234,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float newTime = (endTime - startTime) / 1000000f;
             timeProfilerHelper.add(newTime);
 
-            Matrix.setIdentityM(mBrushModelMatrix, 0);
+            Matrix.setIdentityM(brushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
             Matrix.setIdentityM(translateFromOrigin, 0);
             Matrix.setIdentityM(translateToBrushTip, 0);
             Matrix.setIdentityM(translateToImprintCenter, 0);
             Matrix.setIdentityM(verticalRotationMatrix, 0);
 
+            /**
+             * Start model matrix transformations, first to translate brush it's tip,
+             * then to rotate it vertically, and lastly move it to the center of the imprint.
+             */
             Matrix.translateM(translateToOrigin, 0, -brush.getPosition().vector[0],
                     -brush.getPosition().vector[1], 0);
 
             float horizontalAngle = brush.getHorizontalAngle();
             float cosHorizontalAngle = (float) Math.cos(Math.toRadians(horizontalAngle));
             float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
-
 
             Matrix.translateM(translateToBrushTip, 0,
                     -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
@@ -251,22 +265,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, translateToOrigin, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, translateToBrushTip, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, verticalRotationMatrix, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, translateToImprintCenter, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, translateFromOrigin, 0, brushModelMatrix, 0);
 
-            // Translate the brush to origin, then imprint center so we can rotate around it
-            // Lastly translate back to origin with imprint center still as center
-            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToOrigin, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToBrushTip, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushModelMatrix, 0, verticalRotationMatrix, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushModelMatrix, 0, translateToImprintCenter, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushModelMatrix, 0, translateFromOrigin, 0, mBrushModelMatrix, 0);
+            // Add model matrix to camera matrices
+            Matrix.multiplyMM(brushMVMatrix, 0, viewMatrix, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushMVPMatrix, 0, projectionMatrix, 0, brushMVMatrix, 0);
 
-            Matrix.multiplyMM(mBrushMVMatrix, 0, mViewMatrix, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushMVPMatrix, 0, mProjectionMatrix, 0, mBrushMVMatrix, 0);
-
-            brush.draw(mBrushMVPMatrix, color);
+            brush.draw(brushMVPMatrix, color);
         }
-
-        //Log.d("FastBrush time: ", (timeProfilerHelper.getAverage()) + "ms");
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
@@ -280,42 +290,42 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         // Draw render texture to default buffer
-        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+        backBufferSquare.draw(mvpMatrix, backBufferManager.getTextureBuffer());
 
         /** Draw Brush Head **/
         if(settingsData.isShowBrushView()
                 && touchDataManager.hasTouchData() && !touchDataManager.hasTouchEnded()) {
             GLES30.glLineWidth(Utils.convertPixelsToDp(20f));
-            brush.draw(mBrushMVPMatrix, Utils.brownColor);
+            brush.draw(brushMVPMatrix, Utils.BROWN_COLOR);
         }
 
         /** Draw Brush View **/
         if(settingsData.isShowBrushView() && !touchDataManager.hasTouchEnded()) {
 
             // Draw brush view line
-            Matrix.setLookAtM(mBrushViewMatrix, 0,
-                    0 - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
-                    0 - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
+            Matrix.setLookAtM(brushViewMatrix, 0,
+                    0 - screenRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
+                    0 - screenRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
-            Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelOffsetMatrix, 0);
-            Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
+            Matrix.multiplyMM(brushMVMatrix, 0, brushViewMatrix, 0, brushModelOffsetMatrix, 0);
+            Matrix.multiplyMM(brushMVPMatrix, 0, brushProjectionMatrix, 0, brushMVMatrix, 0);
 
-            GLES30.glLineWidth(Utils.convertPixelsToDp(30f));
-            line.draw(mBrushMVPMatrix, Utils.brownColor);
+            GLES30.glLineWidth(Utils.convertPixelsToDp(15f));
+            line.draw(brushMVPMatrix, Utils.BROWN_COLOR);
 
-            // Draw brush view brush
-            Matrix.setLookAtM(mBrushViewMatrix, 0,
-                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
-                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - mRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
+            // Draw brush side view brush
+            Matrix.setLookAtM(brushViewMatrix, 0,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - screenRatio + BRUSH_VIEW_PADDING_HORIZONTAL, CAMERA_DISTANCE + 1.0f, 0f,
+                    (brush.getPosition().getX() * BRUSH_VIEW_SCALE) - screenRatio + BRUSH_VIEW_PADDING_HORIZONTAL, 0f, 0f,
                     0f, 0.0f, 1.0f);
 
-            Matrix.multiplyMM(mBrushModelMatrix, 0, mBrushModelOffsetMatrix, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushMVMatrix, 0, mBrushViewMatrix, 0, mBrushModelMatrix, 0);
-            Matrix.multiplyMM(mBrushMVPMatrix, 0, mBrushProjectionMatrix, 0, mBrushMVMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, brushModelOffsetMatrix, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushMVMatrix, 0, brushViewMatrix, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushMVPMatrix, 0, brushProjectionMatrix, 0, brushMVMatrix, 0);
 
             GLES30.glLineWidth(Brush.BRUSH_VIEW_BRISTLE_THICKNESS);
-            brush.draw(mBrushMVPMatrix, Utils.brownColor);
+            brush.draw(brushMVPMatrix, Utils.BROWN_COLOR);
 
         }
 
@@ -365,7 +375,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         // Draw current render texture to next back buffer
-        backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+        backBufferSquare.draw(mvpMatrix, backBufferManager.getTextureBuffer());
         backBufferManager.setNextBuffer();
     }
 
@@ -410,7 +420,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
             // Draw current render texture to main buffer
-            backBufferSquare.draw(mMVPMatrix, backBufferManager.getTextureBuffer());
+            backBufferSquare.draw(mvpMatrix, backBufferManager.getTextureBuffer());
         }
     }
 
@@ -424,8 +434,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     /** Translates a viewport vector to world vector */
     public Vector2 viewportToWorld(Vector2 vec) {
-        float worldX = -(2 * (vec.getX() / mWidth) - 1) * mRatio;
-        float worldY = -(2 * (vec.getY() / mHeight) - 1);
+        float worldX = -(2 * (vec.getX() / width) - 1) * screenRatio;
+        float worldY = -(2 * (vec.getY() / height) - 1);
 
         return new Vector2(worldX, worldY);
     }
@@ -442,12 +452,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Bitmap createBitmapFromPixelBuffer(int[] pixelBuffer) {
 
         // Create bitmap of the default buffer
-        Bitmap brushBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_4444);
-        brushBitmap.setPixels(pixelBuffer, (mWidth * mHeight) - mWidth, -mWidth, 0, 0, mWidth, mHeight);
+        Bitmap brushBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+        brushBitmap.setPixels(pixelBuffer, (width * height) - width, -width, 0, 0, width, height);
 
         // Create bitmap of the background buffer
         Bitmap backgroundTexture = BitmapFactory.decodeResource(context.getResources(), R.drawable.paperbright);
-        Bitmap backgroundTextureScaled = Bitmap.createScaledBitmap(backgroundTexture, mWidth, mHeight, true);
+        Bitmap backgroundTextureScaled = Bitmap.createScaledBitmap(backgroundTexture, width, height, true);
 
         // Create a canvas for compositing the two images
         Canvas canvasImage = new Canvas(backgroundTextureScaled);
@@ -463,13 +473,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
         GLES30.glBindRenderbuffer(GLES30.GL_RENDERBUFFER, 0);
 
-        ByteBuffer bb = ByteBuffer.allocateDirect(mWidth * mHeight * 4);
+        ByteBuffer bb = ByteBuffer.allocateDirect(width * height * 4);
         bb.order(ByteOrder.nativeOrder());
 
         // Read the pixels from the default buffer
-        GLES30.glReadPixels(0, 0, mWidth, mHeight, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, bb);
+        GLES30.glReadPixels(0, 0, width, height, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, bb);
 
-        int pixelBuffer[] = new int[mWidth * mHeight];
+        int pixelBuffer[] = new int[width * height];
         bb.asIntBuffer().get(pixelBuffer);
 
         return pixelBuffer;
@@ -486,9 +496,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES30.glGenTextures(1, savedTextureArray, 0);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, savedTextureArray[0]);
 
-        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, mWidth, mHeight, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, IntBuffer.wrap(pixelBuffer));
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, width, height, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, IntBuffer.wrap(pixelBuffer));
 
-        backBufferSquare.draw(mMVPMatrix, savedTextureArray[0]);
+        backBufferSquare.draw(mvpMatrix, savedTextureArray[0]);
     }
 
     /** Whenever new settings changes are made, this methods reconfigures the affected objects */
@@ -504,6 +514,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onPause() {
         if(settingsManager != null && touchDataManager != null) {
 
+            // Save settings
             SharedPreferences.Editor editor = settingsManager.getSharedPreferences().edit();
             editor.putInt("numTouches", touchDataManager.getNumTouches());
             editor.putFloat("averageTouchSize", touchDataManager.getAverageTouchSize());

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.utils.Utils;
+import co.adrianblan.fastbrush.vector.Vector2;
 
 /**
  * Class which contains TouchData objects and methods.
@@ -47,7 +48,11 @@ public class TouchDataManager {
         } else {
 
             float distance = touchData.getPosition().distance(prevTouchData.getPosition());
+
+            // parent touch data is the last data from the previous event
             TouchData parentTouchData = prevTouchData;
+
+            // prev touch data is the last data from both the previous and current event
             TouchData prevInterpolatedTouchData = parentTouchData;
 
             int maxInterpolations = (int) (distance / MIN_DISTANCE);
@@ -58,8 +63,7 @@ public class TouchDataManager {
                 for (int i = 0; i < maxInterpolations; i++) {
 
                     prevInterpolatedTouchData = getInterpolatedTouchData(touchData, parentTouchData,
-                            prevInterpolatedTouchData.getSize(), prevInterpolatedTouchData.getPressure(),
-                            i, maxInterpolations);
+                            prevInterpolatedTouchData, i, maxInterpolations);
 
                     add(prevInterpolatedTouchData);
                 }
@@ -68,10 +72,12 @@ public class TouchDataManager {
 
             if(distance < MIN_DISTANCE && !touchIsEnding) {
                 // Throttle values so that they do not increase too quickly
-                float size = Utils.getThrottledValue(parentTouchData.getSize(), touchData.getSize(), 0.01f);
-                float pressure = Utils.getThrottledValue(parentTouchData.getPressure(), touchData.getPressure());
+                float size = Utils.getThrottledValue(prevInterpolatedTouchData.getSize(), touchData.getSize(), 0.01f);
+                float pressure = Utils.getThrottledValue(prevInterpolatedTouchData.getPressure(), touchData.getPressure());
+                float xv = Utils.getThrottledValue(prevInterpolatedTouchData.velocity.x, touchData.velocity.x);
+                float yv = Utils.getThrottledValue(prevInterpolatedTouchData.velocity.y, touchData.velocity.y);
 
-                TouchData td = new TouchData(touchData.getPosition(), touchData.getVelocity(), size, pressure);
+                TouchData td = new TouchData(touchData.getPosition(), new Vector2(xv, yv), size, pressure);
 
                 add(td);
             }
@@ -82,15 +88,14 @@ public class TouchDataManager {
      * Cretates an interpolated TouchData object.
      *
      * @param touchData the TouchData object to interpolate to
-     * @param parentTouchData the TouchData object to interpolate position from
-     * @param prevSize the size to interpolate from
-     * @param prevPressure the pressure to interpolate from
+     * @param parentTouchData the last TouchData object from the last touch event
+     * @param prevIntepolatedTouchData the last TouchData object from the current touch event
      * @param interpolation the current interpolation
      * @param maxInterpolations the maximum number of interpolations
      * @return
      */
     private TouchData getInterpolatedTouchData(TouchData touchData, TouchData parentTouchData,
-                                          float prevSize, float prevPressure,
+                                          TouchData prevIntepolatedTouchData,
                                           int interpolation, int maxInterpolations) {
 
         float interpolationScale = (interpolation + 1f) / ((float) maxInterpolations + 1f);
@@ -101,13 +106,11 @@ public class TouchDataManager {
         float y = parentTouchData.position.y + (touchData.position.y - parentTouchData.position.y)
                 * interpolationScale;
 
-        float xv = parentTouchData.velocity.x + (touchData.velocity.x - parentTouchData.velocity.x)
-                * interpolationScale;
-        float yv = parentTouchData.velocity.y + (touchData.velocity.y - parentTouchData.velocity.y) *
-                interpolationScale;
+        float xv = Utils.getThrottledValue(prevIntepolatedTouchData.velocity.x, touchData.velocity.x);
+        float yv = Utils.getThrottledValue(prevIntepolatedTouchData.velocity.y, touchData.velocity.y);
 
-        float size = Utils.getThrottledValue(prevSize, touchData.getSize(), 0.01f);
-        float pressure  = Utils.getThrottledValue(prevPressure, touchData.getPressure());
+        float size = Utils.getThrottledValue(prevIntepolatedTouchData.getSize(), touchData.getSize(), 0.01f);
+        float pressure  = Utils.getThrottledValue(prevIntepolatedTouchData.getPressure(), touchData.getPressure());
 
         TouchData interpolatedTouchData = new TouchData(x, y, xv, yv, size, pressure);
 
