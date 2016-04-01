@@ -40,6 +40,7 @@ public class PhysicsCompute {
 
         script.set_BRUSH_BASE_LENGTH(Bristle.BASE_LENGTH);
         script.set_SEGMENTS_PER_BRISTLE(Brush.SEGMENTS_PER_BRISTLE);
+        script.set_BRUSH_RADIUS_UPPER(Bristle.BRUSH_RADIUS_UPPER);
         script.set_script(script);
 
         int numBristles = brush.getBristles().length;
@@ -91,8 +92,8 @@ public class PhysicsCompute {
         script.set_upperControlPointLength(bristleParameters.upperControlPointLength);
         script.set_lowerControlPointLength(bristleParameters.lowerControlPointLength);
 
-        script.set_sinHorizontalAngle((float) Math.sin(Math.toRadians(brush.getHorizontalAngle())));
-        script.set_cosHorizontalAngle((float) Math.cos(Math.toRadians(brush.getHorizontalAngle())));
+        script.set_brushHorizontalAngle((float) Math.toRadians(brush.getHorizontalAngle()));
+        script.set_bristleHorizontalMaxAngle((float) Math.toRadians(bristleParameters.bristleHorizontalAngle));
 
         // Computes all positions
         script.invoke_compute(inBristleIndices);

@@ -5,6 +5,7 @@
 // Script globals
 float BRUSH_BASE_LENGTH;
 float SEGMENTS_PER_BRISTLE;
+float BRUSH_RADIUS_UPPER;
 
 float3 brushPosition;
 
@@ -12,8 +13,9 @@ float planarDistanceFromHandle;
 float upperControlPointLength;
 float lowerControlPointLength;
 
-float cosHorizontalAngle;
-float sinHorizontalAngle;
+// The angle of the brush rotation, and the maximum bristle spread angle (in radians)
+float brushHorizontalAngle;
+float bristleHorizontalMaxAngle;
 
 float* inBristlePositionTop;
 float* inBristlePositionBottom;
@@ -39,6 +41,17 @@ void root(uchar4 *in, uint32_t x) {
     bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1];
     bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2];
     bristlePositionBottom += brushPosition;
+
+    float bristleHorizontalAngleRatio =
+        inBristlePositionTop[x * 3] / (BRUSH_RADIUS_UPPER / 2.0f);
+    float bristleVerticalAngleRatio =
+        inBristlePositionTop[x * 3 + 1] / (BRUSH_RADIUS_UPPER / 2.0f);
+
+    float sinBrushHorizontalAngle = sin(brushHorizontalAngle
+        + bristleHorizontalAngleRatio * bristleHorizontalMaxAngle);
+
+    float cosBrushHorizontalAngle = cos(brushHorizontalAngle
+        + bristleHorizontalAngleRatio * bristleHorizontalMaxAngle);
 
     float bottom = bristlePositionBottom.z;
 
@@ -76,11 +89,11 @@ void root(uchar4 *in, uint32_t x) {
                         * upperControlPointLength)
                 + thirdFactor
                         * (bristlePositionBottom.x
-                        + cosHorizontalAngle * planarDistanceFromHandle
-                        - cosHorizontalAngle * lowerControlPointLength)
+                        + cosBrushHorizontalAngle * planarDistanceFromHandle
+                        - cosBrushHorizontalAngle * lowerControlPointLength)
                 + fourthFactor
                         * (bristlePositionBottom.x
-                        + cosHorizontalAngle * planarDistanceFromHandle);
+                        + cosBrushHorizontalAngle * planarDistanceFromHandle);
 
         interpolatedPosition.y =
                 firstFactor
@@ -90,11 +103,11 @@ void root(uchar4 *in, uint32_t x) {
                     * upperControlPointLength)
                 + thirdFactor
                     * (bristlePositionBottom.y
-                    + sinHorizontalAngle * planarDistanceFromHandle
-                    - sinHorizontalAngle * lowerControlPointLength)
+                    + sinBrushHorizontalAngle * planarDistanceFromHandle
+                    - sinBrushHorizontalAngle * lowerControlPointLength)
                 + fourthFactor
                     * (bristlePositionBottom.y
-                    + sinHorizontalAngle * planarDistanceFromHandle);
+                    + sinBrushHorizontalAngle * planarDistanceFromHandle);
 
         interpolatedPosition.z =
                 firstFactor
