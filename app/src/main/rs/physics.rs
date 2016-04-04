@@ -3,7 +3,7 @@
 #pragma rs_fp_relaxed
 
 // Script globals
-float BRUSH_BASE_LENGTH;
+float BRISTLE_BASE_LENGTH;
 float SEGMENTS_PER_BRISTLE;
 float BRUSH_RADIUS_UPPER;
 
@@ -23,8 +23,7 @@ float* outBristlePosition;
 
 rs_script script;
 
-void init() {
-}
+void init() {}
 
 void root(uchar4 *in, uint32_t x) {
 
@@ -42,22 +41,31 @@ void root(uchar4 *in, uint32_t x) {
     bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2];
     bristlePositionBottom += brushPosition;
 
-    float bristleHorizontalAngleRatio =
-        inBristlePositionTop[x * 3] / (BRUSH_RADIUS_UPPER / 2.0f);
-    float bristleVerticalAngleRatio =
-        inBristlePositionTop[x * 3 + 1] / (BRUSH_RADIUS_UPPER / 2.0f);
+    float bristleLength = fast_distance(bristlePositionTop, bristlePositionBottom);
 
-    float sinBrushHorizontalAngle = sin(brushHorizontalAngle
-        + bristleHorizontalAngleRatio * bristleHorizontalMaxAngle);
+    float bristleHorizontalRatio =
+        inBristlePositionTop[x * 3] / BRUSH_RADIUS_UPPER;
+    float bristleVerticalRatio =
+        inBristlePositionTop[x * 3 + 1] / BRUSH_RADIUS_UPPER;
 
-    float cosBrushHorizontalAngle = cos(brushHorizontalAngle
-        + bristleHorizontalAngleRatio * bristleHorizontalMaxAngle);
+    bristleHorizontalMaxAngle = 3.14f / 8.0f;
 
-    float bottom = bristlePositionBottom.z;
+    float2 bristleVector = (bristleHorizontalRatio, bristleVerticalRatio);
+    bristleVector = normalize(bristleVector);
 
-    if(bottom < 0) {
-        bottom = 0;
-    }
+    float2 brushAngleVector = (cos(brushHorizontalAngle), sin(brushHorizontalAngle));
+    brushAngleVector = normalize(brushAngleVector);
+
+    float bristleShiftMagnitude = 1.0f - fabs(dot(brushAngleVector, bristleVector));
+
+    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle
+        * (bristleLength / BRISTLE_BASE_LENGTH);
+
+    float sinBrushHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
+    float cosBrushHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);
+
+    // Takes positive bottom positions
+    float bottom = fmax(bristlePositionBottom.z, 0);
 
     float3 interpolatedPosition = bristlePositionTop;
     float scale;
@@ -66,8 +74,6 @@ void root(uchar4 *in, uint32_t x) {
     float thirdFactor;
     float fourthFactor;
 
-    float length = distance(bristlePositionTop, bristlePositionBottom);
-
     for(int i = 1; i <= SEGMENTS_PER_BRISTLE; i++) {
 
         outBristlePosition[outIndex] = interpolatedPosition.x;
@@ -75,50 +81,47 @@ void root(uchar4 *in, uint32_t x) {
         outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
 
-        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (length / BRUSH_BASE_LENGTH);
+        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (bristleLength / BRISTLE_BASE_LENGTH);
         firstFactor = (1 - scale) * (1 - scale) * (1 - scale);
         secondFactor = 3 * (1 - scale) * (1 - scale) * scale;
         thirdFactor = 3 * (1 - scale) * scale * scale;
         fourthFactor = scale * scale * scale;
 
+        // We do not perform any "rotation", we simply choose the extended bristles from their angle
         interpolatedPosition.x =
-                firstFactor
-                        * bristlePositionTop.x
-                + secondFactor
-                        * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
-                        * upperControlPointLength)
-                + thirdFactor
-                        * (bristlePositionBottom.x
-                        + cosBrushHorizontalAngle * planarDistanceFromHandle
-                        - cosBrushHorizontalAngle * lowerControlPointLength)
-                + fourthFactor
-                        * (bristlePositionBottom.x
-                        + cosBrushHorizontalAngle * planarDistanceFromHandle);
+            firstFactor
+                * bristlePositionTop.x
+            + secondFactor
+                * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
+                * upperControlPointLength)
+            + thirdFactor
+                * (bristlePositionBottom.x
+                    + cosBrushHorizontalValue * (planarDistanceFromHandle - lowerControlPointLength))
+            + fourthFactor
+                * (bristlePositionBottom.x + cosBrushHorizontalValue * planarDistanceFromHandle);
 
         interpolatedPosition.y =
-                firstFactor
-                    * bristlePositionTop.y
-                + secondFactor
-                    * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
-                    * upperControlPointLength)
-                + thirdFactor
-                    * (bristlePositionBottom.y
-                    + sinBrushHorizontalAngle * planarDistanceFromHandle
-                    - sinBrushHorizontalAngle * lowerControlPointLength)
-                + fourthFactor
-                    * (bristlePositionBottom.y
-                    + sinBrushHorizontalAngle * planarDistanceFromHandle);
+            firstFactor
+                * bristlePositionTop.y
+            + secondFactor
+                * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
+                * upperControlPointLength)
+            + thirdFactor
+                * (bristlePositionBottom.y
+                    + sinBrushHorizontalValue * (planarDistanceFromHandle - lowerControlPointLength))
+            + fourthFactor
+                * (bristlePositionBottom.y + sinBrushHorizontalValue * planarDistanceFromHandle);
 
         interpolatedPosition.z =
-                firstFactor
-                    * bristlePositionTop.z
-                + secondFactor
-                    * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
-                    * upperControlPointLength)
-                + thirdFactor
-                    * bottom
-                + fourthFactor
-                    * bottom;
+            firstFactor
+                * bristlePositionTop.z
+            + secondFactor
+                * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
+                * upperControlPointLength)
+            + thirdFactor
+                * bottom
+            + fourthFactor
+                * bottom;
 
         outBristlePosition[outIndex] = interpolatedPosition.x;
         outBristlePosition[outIndex + 1] = interpolatedPosition.y;

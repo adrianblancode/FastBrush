@@ -39,12 +39,12 @@ public class BristleParameters {
 
     public void set(float planarDistanceFromHandle, float planarImprintLength,
                     float upperControlPointLength, float lowerControlPointLength,
-                    float horizontalAngle) {
+                    float bristleHorizontalAngle) {
         this.planarDistanceFromHandle = planarDistanceFromHandle;
         this.planarImprintLength = planarImprintLength;
         this.upperControlPointLength = upperControlPointLength;
         this.lowerControlPointLength = lowerControlPointLength;
-        this.bristleHorizontalAngle = horizontalAngle;
+        this.bristleHorizontalAngle = bristleHorizontalAngle;
     }
 
     public float getPlanarImprintLength() {

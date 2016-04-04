@@ -50,6 +50,8 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
+        //numBristles = 5;
+
         sizePressureFactor = settingsData.getPressureFactor();
 
         position = new Vector3();
@@ -86,6 +88,9 @@ public class Brush {
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 
+        // TODO remove
+        position.addX(0.4f);
+
         xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
         yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
 
@@ -108,6 +113,7 @@ public class Brush {
             difference = difference - 360f;
         }
 
+        // Angle in degrees
         horizontalAngle = ((horizontalAngle + (difference / 4f)) + 360) % 360;
 
         // Clamp the vertical angle

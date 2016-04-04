@@ -38,9 +38,9 @@ public class PhysicsCompute {
         renderScript = RenderScript.create(context);
         script = new ScriptC_physics(renderScript);
 
-        script.set_BRUSH_BASE_LENGTH(Bristle.BASE_LENGTH);
+        script.set_BRISTLE_BASE_LENGTH(Bristle.BASE_LENGTH);
         script.set_SEGMENTS_PER_BRISTLE(Brush.SEGMENTS_PER_BRISTLE);
-        script.set_BRUSH_RADIUS_UPPER(Bristle.BRUSH_RADIUS_UPPER);
+        script.set_BRUSH_RADIUS_UPPER(Bristle.radiusUpper);
         script.set_script(script);
 
         int numBristles = brush.getBristles().length;

@@ -14,6 +14,9 @@ public class Bristle {
     private static final float BRUSH_RADIUS_LOWER = 0.27f;
     private static final float MIN_SIZE_SCALE = 0.1f;
 
+    public static float radiusUpper = BRUSH_RADIUS_UPPER;
+    public static float radiusLower = BRUSH_RADIUS_LOWER;
+
     public float length;
     public Vector3 top;
     public Vector3 bottom;
@@ -21,8 +24,8 @@ public class Bristle {
 
     public Bristle(SettingsData settingsData) {
 
-        float radiusUpper = BRUSH_RADIUS_UPPER * (settingsData.getSize() + MIN_SIZE_SCALE);
-        float radiusLower = BRUSH_RADIUS_LOWER * (settingsData.getSize() + MIN_SIZE_SCALE);
+        radiusUpper = BRUSH_RADIUS_UPPER * (settingsData.getSize() + MIN_SIZE_SCALE);
+        radiusLower = BRUSH_RADIUS_LOWER * (settingsData.getSize() + MIN_SIZE_SCALE);
 
         float radiusAngle = (float) (Math.random() * 2f * Math.PI);
         float radiusLength = (float) Math.random();
