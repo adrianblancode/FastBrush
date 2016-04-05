@@ -31,6 +31,16 @@
             android:orientation="vertical">
 
             <ImageButton
+                android:id="@+id/button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingLeft="@dimen/icon_padding"
+                android:paddingRight="@dimen/icon_padding"
+                android:background="@null"
+                android:src="@drawable/ic_save_white_24dp"/>
+
+            <ImageButton
                 android:id="@+id/button_brush"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
@@ -50,16 +60,6 @@
                 android:paddingRight="@dimen/icon_padding"
                 android:background="@null"
                 android:src="@drawable/ic_opacity_white_24dp"/>
-
-            <ImageButton
-                android:id="@+id/button_save"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingLeft="@dimen/icon_padding"
-                android:paddingRight="@dimen/icon_padding"
-                android:background="@null"
-                android:src="@drawable/ic_save_white_24dp"/>
 
             <ImageButton
                 android:id="@+id/button_delete"

@@ -15,12 +15,16 @@ public class BristleParameters {
     public float upperControlPointLength;
     public float lowerControlPointLength;
 
+    // Angle of the maximum spread of the bristles
+    public float bristleHorizontalAngle;
+
     public BristleParameters() {}
 
     public BristleParameters(float planarDistanceFromHandle, float planarImprintLength,
-                             float upperControlPointLength, float lowerControlPointLength) {
+                             float upperControlPointLength, float lowerControlPointLength,
+                             float bristleHorizontalAngle) {
         set(planarDistanceFromHandle, planarImprintLength,
-                upperControlPointLength, lowerControlPointLength);
+                upperControlPointLength, lowerControlPointLength, bristleHorizontalAngle);
     }
 
     public BristleParameters(BristleParameters b) {
@@ -29,15 +33,18 @@ public class BristleParameters {
 
     public void set(BristleParameters b) {
         set(b.getPlanarDistanceFromHandle(), b.getPlanarImprintLength(),
-                b.getUpperControlPointLength(), b.getLowerControlPointLength());
+                b.getUpperControlPointLength(), b.getLowerControlPointLength(),
+                b.getBristleHorizontalAngle());
     }
 
     public void set(float planarDistanceFromHandle, float planarImprintLength,
-                    float upperControlPointLength, float lowerControlPointLength) {
+                    float upperControlPointLength, float lowerControlPointLength,
+                    float bristleHorizontalAngle) {
         this.planarDistanceFromHandle = planarDistanceFromHandle;
         this.planarImprintLength = planarImprintLength;
         this.upperControlPointLength = upperControlPointLength;
         this.lowerControlPointLength = lowerControlPointLength;
+        this.bristleHorizontalAngle = bristleHorizontalAngle;
     }
 
     public float getPlanarImprintLength() {
@@ -70,6 +77,14 @@ public class BristleParameters {
 
     public void setLowerControlPointLength(float lowerControlPointLength) {
         this.lowerControlPointLength = lowerControlPointLength;
+    }
+
+    public float getBristleHorizontalAngle() {
+        return bristleHorizontalAngle;
+    }
+
+    public void setBristleHorizontalAngle(float bristleHorizontalAngle) {
+        this.bristleHorizontalAngle = bristleHorizontalAngle;
     }
 
     @Override

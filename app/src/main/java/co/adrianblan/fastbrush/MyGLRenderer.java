@@ -256,7 +256,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                     -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
                     -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0.03f);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.35f,
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.30f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
@@ -379,7 +379,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         backBufferManager.setNextBuffer();
     }
 
-    /** Clears all the ArrayList of Point of all objects*/
+    /** Indicates that the touch data has ended, clears the array and adds the last TouchData */
     public void touchHasEnded() {
 
         touchDataManager.clear();

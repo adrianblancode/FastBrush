@@ -104,10 +104,8 @@ public class BrushDialogFragment extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float result = progress / 100f;
 
-                if(progress > 0) {
-                    settingsData.setSize(result);
-                    brushSizeSubtitle.setText(String.valueOf(result));
-                }
+                settingsData.setSize(result);
+                brushSizeSubtitle.setText(String.valueOf(result));
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}

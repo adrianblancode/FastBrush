@@ -17,48 +17,48 @@ public class BrushParamaterDatabaseHandler {
     private void init() {
 
         // Neutral
-        brushParameterDatabase.put(new BrushKey(0, 1), new BristleParameters(0f, 0f, 1f, 0f));
+        brushParameterDatabase.put(new BrushKey(0, 1), new BristleParameters(0f, 0f, 1f, 0f, 0f));
 
         // Neutral pressure 1
-        brushParameterDatabase.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f, 0.98f, 0.1f));
+        brushParameterDatabase.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f, 0.98f, 0.1f, 0f));
 
         // Neutral pressure 2
-        brushParameterDatabase.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f, 0.60f, 0.42f));
+        brushParameterDatabase.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f, 0.60f, 0.42f, 0f));
 
         // Neutral pressure 3
-        brushParameterDatabase.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f, 0.41f, 0.71f));
+        brushParameterDatabase.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f, 0.41f, 0.71f, 10));
 
         // Neutral pressure 4
-        brushParameterDatabase.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f));
+        brushParameterDatabase.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f, 15));
 
         // Neutral pressure 5
-        brushParameterDatabase.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f));
+        brushParameterDatabase.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f, 22));
 
 
         // Front neutral
-        brushParameterDatabase.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0f, 1f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
 
         // Front pressure 1
-        brushParameterDatabase.put(new BrushKey(45f, 0.97f), new BristleParameters(0.03f, 0f, 1f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 0.97f), new BristleParameters(0.03f, 0f, 1f, 0f, 0f));
 
         // Front pressure 2
-        brushParameterDatabase.put(new BrushKey(45f, 0.85f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 0.85f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f, 0f));
 
         // Front pressure 3
-        brushParameterDatabase.put(new BrushKey(45f, 0.68f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 0.68f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f, 0f));
 
         // Front pressure 4
-        brushParameterDatabase.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f, 5));
 
         // Front pressure 5
-        brushParameterDatabase.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f));
+        brushParameterDatabase.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f, 15));
 
 
         // Front pressure extreme 1
-        brushParameterDatabase.put(new BrushKey(90f, 1f), new BristleParameters(0f, 0f, 1f, 0f));
+        brushParameterDatabase.put(new BrushKey(90f, 1f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
 
         // Front pressure extreme 2
-        brushParameterDatabase.put(new BrushKey(90f, 0f), new BristleParameters(0f, 0f, 1f, 0f));
+        brushParameterDatabase.put(new BrushKey(90f, 0f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
 
         /**
         // Back neutral
@@ -169,15 +169,18 @@ public class BrushParamaterDatabaseHandler {
     private BristleParameters getInterpolatedValue(BristleParameters first, BristleParameters second, float scale) {
         BristleParameters interpolatedValue = new BristleParameters();
 
-        interpolatedValue.planarDistanceFromHandle = (first.planarDistanceFromHandle
-                + (second.planarDistanceFromHandle - first.planarDistanceFromHandle) * scale);
-        interpolatedValue.planarImprintLength = (first.planarImprintLength
-                + (second.planarImprintLength - first.planarImprintLength) * scale);
+        interpolatedValue.planarDistanceFromHandle = first.planarDistanceFromHandle
+                + (second.planarDistanceFromHandle - first.planarDistanceFromHandle) * scale;
+        interpolatedValue.planarImprintLength = first.planarImprintLength
+                + (second.planarImprintLength - first.planarImprintLength) * scale;
 
-        interpolatedValue.upperControlPointLength = (first.upperControlPointLength
-                + (second.upperControlPointLength - first.upperControlPointLength) * scale);
-        interpolatedValue.lowerControlPointLength = (first.lowerControlPointLength
-                + (second.lowerControlPointLength - first.lowerControlPointLength) * scale);
+        interpolatedValue.upperControlPointLength = first.upperControlPointLength
+                + (second.upperControlPointLength - first.upperControlPointLength) * scale;
+        interpolatedValue.lowerControlPointLength = first.lowerControlPointLength
+                + (second.lowerControlPointLength - first.lowerControlPointLength) * scale;
+
+        interpolatedValue.bristleHorizontalAngle = first.bristleHorizontalAngle
+                + (second.bristleHorizontalAngle - first.bristleHorizontalAngle) * scale;
 
         return interpolatedValue;
     }

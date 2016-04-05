@@ -41,6 +41,7 @@ public class BrushKey {
         if (!(obj instanceof BrushKey)) {
             return false;
         } else if (obj == this) {
+            // We return true if we compare an object with itself
             return true;
         }
 
