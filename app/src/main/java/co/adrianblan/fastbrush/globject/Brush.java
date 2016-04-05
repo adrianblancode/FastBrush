@@ -21,7 +21,7 @@ public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(3f);
     public static final int SEGMENTS_PER_BRISTLE = 4;
-    private static final float MAX_TILT_VERTICAL = 35f;
+    private static final float MAX_TILT_VERTICAL = 30f;
 
     private int numBristles;
     private float sizePressureFactor;
@@ -50,7 +50,7 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
-        //numBristles = 5;
+        //numBristles = 2;
 
         sizePressureFactor = settingsData.getPressureFactor();
 
@@ -84,12 +84,12 @@ public class Brush {
 
         // How far the brush is to dip down from the highest position
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.2f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 2.0f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
 
         // TODO remove
-        position.addX(0.4f);
+        position.addX(0.5f);
 
         xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
         yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);

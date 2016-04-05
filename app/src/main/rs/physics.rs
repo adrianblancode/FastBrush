@@ -48,18 +48,24 @@ void root(uchar4 *in, uint32_t x) {
     float bristleVerticalRatio =
         inBristlePositionTop[x * 3 + 1] / BRUSH_RADIUS_UPPER;
 
-    bristleHorizontalMaxAngle = 3.14f / 8.0f;
-
-    float2 bristleVector = (bristleHorizontalRatio, bristleVerticalRatio);
+    // A vector which points to the bristle position
+    float2 bristleVector;
+    bristleVector.x = bristleHorizontalRatio;
+    bristleVector.y = bristleVerticalRatio;
     bristleVector = normalize(bristleVector);
 
-    float2 brushAngleVector = (cos(brushHorizontalAngle), sin(brushHorizontalAngle));
-    brushAngleVector = normalize(brushAngleVector);
+    // Degree the brush vector is offset by
+    float orthogonalOffset = M_PI_4;
 
-    float bristleShiftMagnitude = 1.0f - fabs(dot(brushAngleVector, bristleVector));
+    // A vector which points to the orthogonal angle to where the brush is pointing
+    float2 brushOrthogonalAngleVector;
+    brushOrthogonalAngleVector.x = cos(brushHorizontalAngle + orthogonalOffset);
+    brushOrthogonalAngleVector.y = sin(brushHorizontalAngle + orthogonalOffset);
+    brushOrthogonalAngleVector = normalize(brushOrthogonalAngleVector);
 
-    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle
-        * (bristleLength / BRISTLE_BASE_LENGTH);
+    float bristleShiftMagnitude = dot(brushOrthogonalAngleVector, bristleVector);
+
+    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle;
 
     float sinBrushHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
     float cosBrushHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);

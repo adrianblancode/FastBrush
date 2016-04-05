@@ -9,9 +9,9 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Bristle {
 
     public static final float BASE_LENGTH = 1.0f;
-    public static final float BASE_TIP_LENGTH = 0.40f;
+    public static final float BASE_TIP_LENGTH = 0.35f;
     public static final float BRUSH_RADIUS_UPPER = 0.25f;
-    private static final float BRUSH_RADIUS_LOWER = 0.27f;
+    private static final float BRUSH_RADIUS_LOWER = 0.25f;
     private static final float MIN_SIZE_SCALE = 0.1f;
 
     public static float radiusUpper = BRUSH_RADIUS_UPPER;
@@ -27,7 +27,8 @@ public class Bristle {
         radiusUpper = BRUSH_RADIUS_UPPER * (settingsData.getSize() + MIN_SIZE_SCALE);
         radiusLower = BRUSH_RADIUS_LOWER * (settingsData.getSize() + MIN_SIZE_SCALE);
 
-        float radiusAngle = (float) (Math.random() * 2f * Math.PI);
+        // We take the square root in order to guarantee uniform distribution in the circle
+        float radiusAngle = (float) (Math.sqrt(Math.random()) * 2f * Math.PI);
         float radiusLength = (float) Math.random();
 
         float horizontal = (float) Math.cos(radiusAngle) * radiusLength;
