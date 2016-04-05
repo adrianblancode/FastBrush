@@ -84,13 +84,10 @@ public class Brush {
 
         // How far the brush is to dip down from the highest position
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 2.0f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.4f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
-
-        // TODO remove
-        position.addX(0.5f);
-
+        
         xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
         yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
 

@@ -29,10 +29,10 @@ public class BrushParamaterDatabaseHandler {
         brushParameterDatabase.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f, 0.41f, 0.71f, 10));
 
         // Neutral pressure 4
-        brushParameterDatabase.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f, 20));
+        brushParameterDatabase.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f, 15));
 
         // Neutral pressure 5
-        brushParameterDatabase.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f, 30));
+        brushParameterDatabase.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f, 22));
 
 
         // Front neutral
@@ -48,10 +48,10 @@ public class BrushParamaterDatabaseHandler {
         brushParameterDatabase.put(new BrushKey(45f, 0.68f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f, 0f));
 
         // Front pressure 4
-        brushParameterDatabase.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f, 10));
+        brushParameterDatabase.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f, 5));
 
         // Front pressure 5
-        brushParameterDatabase.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f, 20));
+        brushParameterDatabase.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f, 15));
 
 
         // Front pressure extreme 1
