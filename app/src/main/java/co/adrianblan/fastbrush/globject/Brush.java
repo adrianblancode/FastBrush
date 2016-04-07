@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 import co.adrianblan.fastbrush.buffer.VertexBufferManager;
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.database.BrushKey;
-import co.adrianblan.fastbrush.database.BrushParamaterDatabaseHandler;
+import co.adrianblan.fastbrush.database.BrushParameterDatabaseHandler;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
@@ -33,7 +33,7 @@ public class Brush {
 
     private VertexBufferManager vertexBufferManager;
 
-    private BrushParamaterDatabaseHandler brushParamaterDatabaseHandler;
+    private BrushParameterDatabaseHandler brushParameterDatabaseHandler;
     private BrushKey brushKey;
     private BristleParameters bristleParameters;
 
@@ -57,7 +57,7 @@ public class Brush {
         position = new Vector3();
         resetPosition();
 
-        brushParamaterDatabaseHandler = new BrushParamaterDatabaseHandler();
+        brushParameterDatabaseHandler = new BrushParameterDatabaseHandler();
         brushKey = new BrushKey();
         bristleParameters = new BristleParameters();
 
@@ -120,7 +120,7 @@ public class Brush {
 
         // Get the bristle parameters associated with the current brush state
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
-        bristleParameters = brushParamaterDatabaseHandler.getBristleParameter(brushKey);
+        bristleParameters = brushParameterDatabaseHandler.getBristleParameter(brushKey);
     }
 
     /**
