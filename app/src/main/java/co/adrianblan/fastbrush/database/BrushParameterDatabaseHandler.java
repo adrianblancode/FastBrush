@@ -3,10 +3,10 @@ package co.adrianblan.fastbrush.database;
 /**
  * A database which details all parameters of the brush snapshots.
  */
-public class BrushParamaterDatabaseHandler {
+public class BrushParameterDatabaseHandler {
     BrushParameterDatabase brushParameterDatabase;
 
-    public BrushParamaterDatabaseHandler() {
+    public BrushParameterDatabaseHandler() {
         brushParameterDatabase = new BrushParameterDatabase(20);
         init();
     }
@@ -16,66 +16,146 @@ public class BrushParamaterDatabaseHandler {
      */
     private void init() {
 
+        BristleParameters bristleParameters;
+
         // Neutral
-        brushParameterDatabase.put(new BrushKey(0, 1), new BristleParameters(0f, 0f, 1f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0);
+        bristleParameters.setPlanarImprintLength(0);
+        bristleParameters.setUpperControlPointLength(1);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(0, 1), bristleParameters);
 
         // Neutral pressure 1
-        brushParameterDatabase.put(new BrushKey(0, 0.96f), new BristleParameters(0.12f, 0.06f, 0.98f, 0.1f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.12f);
+        bristleParameters.setPlanarImprintLength(0.06f);
+        bristleParameters.setUpperControlPointLength(0.98f);
+        bristleParameters.setLowerControlPointLength(0.1f);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(0, 0.96f), bristleParameters);
 
         // Neutral pressure 2
-        brushParameterDatabase.put(new BrushKey(0, 0.83f), new BristleParameters(0.32f, 0.10f, 0.60f, 0.42f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.32f);
+        bristleParameters.setPlanarImprintLength(0.10f);
+        bristleParameters.setUpperControlPointLength(0.60f);
+        bristleParameters.setLowerControlPointLength(0.42f);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(0, 0.83f), bristleParameters);
 
         // Neutral pressure 3
-        brushParameterDatabase.put(new BrushKey(0, 0.56f), new BristleParameters(0.62f, 0.20f, 0.41f, 0.71f, 10));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.62f);
+        bristleParameters.setPlanarImprintLength(0.20f);
+        bristleParameters.setUpperControlPointLength(0.41f);
+        bristleParameters.setLowerControlPointLength(0.71f);
+        bristleParameters.setBristleHorizontalAngle(10);
+
+        brushParameterDatabase.put(new BrushKey(0, 0.56f), bristleParameters);
 
         // Neutral pressure 4
-        brushParameterDatabase.put(new BrushKey(0, 0.42f), new BristleParameters(0.78f, 0.26f, 0.38f, 0.68f, 15));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.78f);
+        bristleParameters.setPlanarImprintLength(0.26f);
+        bristleParameters.setUpperControlPointLength(0.38f);
+        bristleParameters.setLowerControlPointLength(0.68f);
+        bristleParameters.setBristleHorizontalAngle(15);
+
+        brushParameterDatabase.put(new BrushKey(0, 0.42f), bristleParameters);
 
         // Neutral pressure 5
-        brushParameterDatabase.put(new BrushKey(0, 0.29f), new BristleParameters(0.93f, 0.45f, 0.30f, 0.54f, 22));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.93f);
+        bristleParameters.setPlanarImprintLength(0.45f);
+        bristleParameters.setUpperControlPointLength(0.30f);
+        bristleParameters.setLowerControlPointLength(0.54f);
+        bristleParameters.setBristleHorizontalAngle(22);
 
+        brushParameterDatabase.put(new BrushKey(0, 0.29f), bristleParameters);
 
         // Front neutral
-        brushParameterDatabase.put(new BrushKey(45f, 1f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0);
+        bristleParameters.setPlanarImprintLength(0);
+        bristleParameters.setUpperControlPointLength(1);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(45f, 1f), bristleParameters);
 
         // Front pressure 1
-        brushParameterDatabase.put(new BrushKey(45f, 0.97f), new BristleParameters(0.03f, 0f, 1f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.03f);
+        bristleParameters.setPlanarImprintLength(0);
+        bristleParameters.setUpperControlPointLength(1);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+        brushParameterDatabase.put(new BrushKey(45f, 0.97f), bristleParameters);
 
         // Front pressure 2
-        brushParameterDatabase.put(new BrushKey(45f, 0.85f), new BristleParameters(0.012f, 0.01f, 0.94f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.12f);
+        bristleParameters.setPlanarImprintLength(0.01f);
+        bristleParameters.setUpperControlPointLength(0.94f);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+        brushParameterDatabase.put(new BrushKey(45f, 0.85f), bristleParameters);
 
         // Front pressure 3
-        brushParameterDatabase.put(new BrushKey(45f, 0.68f), new BristleParameters(0.26f, 0.01f, 0.80f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.26f);
+        bristleParameters.setPlanarImprintLength(0.01f);
+        bristleParameters.setUpperControlPointLength(0.80f);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(45f, 0.68f), bristleParameters);
 
         // Front pressure 4
-        brushParameterDatabase.put(new BrushKey(45f, 0.54f), new BristleParameters(0.38f, 0.01f, 0.64f, 0f, 5));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.38f);
+        bristleParameters.setPlanarImprintLength(0.01f);
+        bristleParameters.setUpperControlPointLength(0.64f);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(5);
+
+        brushParameterDatabase.put(new BrushKey(45f, 0.54f), bristleParameters);
 
         // Front pressure 5
-        brushParameterDatabase.put(new BrushKey(45f, 0.24f), new BristleParameters(0.52f, 0.01f, 0.26f, 0f, 15));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0.52f);
+        bristleParameters.setPlanarImprintLength(0.01f);
+        bristleParameters.setUpperControlPointLength(0.26f);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(15);
+
+        brushParameterDatabase.put(new BrushKey(45f, 0.24f), bristleParameters);
 
 
         // Front pressure extreme 1
-        brushParameterDatabase.put(new BrushKey(90f, 1f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0);
+        bristleParameters.setPlanarImprintLength(0);
+        bristleParameters.setUpperControlPointLength(1);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
+
+        brushParameterDatabase.put(new BrushKey(90f, 1f), bristleParameters);
 
         // Front pressure extreme 2
-        brushParameterDatabase.put(new BrushKey(90f, 0f), new BristleParameters(0f, 0f, 1f, 0f, 0f));
+        bristleParameters = new BristleParameters();
+        bristleParameters.setPlanarDistanceFromHandle(0);
+        bristleParameters.setPlanarImprintLength(0);
+        bristleParameters.setUpperControlPointLength(1);
+        bristleParameters.setLowerControlPointLength(0);
+        bristleParameters.setBristleHorizontalAngle(0);
 
-        /**
-        // Back neutral
-        brushParameterDatabase.put(new BrushKey(-45f, 1f), new BristleParameters(0f, 0));
-
-        // Back pressure 1 (approximated)
-        brushParameterDatabase.put(new BrushKey(-45f, 0.70f), new BristleParameters(0.30f, 0));
-
-        // Back pressure 2
-        brushParameterDatabase.put(new BrushKey(-45f, 0.55f), new BristleParameters(0.60f, 0));
-
-        // Back pressure 3
-        brushParameterDatabase.put(new BrushKey(-45f, 0.34f), new BristleParameters(0.60f, 0));
-
-        // Back pressure 4
-        brushParameterDatabase.put(new BrushKey(-45f, 0.24f), new BristleParameters(0.66f, 0));
-         */
+        brushParameterDatabase.put(new BrushKey(90f, 0f), bristleParameters);
     }
 
     /**
