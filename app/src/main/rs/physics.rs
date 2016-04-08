@@ -79,7 +79,8 @@ void root(uchar4 *in, uint32_t x) {
     float bristleAlignmentMagnitudeNormalized = (bristleAlignmentMagnitude / 2.0f) + 1;
 
     float bristleShiftMagnitude = dot(brushOrthogonalVector, bristleVector);
-    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle;
+    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle
+        * (1.0f - bristleAlignmentMagnitudeNormalized) * 5.0f;
 
     float sinBristleHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
     float cosBristleHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);
@@ -117,7 +118,7 @@ void root(uchar4 *in, uint32_t x) {
         outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
 
-        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (1.0f - ((1.0f - (bristleLength / BRISTLE_BASE_LENGTH)) * 0.5f));
+        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (1.0f - (1.0f - (bristleLength / BRISTLE_BASE_LENGTH)) * 0.8f);
         firstFactor = (1 - scale) * (1 - scale) * (1 - scale);
         secondFactor = 3 * (1 - scale) * (1 - scale) * scale;
         thirdFactor = 3 * (1 - scale) * scale * scale;

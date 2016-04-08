@@ -261,7 +261,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                     cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.3f,
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.5f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
@@ -312,7 +312,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(brushMVMatrix, 0, brushViewMatrix, 0, brushModelOffsetMatrix, 0);
             Matrix.multiplyMM(brushMVPMatrix, 0, brushProjectionMatrix, 0, brushMVMatrix, 0);
 
-            GLES30.glLineWidth(Utils.convertPixelsToDp(15f));
+            GLES30.glLineWidth(Utils.convertPixelsToDp(12f));
             line.draw(brushMVPMatrix, Utils.BROWN_COLOR);
 
             // Draw brush side view brush
