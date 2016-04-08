@@ -9,7 +9,7 @@ import co.adrianblan.fastbrush.vector.Vector3;
 public class Bristle {
 
     public static final float BASE_LENGTH = 0.8f;
-    public static final float BASE_TIP_LENGTH = 0.40f * BASE_LENGTH;
+    public static final float BASE_TIP_LENGTH = 0.35f * BASE_LENGTH;
     public static final float BRUSH_RADIUS_UPPER = 0.25f * BASE_LENGTH;
     private static final float BRUSH_RADIUS_LOWER = 0.27f * BASE_LENGTH;
     private static final float MIN_SIZE_SCALE = 0.1f;
