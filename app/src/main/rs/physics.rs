@@ -10,8 +10,8 @@ float BRUSH_RADIUS_UPPER;
 float3 brushPosition;
 
 float planarDistanceFromHandle;
-float upperControlPointLength;
-float lowerControlPointLength;
+float middlePathUpperControlPointLength;
+float middlePathLowerControlPointLength;
 
 // The angle of the brush rotation, and the maximum bristle spread angle (in radians)
 float brushHorizontalAngle;
@@ -99,10 +99,10 @@ void root(uchar4 *in, uint32_t x) {
                 * bristlePositionTop.x
             + secondFactor
                 * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
-                * upperControlPointLength)
+                * middlePathUpperControlPointLength)
             + thirdFactor
                 * (bristlePositionBottom.x
-                    + cosBrushHorizontalValue * (planarDistanceFromHandle - lowerControlPointLength))
+                    + cosBrushHorizontalValue * (planarDistanceFromHandle - middlePathLowerControlPointLength))
             + fourthFactor
                 * (bristlePositionBottom.x + cosBrushHorizontalValue * planarDistanceFromHandle);
 
@@ -111,10 +111,10 @@ void root(uchar4 *in, uint32_t x) {
                 * bristlePositionTop.y
             + secondFactor
                 * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
-                * upperControlPointLength)
+                * middlePathUpperControlPointLength)
             + thirdFactor
                 * (bristlePositionBottom.y
-                    + sinBrushHorizontalValue * (planarDistanceFromHandle - lowerControlPointLength))
+                    + sinBrushHorizontalValue * (planarDistanceFromHandle - middlePathLowerControlPointLength))
             + fourthFactor
                 * (bristlePositionBottom.y + sinBrushHorizontalValue * planarDistanceFromHandle);
 
@@ -123,7 +123,7 @@ void root(uchar4 *in, uint32_t x) {
                 * bristlePositionTop.z
             + secondFactor
                 * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
-                * upperControlPointLength)
+                * middlePathUpperControlPointLength)
             + thirdFactor
                 * bottom
             + fourthFactor

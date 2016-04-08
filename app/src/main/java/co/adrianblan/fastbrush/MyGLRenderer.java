@@ -254,21 +254,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
             Matrix.translateM(translateToBrushTip, 0,
                     -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
-                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0.03f);
-
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.30f,
-                    (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
-                    (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
+                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0f);
 
             Matrix.translateM(translateToImprintCenter, 0,
                     cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 1.0f,
+                    (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
+                    (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
+
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToOrigin, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToBrushTip, 0, brushModelMatrix, 0);
-            Matrix.multiplyMM(brushModelMatrix, 0, verticalRotationMatrix, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToImprintCenter, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, verticalRotationMatrix, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateFromOrigin, 0, brushModelMatrix, 0);
 
             // Add model matrix to camera matrices
