@@ -5,12 +5,6 @@ package co.adrianblan.fastbrush.database;
  */
 public class BristleParameters {
 
-    // The planar distance the bristle end is from the handle
-    public float planarDistanceFromHandle;
-
-    // The length of the imprint on the plane
-    public float planarImprintLength;
-
     /**
      * There are three paths. Upper, middle and lower paths mark the transformation
      * of the lower, middle and upper bristles. Each path has an upper control point which
@@ -28,15 +22,23 @@ public class BristleParameters {
     public float middlePathUpperControlPointLength;
     public float middlePathLowerControlPointLength;
 
+    // The planar distance the bristle end is from the handle
+    public float upperPathDistanceFromHandle;
+    public float middlePathDistanceFromHandle;
+    public float lowerPathDistanceFromHandle;
+
+    // The length of the imprint on the plane
+    public float planarImprintLength;
+
     // Angle of the maximum spread of the bristles
     public float bristleHorizontalAngle;
 
     public BristleParameters() {}
 
-    public BristleParameters(float planarDistanceFromHandle, float planarImprintLength,
+    public BristleParameters(float middlePathDistanceFromHandle, float planarImprintLength,
                              float middlePathUpperControlPointLength, float middlePathLowerControlPointLength,
                              float bristleHorizontalAngle) {
-        set(planarDistanceFromHandle, planarImprintLength,
+        set(middlePathDistanceFromHandle, planarImprintLength,
                 middlePathUpperControlPointLength, middlePathLowerControlPointLength, bristleHorizontalAngle);
     }
 
@@ -45,7 +47,7 @@ public class BristleParameters {
     }
 
     public void set(BristleParameters b) {
-        set(b.getPlanarDistanceFromHandle(), b.getPlanarImprintLength(),
+        set(b.getMiddlePathDistanceFromHandle(), b.getPlanarImprintLength(),
                 b.getMiddlePathUpperControlPointLength(), b.getMiddlePathLowerControlPointLength(),
                 b.getBristleHorizontalAngle());
     }
@@ -53,27 +55,11 @@ public class BristleParameters {
     public void set(float planarDistanceFromHandle, float planarImprintLength,
                     float upperControlPointLength, float lowerControlPointLength,
                     float bristleHorizontalAngle) {
-        this.planarDistanceFromHandle = planarDistanceFromHandle;
+        this.middlePathDistanceFromHandle = planarDistanceFromHandle;
         this.planarImprintLength = planarImprintLength;
         this.middlePathUpperControlPointLength = upperControlPointLength;
         this.middlePathLowerControlPointLength = lowerControlPointLength;
         this.bristleHorizontalAngle = bristleHorizontalAngle;
-    }
-
-    public float getPlanarImprintLength() {
-        return planarImprintLength;
-    }
-
-    public void setPlanarImprintLength(float planarImprintLength) {
-        this.planarImprintLength = planarImprintLength;
-    }
-
-    public float getPlanarDistanceFromHandle() {
-        return planarDistanceFromHandle;
-    }
-
-    public void setPlanarDistanceFromHandle(float planarDistanceFromHandle) {
-        this.planarDistanceFromHandle = planarDistanceFromHandle;
     }
 
     public float getUpperPathUpperControlPointLength() {
@@ -133,8 +119,41 @@ public class BristleParameters {
         this.lowerPathLowerControlPointLength = lowerPathLowerControlPointLength;
     }
 
+
+    public float getUpperPathDistanceFromHandle() {
+        return upperPathDistanceFromHandle;
+    }
+
+    public void setUpperPathDistanceFromHandle(float upperPathDistanceFromHandle) {
+        this.upperPathDistanceFromHandle = upperPathDistanceFromHandle;
+    }
+
+    public float getMiddlePathDistanceFromHandle() {
+        return middlePathDistanceFromHandle;
+    }
+
+    public void setMiddlePathDistanceFromHandle(float middlePathDistanceFromHandle) {
+        this.middlePathDistanceFromHandle = middlePathDistanceFromHandle;
+    }
+
+    public float getLowerPathDistanceFromHandle() {
+        return lowerPathDistanceFromHandle;
+    }
+
+    public void setLowerPathDistanceFromHandle(float lowerPathDistanceFromHandle) {
+        this.lowerPathDistanceFromHandle = lowerPathDistanceFromHandle;
+    }
+
+    public float getPlanarImprintLength() {
+        return planarImprintLength;
+    }
+
+    public void setPlanarImprintLength(float planarImprintLength) {
+        this.planarImprintLength = planarImprintLength;
+    }
+
     @Override
     public String toString(){
-        return "distance: " + planarDistanceFromHandle;
+        return "distance: " + middlePathDistanceFromHandle;
     }
 }
