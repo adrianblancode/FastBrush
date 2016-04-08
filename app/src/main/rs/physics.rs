@@ -9,9 +9,16 @@ float BRUSH_RADIUS_UPPER;
 
 float3 brushPosition;
 
-float planarDistanceFromHandle;
+float upperPathUpperControlPointLength;
+float upperPathLowerControlPointLength;
 float middlePathUpperControlPointLength;
 float middlePathLowerControlPointLength;
+float lowerPathUpperControlPointLength;
+float lowerPathLowerControlPointLength;
+
+float upperPathDistanceFromHandle;
+float middlePathDistanceFromHandle;
+float lowerPathDistanceFromHandle;
 
 // The angle of the brush rotation, and the maximum bristle spread angle (in radians)
 float brushHorizontalAngle;
@@ -24,6 +31,8 @@ float* outBristlePosition;
 rs_script script;
 
 void init() {}
+
+static float interpolate(float, float, float, float);
 
 void root(uchar4 *in, uint32_t x) {
 
@@ -54,21 +63,42 @@ void root(uchar4 *in, uint32_t x) {
     bristleVector.y = bristleVerticalRatio;
     bristleVector = normalize(bristleVector);
 
-    // Degree the brush vector is offset by
-    float orthogonalOffset = M_PI_4;
-
     // A vector which points to the orthogonal angle to where the brush is pointing
-    float2 brushOrthogonalAngleVector;
-    brushOrthogonalAngleVector.x = cos(brushHorizontalAngle + orthogonalOffset);
-    brushOrthogonalAngleVector.y = sin(brushHorizontalAngle + orthogonalOffset);
-    brushOrthogonalAngleVector = normalize(brushOrthogonalAngleVector);
+    float2 brushVector;
+    brushVector.x = cos(brushHorizontalAngle);
+    brushVector.y = sin(brushHorizontalAngle);
+    brushVector = normalize(brushVector);
 
-    float bristleShiftMagnitude = dot(brushOrthogonalAngleVector, bristleVector);
+    float2 brushOrthogonalVector;
+    brushOrthogonalVector.x = cos(brushHorizontalAngle + M_PI_4);
+    brushOrthogonalVector.y = sin(brushHorizontalAngle + M_PI_4);
+    brushOrthogonalVector = normalize(brushOrthogonalVector);
 
+    // Magnitude from [-1, 1]
+    float bristleAlignmentMagnitude = dot(brushVector, bristleVector);
+    float bristleAlignmentMagnitudeNormalized = (bristleAlignmentMagnitude / 2.0f) + 1;
+
+    float bristleShiftMagnitude = dot(brushOrthogonalVector, bristleVector);
     float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle;
 
-    float sinBrushHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
-    float cosBrushHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);
+    float sinBristleHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
+    float cosBristleHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);
+
+
+    float upperControlPointLength = interpolate(bristleAlignmentMagnitudeNormalized,
+        lowerPathUpperControlPointLength, middlePathUpperControlPointLength, upperPathUpperControlPointLength);
+
+    //float upperControlPointLength = lowerPathUpperControlPointLength;
+
+    float lowerControlPointLength = interpolate(bristleAlignmentMagnitudeNormalized,
+        lowerPathLowerControlPointLength, middlePathLowerControlPointLength, upperPathLowerControlPointLength);
+
+    //float lowerControlPointLength = lowerPathLowerControlPointLength;
+
+    float pathDistanceFromHandle = interpolate(bristleAlignmentMagnitudeNormalized,
+        lowerPathDistanceFromHandle, middlePathDistanceFromHandle, upperPathDistanceFromHandle);
+
+    //float pathDistanceFromHandle = lowerPathDistanceFromHandle;
 
     // Takes positive bottom positions
     float bottom = fmax(bristlePositionBottom.z, 0);
@@ -87,7 +117,7 @@ void root(uchar4 *in, uint32_t x) {
         outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
 
-        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (bristleLength / BRISTLE_BASE_LENGTH);
+        scale = ((float) i / SEGMENTS_PER_BRISTLE) * (1.0f - ((1.0f - (bristleLength / BRISTLE_BASE_LENGTH)) * 0.5f));
         firstFactor = (1 - scale) * (1 - scale) * (1 - scale);
         secondFactor = 3 * (1 - scale) * (1 - scale) * scale;
         thirdFactor = 3 * (1 - scale) * scale * scale;
@@ -99,31 +129,31 @@ void root(uchar4 *in, uint32_t x) {
                 * bristlePositionTop.x
             + secondFactor
                 * (bristlePositionTop.x - (bristlePositionTop.x - bristlePositionBottom.x)
-                * middlePathUpperControlPointLength)
+                * upperControlPointLength)
             + thirdFactor
                 * (bristlePositionBottom.x
-                    + cosBrushHorizontalValue * (planarDistanceFromHandle - middlePathLowerControlPointLength))
+                    + cosBristleHorizontalValue * (pathDistanceFromHandle - lowerControlPointLength))
             + fourthFactor
-                * (bristlePositionBottom.x + cosBrushHorizontalValue * planarDistanceFromHandle);
+                * (bristlePositionBottom.x + cosBristleHorizontalValue * pathDistanceFromHandle);
 
         interpolatedPosition.y =
             firstFactor
                 * bristlePositionTop.y
             + secondFactor
                 * (bristlePositionTop.y - (bristlePositionTop.y - bristlePositionBottom.y)
-                * middlePathUpperControlPointLength)
+                * upperControlPointLength)
             + thirdFactor
                 * (bristlePositionBottom.y
-                    + sinBrushHorizontalValue * (planarDistanceFromHandle - middlePathLowerControlPointLength))
+                    + sinBristleHorizontalValue * (pathDistanceFromHandle - lowerControlPointLength))
             + fourthFactor
-                * (bristlePositionBottom.y + sinBrushHorizontalValue * planarDistanceFromHandle);
+                * (bristlePositionBottom.y + sinBristleHorizontalValue * pathDistanceFromHandle);
 
         interpolatedPosition.z =
             firstFactor
                 * bristlePositionTop.z
             + secondFactor
                 * (bristlePositionTop.z - (bristlePositionTop.z - bottom)
-                * middlePathUpperControlPointLength)
+                * upperControlPointLength)
             + thirdFactor
                 * bottom
             + fourthFactor
@@ -134,6 +164,14 @@ void root(uchar4 *in, uint32_t x) {
         outBristlePosition[outIndex + 2] = interpolatedPosition.z;
         outIndex += 3;
     }
+}
+
+// Interpolates between three values based on a scale
+static float interpolate(float scale, float firstValue, float secondValue, float thirdValue) {
+    return
+        (1 - scale) * (1 - scale) * firstValue
+        + 2 * (1 - scale) * scale * secondValue
+        + scale * scale * thirdValue;
 }
 
 void compute (rs_allocation in) {
