@@ -35,6 +35,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 import co.adrianblan.fastbrush.compute.PhysicsCompute;
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -253,14 +254,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
 
             Matrix.translateM(translateToBrushTip, 0,
-                    -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
-                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0f);
+                    -cosHorizontalAngle * brush.getBristleParameters().middlePathDistanceFromHandle * 1.0f,
+                    -sinHorizontalAngle * brush.getBristleParameters().middlePathDistanceFromHandle * 1.0f, 0f);
 
             Matrix.translateM(translateToImprintCenter, 0,
                     cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 1.0f,
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.3f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 

@@ -36,6 +36,7 @@ public class Brush {
     private BrushParameterDatabaseHandler brushParameterDatabaseHandler;
     private BrushKey brushKey;
     private BristleParameters bristleParameters;
+    private BristleParameters defaultBristleParameters;
 
     private Bristle[] bristles;
     private Vector3 position;
@@ -60,6 +61,7 @@ public class Brush {
         brushParameterDatabaseHandler = new BrushParameterDatabaseHandler();
         brushKey = new BrushKey();
         bristleParameters = new BristleParameters();
+        defaultBristleParameters = brushParameterDatabaseHandler.getBrushParameterDatabase().bristleParameters[0];
 
         bristles = new Bristle[numBristles];
         jitter = new Vector3();
@@ -84,7 +86,7 @@ public class Brush {
 
         // How far the brush is to dip down from the highest position
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.4f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 2.0f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
         
@@ -188,6 +190,8 @@ public class Brush {
         xTilt = 0;
         yTilt = 0;
         dip = 0;
+
+        bristleParameters = defaultBristleParameters;
     }
 
     public Bristle[] getBristles() {
