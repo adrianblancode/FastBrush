@@ -89,8 +89,8 @@ public class PhysicsCompute {
         BristleParameters bristleParameters = brush.getBristleParameters();
 
         script.set_planarDistanceFromHandle(bristleParameters.planarDistanceFromHandle);
-        script.set_upperControlPointLength(bristleParameters.upperControlPointLength);
-        script.set_lowerControlPointLength(bristleParameters.lowerControlPointLength);
+        script.set_middlePathUpperControlPointLength(bristleParameters.middlePathUpperControlPointLength);
+        script.set_middlePathLowerControlPointLength(bristleParameters.middlePathLowerControlPointLength);
 
         script.set_brushHorizontalAngle((float) Math.toRadians(brush.getHorizontalAngle()));
         script.set_bristleHorizontalMaxAngle((float) Math.toRadians(bristleParameters.bristleHorizontalAngle));
