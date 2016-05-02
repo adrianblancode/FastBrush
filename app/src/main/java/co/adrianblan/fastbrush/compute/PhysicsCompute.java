@@ -112,6 +112,11 @@ public class PhysicsCompute {
         return out;
     }
 
+    // Warning might be uninitialized
+    public float[] getCurrentVertexData() {
+        return out;
+    }
+
     public void destroy() {
         inAllocationTop.destroy();
         inAllocationBottom.destroy();

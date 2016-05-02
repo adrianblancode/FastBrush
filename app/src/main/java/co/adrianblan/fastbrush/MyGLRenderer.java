@@ -261,7 +261,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                     cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.5f,
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.2f,
                     (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
                     (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
 
