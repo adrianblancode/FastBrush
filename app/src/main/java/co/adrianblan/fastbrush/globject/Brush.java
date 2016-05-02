@@ -138,6 +138,10 @@ public class Brush {
         vertexBuffer.position(0);
     }
 
+    public void resetVertexBufferPosition() {
+        vertexBufferManager.getCurrentBuffer().position(0);
+    }
+
     /**
      * Takes a mvpMatrix and a color, and draws the brush vertexes currently in our vertex buffer.
      */

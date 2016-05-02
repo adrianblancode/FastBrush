@@ -26,14 +26,14 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setLowerPathLowerControlPointLength(0.06f);
         bristleParameters.setMiddlePathUpperControlPointLength(0.20f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.20f);
-        bristleParameters.setUpperPathUpperControlPointLength(0.20f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.06f);
+        bristleParameters.setUpperPathUpperControlPointLength(0.15f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.10f);
 
-        bristleParameters.setLowerPathDistanceFromHandle(0.03f);
+        bristleParameters.setLowerPathDistanceFromHandle(0);
         bristleParameters.setMiddlePathDistanceFromHandle(0);
-        bristleParameters.setUpperPathDistanceFromHandle(-0.03f);
+        bristleParameters.setUpperPathDistanceFromHandle(0);
 
-        bristleParameters.setPlanarImprintLength(0.02f);
+        bristleParameters.setPlanarImprintLength(0);
         bristleParameters.setBristleHorizontalAngle(0);
 
         brushParameterDatabase.put(new BrushKey(0, 1), bristleParameters);
@@ -45,7 +45,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setLowerPathLowerControlPointLength(0.06f);
         bristleParameters.setMiddlePathUpperControlPointLength(0.18f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.40f);
-        bristleParameters.setUpperPathUpperControlPointLength(0.15f);
+        bristleParameters.setUpperPathUpperControlPointLength(0.20f);
         bristleParameters.setUpperPathLowerControlPointLength(0.30f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0);
@@ -53,7 +53,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setUpperPathDistanceFromHandle(0.35f);
 
         bristleParameters.setPlanarImprintLength(0.20f);
-        bristleParameters.setBristleHorizontalAngle(0);
+        bristleParameters.setBristleHorizontalAngle(10);
 
         brushParameterDatabase.put(new BrushKey(0, 0.85f), bristleParameters);
 
@@ -64,8 +64,8 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setLowerPathLowerControlPointLength(0.20f);
         bristleParameters.setMiddlePathUpperControlPointLength(0.38f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.65f);
-        bristleParameters.setUpperPathUpperControlPointLength(0.20f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.45f);
+        bristleParameters.setUpperPathUpperControlPointLength(0.30f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.50f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.15f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.65f);
@@ -82,12 +82,12 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setLowerPathLowerControlPointLength(0.80f);
         bristleParameters.setMiddlePathUpperControlPointLength(0.23f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.70f);
-        bristleParameters.setUpperPathUpperControlPointLength(0.10f);
+        bristleParameters.setUpperPathUpperControlPointLength(0.15f);
         bristleParameters.setUpperPathLowerControlPointLength(0.55f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.52f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.80f);
-        bristleParameters.setUpperPathDistanceFromHandle(0.88f);
+        bristleParameters.setUpperPathDistanceFromHandle(0.70f);
 
         bristleParameters.setPlanarImprintLength(0.50f);
         bristleParameters.setBristleHorizontalAngle(45);
@@ -101,8 +101,8 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setLowerPathLowerControlPointLength(0.04f);
         bristleParameters.setMiddlePathUpperControlPointLength(0.10f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.10f);
-        bristleParameters.setUpperPathUpperControlPointLength(0.17f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.04f);
+        bristleParameters.setUpperPathUpperControlPointLength(0.12f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.08f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.04f);
         bristleParameters.setMiddlePathDistanceFromHandle(0);
@@ -120,14 +120,14 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setMiddlePathUpperControlPointLength(0.08f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.18f);
         bristleParameters.setUpperPathUpperControlPointLength(0.17f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.04f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.20f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.06f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.19f);
         bristleParameters.setUpperPathDistanceFromHandle(0.05f);
 
         bristleParameters.setPlanarImprintLength(0.15f);
-        bristleParameters.setBristleHorizontalAngle(25);
+        bristleParameters.setBristleHorizontalAngle(15);
 
         brushParameterDatabase.put(new BrushKey(45f, 0.9f), bristleParameters);
 
@@ -138,13 +138,13 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setMiddlePathUpperControlPointLength(0.36f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.06f);
         bristleParameters.setUpperPathUpperControlPointLength(0.06f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.25f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.20f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.14f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.30f);
         bristleParameters.setUpperPathDistanceFromHandle(0.17f);
 
-        bristleParameters.setPlanarImprintLength(0.30f);
+        bristleParameters.setPlanarImprintLength(0.23f);
         bristleParameters.setBristleHorizontalAngle(35);
         brushParameterDatabase.put(new BrushKey(45f, 0.70f), bristleParameters);
 
@@ -155,13 +155,13 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setMiddlePathUpperControlPointLength(0.33f);
         bristleParameters.setMiddlePathLowerControlPointLength(0);
         bristleParameters.setUpperPathUpperControlPointLength(0.23f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.35f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.30f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.25f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.41f);
         bristleParameters.setUpperPathDistanceFromHandle(0.30f);
 
-        bristleParameters.setPlanarImprintLength(0.40f);
+        bristleParameters.setPlanarImprintLength(0.30f);
         bristleParameters.setBristleHorizontalAngle(45);
 
         brushParameterDatabase.put(new BrushKey(45f, 0.60f), bristleParameters);
@@ -174,14 +174,14 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setMiddlePathUpperControlPointLength(0.10f);
         bristleParameters.setMiddlePathLowerControlPointLength(0.10f);
         bristleParameters.setUpperPathUpperControlPointLength(0.17f);
-        bristleParameters.setUpperPathLowerControlPointLength(0.04f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.30f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.04f);
         bristleParameters.setMiddlePathDistanceFromHandle(0);
         bristleParameters.setUpperPathDistanceFromHandle(0.04f);
 
-        bristleParameters.setPlanarImprintLength(0);
-        bristleParameters.setBristleHorizontalAngle(0);
+        bristleParameters.setPlanarImprintLength(0.5f);
+        bristleParameters.setBristleHorizontalAngle(20);
 
         brushParameterDatabase.put(new BrushKey(90f, 1f), bristleParameters);
 
@@ -192,7 +192,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setMiddlePathUpperControlPointLength(0.33f);
         bristleParameters.setMiddlePathLowerControlPointLength(0);
         bristleParameters.setUpperPathUpperControlPointLength(0.08f);
-        bristleParameters.setUpperPathLowerControlPointLength(0f);
+        bristleParameters.setUpperPathLowerControlPointLength(0.40f);
 
         bristleParameters.setLowerPathDistanceFromHandle(0.30f);
         bristleParameters.setMiddlePathDistanceFromHandle(0.41f);
@@ -280,7 +280,7 @@ public class BrushParameterDatabaseHandler {
         float interpolatedLowAngle = keyLowLow.angle * (1 - lowAngleHeightPercent) +
                 keyLowHigh.angle * lowAngleHeightPercent;
 
-        float interpolatedAnglePercent = (targetKey.angle -  (interpolatedLowAngle))
+        float interpolatedAnglePercent = (targetKey.angle - interpolatedLowAngle)
                 / (interpolatedLowAngle - interpolatedHighAngle);
 
         BristleParameters finalInterpolatedValue
