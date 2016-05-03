@@ -1,5 +1,10 @@
 # FastBrush
 
-Fast brush painting simulation for Android using OpenGL.
+This report presents FastBrush, a state of the art implementation for real time brush simulation for Android using OpenGL. It both achieves unprecedented detail of results and is lightweight enough to be implemented for mobile devices. It uses multidimensional data driven modeling to create a deformation table, which enables calculating the physics of the brush deformations in constant time for the entire brush, and thus the physics calculation overhead of a large number of bristles becomes negligible. The final result of this system has far higher detail than available consumer painting applications. A paintbrush has up to a thousand bristles, while Adobe Photoshop is only able to simulate up to 10\% of that amount in real-time, FastBrush is able to capture the full fidelity of a brush with up to a thousand bristles in real-time on consumer mobile devices.
 
 This work is part of my master thesis in Computer Science at KTH Royal Institute of Technology, in Stockholm, Sweden. 
+
+## Images
+![FastBrush Painting](http://i.imgur.com/1tkdxAY.png)
+Source: Jeasmine Ljungström using FastBrush
+
