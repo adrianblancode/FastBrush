@@ -23,7 +23,7 @@ public class Brush {
     public static final int SEGMENTS_PER_BRISTLE = 4;
     private static final float MAX_TILT_VERTICAL = 30f;
 
-    private int numBristles;
+    public int numBristles;
     private float sizePressureFactor;
 
     private int mProgram;
@@ -38,7 +38,7 @@ public class Brush {
     private BristleParameters bristleParameters;
     private BristleParameters defaultBristleParameters;
 
-    private Bristle[] bristles;
+    public Bristle[] bristles;
     private Vector3 position;
     private Vector3 jitter;
 
@@ -51,7 +51,7 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
-        //numBristles = 2;
+        numBristles = 1;
 
         sizePressureFactor = settingsData.getPressureFactor();
 
