@@ -7,6 +7,7 @@ import android.support.v8.renderscript.Float3;
 import android.support.v8.renderscript.RenderScript;
 
 import co.adrianblan.fastbrush.ScriptC_physics;
+import co.adrianblan.fastbrush.ScriptField_ComputeParameters;
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.globject.Brush;
@@ -26,11 +27,13 @@ public class PhysicsCompute {
     private Allocation inAllocationBottom;
     private Allocation outAllocation;
 
+    private ScriptField_ComputeParameters computeParameters;
+
     private Brush brush;
 
-    float [] out;
-    float [] inTop;
-    float [] inBottom;
+    private float [] out;
+    private float [] inTop;
+    private float [] inBottom;
 
     public PhysicsCompute(Context context, Brush brush) {
 
@@ -81,28 +84,34 @@ public class PhysicsCompute {
         script.bind_inBristlePositionTop(inAllocationTop);
         script.bind_inBristlePositionBottom(inAllocationBottom);
         script.bind_outBristlePosition(outAllocation);
+
+        computeParameters = new ScriptField_ComputeParameters(renderScript, 1);
+        script.bind_computeParameters(computeParameters);
     }
 
     public float[] computeVertexData() {
 
-        //Set all parameters for compute script
-        script.set_brushPosition(brush.getPosition().getFloat3());
+        // Set all parameters for compute script
+        computeParameters.set_brushPosition(0, brush.getPosition().getFloat3(), false);
 
         BristleParameters bristleParameters = brush.getBristleParameters();
 
-        script.set_upperPathUpperControlPointLength(bristleParameters.upperPathUpperControlPointLength);
-        script.set_upperPathLowerControlPointLength(bristleParameters.upperPathLowerControlPointLength);
-        script.set_middlePathUpperControlPointLength(bristleParameters.middlePathUpperControlPointLength);
-        script.set_middlePathLowerControlPointLength(bristleParameters.middlePathLowerControlPointLength);
-        script.set_lowerPathUpperControlPointLength(bristleParameters.lowerPathUpperControlPointLength);
-        script.set_lowerPathLowerControlPointLength(bristleParameters.lowerPathLowerControlPointLength);
+        computeParameters.set_upperPathUpperControlPointLength(0, bristleParameters.upperPathUpperControlPointLength, false);
+        computeParameters.set_upperPathLowerControlPointLength(0, bristleParameters.upperPathLowerControlPointLength, false);
+        computeParameters.set_middlePathUpperControlPointLength(0, bristleParameters.middlePathUpperControlPointLength, false);
+        computeParameters.set_middlePathLowerControlPointLength(0, bristleParameters.middlePathLowerControlPointLength, false);
+        computeParameters.set_lowerPathUpperControlPointLength(0, bristleParameters.lowerPathUpperControlPointLength, false);
+        computeParameters.set_lowerPathLowerControlPointLength(0, bristleParameters.lowerPathLowerControlPointLength, false);
 
-        script.set_upperPathDistanceFromHandle(bristleParameters.upperPathDistanceFromHandle);
-        script.set_middlePathDistanceFromHandle(bristleParameters.middlePathDistanceFromHandle);
-        script.set_lowerPathDistanceFromHandle(bristleParameters.lowerPathDistanceFromHandle);
+        computeParameters.set_upperPathDistanceFromHandle(0, bristleParameters.upperPathDistanceFromHandle, false);
+        computeParameters.set_middlePathDistanceFromHandle(0, bristleParameters.middlePathDistanceFromHandle, false);
+        computeParameters.set_lowerPathDistanceFromHandle(0, bristleParameters.lowerPathDistanceFromHandle, false);
 
-        script.set_brushHorizontalAngle((float) Math.toRadians(brush.getHorizontalAngle()));
-        script.set_bristleHorizontalMaxAngle((float) Math.toRadians(bristleParameters.bristleHorizontalAngle));
+        computeParameters.set_brushHorizontalAngle(0, (float) Math.toRadians(brush.getHorizontalAngle()), false);
+        computeParameters.set_bristleHorizontalMaxAngle(0, (float) Math.toRadians(bristleParameters.bristleHorizontalAngle), false);
+
+        // Copy all parameters at once for reduced overhead
+        computeParameters.copyAll();
 
         // Computes all positions
         script.invoke_compute(inBristleIndices);
