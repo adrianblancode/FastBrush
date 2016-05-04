@@ -7,6 +7,12 @@ The final result of this system has far higher detail than available consumer pa
 This work is part of my master thesis in Computer Science at KTH Royal Institute of Technology, in Stockholm, Sweden. 
 
 ## Images
+![Photoshop Brush](http://i.imgur.com/vI5QqZZ.png)
+Source: Adobe Photoshop CC 2015, using the maximum hundred bristles at the maximum size (300px)
+
+![FastBrush Brush](http://i.imgur.com/VXJGO1Q.png)
+Source: FastBrush, using a thousand bristles at the maximum size
+
 ![FastBrush Painting](http://i.imgur.com/1tkdxAY.png)
 Source: Jeasmine Ljungström using FastBrush
 
