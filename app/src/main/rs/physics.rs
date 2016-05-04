@@ -7,22 +7,29 @@ float BRISTLE_BASE_LENGTH;
 float SEGMENTS_PER_BRISTLE;
 float BRUSH_RADIUS_UPPER;
 
-float3 brushPosition;
+typedef struct ComputeParameters {
 
-float upperPathUpperControlPointLength;
-float upperPathLowerControlPointLength;
-float middlePathUpperControlPointLength;
-float middlePathLowerControlPointLength;
-float lowerPathUpperControlPointLength;
-float lowerPathLowerControlPointLength;
+    // xyz?
+    float3 brushPosition;
 
-float upperPathDistanceFromHandle;
-float middlePathDistanceFromHandle;
-float lowerPathDistanceFromHandle;
+    float upperPathUpperControlPointLength;
+    float upperPathLowerControlPointLength;
+    float middlePathUpperControlPointLength;
+    float middlePathLowerControlPointLength;
+    float lowerPathUpperControlPointLength;
+    float lowerPathLowerControlPointLength;
 
-// The angle of the brush rotation, and the maximum bristle spread angle (in radians)
-float brushHorizontalAngle;
-float bristleHorizontalMaxAngle;
+    float upperPathDistanceFromHandle;
+    float middlePathDistanceFromHandle;
+    float lowerPathDistanceFromHandle;
+
+    // The angle of the brush rotation, and the maximum bristle spread angle (in radians)
+    float brushHorizontalAngle;
+    float bristleHorizontalMaxAngle;
+
+} ComputeParameters_t;
+
+ComputeParameters_t* computeParameters;
 
 float* inBristlePositionTop;
 float* inBristlePositionBottom;
@@ -42,13 +49,13 @@ void root(uchar4 *in, uint32_t x) {
     bristlePositionTop.x = inBristlePositionTop[x * 3];
     bristlePositionTop.y = inBristlePositionTop[x * 3 + 1];
     bristlePositionTop.z = inBristlePositionTop[x * 3 + 2];
-    bristlePositionTop += brushPosition;
+    bristlePositionTop += computeParameters->brushPosition;
 
     float3 bristlePositionBottom;
     bristlePositionBottom.x = inBristlePositionBottom[x * 3];
     bristlePositionBottom.y = inBristlePositionBottom[x * 3 + 1];
     bristlePositionBottom.z = inBristlePositionBottom[x * 3 + 2];
-    bristlePositionBottom += brushPosition;
+    bristlePositionBottom += computeParameters->brushPosition;
 
     float bristleLength = fast_distance(bristlePositionTop, bristlePositionBottom);
 
@@ -65,13 +72,13 @@ void root(uchar4 *in, uint32_t x) {
 
     // A vector which points to the orthogonal angle to where the brush is pointing
     float2 brushVector;
-    brushVector.x = cos(brushHorizontalAngle);
-    brushVector.y = sin(brushHorizontalAngle);
+    brushVector.x = cos(computeParameters->brushHorizontalAngle);
+    brushVector.y = sin(computeParameters->brushHorizontalAngle);
     brushVector = normalize(brushVector);
 
     float2 brushOrthogonalVector;
-    brushOrthogonalVector.x = cos(brushHorizontalAngle + M_PI_4);
-    brushOrthogonalVector.y = sin(brushHorizontalAngle + M_PI_4);
+    brushOrthogonalVector.x = cos(computeParameters->brushHorizontalAngle + M_PI_4);
+    brushOrthogonalVector.y = sin(computeParameters->brushHorizontalAngle + M_PI_4);
     brushOrthogonalVector = normalize(brushOrthogonalVector);
 
     // The alignment is how well the bristle aligns
@@ -79,20 +86,19 @@ void root(uchar4 *in, uint32_t x) {
     float bristleAlignmentMagnitudeNormalized = ((bristleAlignmentMagnitude + 1) / 2.0f);
 
     float bristleShiftMagnitude = dot(brushOrthogonalVector, bristleVector);
-    float bristleAngleShift = bristleShiftMagnitude * bristleHorizontalMaxAngle;
+    float bristleAngleShift = bristleShiftMagnitude * computeParameters->bristleHorizontalMaxAngle;
 
-    float sinBristleHorizontalValue = sin(brushHorizontalAngle + bristleAngleShift);
-    float cosBristleHorizontalValue = cos(brushHorizontalAngle + bristleAngleShift);
-
+    float sinBristleHorizontalValue = sin(computeParameters->brushHorizontalAngle + bristleAngleShift);
+    float cosBristleHorizontalValue = cos(computeParameters->brushHorizontalAngle + bristleAngleShift);
 
     float upperControlPointLength = interpolate(bristleAlignmentMagnitudeNormalized,
-        lowerPathUpperControlPointLength, middlePathUpperControlPointLength, upperPathUpperControlPointLength);
+        computeParameters->lowerPathUpperControlPointLength, computeParameters->middlePathUpperControlPointLength, computeParameters->upperPathUpperControlPointLength);
 
     float lowerControlPointLength = interpolate(bristleAlignmentMagnitudeNormalized,
-        lowerPathLowerControlPointLength, middlePathLowerControlPointLength, upperPathLowerControlPointLength);
+        computeParameters->lowerPathLowerControlPointLength, computeParameters->middlePathLowerControlPointLength, computeParameters->upperPathLowerControlPointLength);
 
     float pathDistanceFromHandle = interpolate(bristleAlignmentMagnitudeNormalized,
-        lowerPathDistanceFromHandle, middlePathDistanceFromHandle, upperPathDistanceFromHandle);
+        computeParameters->lowerPathDistanceFromHandle, computeParameters->middlePathDistanceFromHandle, computeParameters->upperPathDistanceFromHandle);
 
     // Takes positive bottom positions
     float bottom = fmax(bristlePositionBottom.z, 0);
