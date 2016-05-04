@@ -21,7 +21,7 @@ public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(3f);
     public static final int SEGMENTS_PER_BRISTLE = 4;
-    private static final float MAX_TILT_VERTICAL = 30f;
+    private static final float MAX_TILT_VERTICAL = 15f;
 
     public int numBristles;
     private float sizePressureFactor;
@@ -112,12 +112,16 @@ public class Brush {
             difference = difference - 360f;
         }
 
+        float horizontalAngleDifferenceRatio = 0.5f;
+
         // Angle in degrees
-        horizontalAngle = ((horizontalAngle + (difference / 4f)) + 360) % 360;
+        horizontalAngle = ((horizontalAngle + (difference * horizontalAngleDifferenceRatio)) + 360) % 360;
+
+        float maxVerticalAngleStep = 0.05f;
 
         // Clamp the vertical angle
         verticalAngle = Utils.clamp(
-                Utils.getThrottledValue(verticalAngle, (tiltLength / Bristle.BASE_LENGTH) * 90f, 0.01f),
+                Utils.getThrottledValue(verticalAngle, (tiltLength / Bristle.BASE_LENGTH) * 90f, maxVerticalAngleStep),
                 0, MAX_TILT_VERTICAL);
 
         // Get the bristle parameters associated with the current brush state
@@ -152,7 +156,7 @@ public class Brush {
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
-        GLhelper.checkGlError("glGetAttribLocation");
+        //GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the vertices
         GLES30.glEnableVertexAttribArray(mPositionHandle);
@@ -171,11 +175,11 @@ public class Brush {
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLhelper.checkGlError("glGetUniformLocation");
+        //GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        GLhelper.checkGlError("glUniformMatrix4fv");
+        //GLhelper.checkGlError("glUniformMatrix4fv");
 
         GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
