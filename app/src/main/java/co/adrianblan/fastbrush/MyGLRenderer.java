@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import co.adrianblan.fastbrush.compute.PhysicsCompute;
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -347,11 +348,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // We are done rendering TouchData, now we clear them
         touchDataManager.clear();
 
+        System.out.println(brush.getPosition().getZ() / Bristle.BASE_LENGTH);
 
+
+        /*
         System.out.println(String.format("Physics: %.2f, rendering: %.2f, compositing: %.2f, total: %.2f, count %d",
                 physicsProfiler.getAverage(), renderProfiler.getAverage(), compositeProfiler.getAverage(),
                 physicsProfiler.getAverage() + renderProfiler.getAverage() + compositeProfiler.getAverage(),
                 physicsProfiler.getCount()));
+        */
     }
 
     /** Loads a drawable into the currently bound texture */

@@ -53,7 +53,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setUpperPathDistanceFromHandle(0.35f);
 
         bristleParameters.setPlanarImprintLength(0.20f);
-        bristleParameters.setBristleHorizontalAngle(10);
+        bristleParameters.setBristleHorizontalAngle(8);
 
         brushParameterDatabase.put(new BrushKey(0, 0.85f), bristleParameters);
 
@@ -72,7 +72,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setUpperPathDistanceFromHandle(0.55f);
 
         bristleParameters.setPlanarImprintLength(0.40f);
-        bristleParameters.setBristleHorizontalAngle(28);
+        bristleParameters.setBristleHorizontalAngle(22);
 
         brushParameterDatabase.put(new BrushKey(0, 0.60f), bristleParameters);
 
@@ -236,18 +236,25 @@ public class BrushParameterDatabaseHandler {
             BrushKey tempKey = brushParameterDatabase.brushKeys[i];
 
             if(currentKey == null) {
-                if((isHighAngle == targetKey.angle < tempKey.angle) && (isHighHeight == targetKey.height < tempKey.height)) {
-                    currentKey = tempKey;
-                    currentIndex = i;
+                // If we have no current key, then accept any key whose both parameters are on the "correct" side
+                if((isHighAngle == (targetKey.angle < tempKey.angle))
+                    && (isHighHeight == (targetKey.height < tempKey.height))) {
+                        currentKey = tempKey;
+                        currentIndex = i;
                 }
-            } else if ((isHighAngle == targetKey.angle < tempKey.angle)
-                    && (isHighAngle == (tempKey.angle - targetKey.angle) < currentKey.angle)
-                    && (isHighHeight == targetKey.height < tempKey.height)
-                    && (isHighHeight == tempKey.height < currentKey.height)
+                // If we already have a current key, make sure that the distance of the parameters are lowered while being on the correct side
+            } else if ((isHighAngle == (targetKey.angle < tempKey.angle))
+                    && (isHighAngle == (tempKey.angle < currentKey.angle))
+                    && (isHighHeight == (targetKey.height < tempKey.height))
+                    && (isHighHeight == (tempKey.height < currentKey.height))
                     ) {
-                currentKey = tempKey;
-                currentIndex = i;
+                        currentKey = tempKey;
+                        currentIndex = i;
             }
+        }
+
+        if(currentKey == null) {
+            System.err.println("Couldn't find nearest key for parameters angle: " + targetKey.angle + ", height: " + targetKey.height);
         }
 
         return currentIndex;
@@ -309,7 +316,6 @@ public class BrushParameterDatabaseHandler {
                 + (second.lowerPathUpperControlPointLength - first.lowerPathUpperControlPointLength) * scale;
         interpolatedValue.lowerPathLowerControlPointLength = first.lowerPathLowerControlPointLength
                 + (second.lowerPathLowerControlPointLength - first.lowerPathLowerControlPointLength) * scale;
-
 
         interpolatedValue.upperPathDistanceFromHandle = first.upperPathDistanceFromHandle
                 + (second.upperPathDistanceFromHandle - first.upperPathDistanceFromHandle) * scale;
