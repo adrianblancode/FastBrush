@@ -51,7 +51,6 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
-        //numBristles = 10000;
 
         sizePressureFactor = settingsData.getPressureFactor();
 

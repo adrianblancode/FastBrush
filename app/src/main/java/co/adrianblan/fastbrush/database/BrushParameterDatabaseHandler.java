@@ -55,6 +55,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setPlanarImprintLength(0.20f);
         bristleParameters.setBristleHorizontalAngle(8);
 
+
         brushParameterDatabase.put(new BrushKey(0, 0.85f), bristleParameters);
 
         // Neutral pressure 4
@@ -91,7 +92,6 @@ public class BrushParameterDatabaseHandler {
 
         bristleParameters.setPlanarImprintLength(0.50f);
         bristleParameters.setBristleHorizontalAngle(35);
-
         brushParameterDatabase.put(new BrushKey(0, 0.20f), bristleParameters);
 
 
@@ -236,6 +236,7 @@ public class BrushParameterDatabaseHandler {
             BrushKey tempKey = brushParameterDatabase.brushKeys[i];
 
             if(currentKey == null) {
+
                 // If we have no current key, then accept any key whose both parameters are on the "correct" side
                 if((isHighAngle == (targetKey.angle < tempKey.angle))
                     && (isHighHeight == (targetKey.height < tempKey.height))) {
@@ -316,6 +317,7 @@ public class BrushParameterDatabaseHandler {
                 + (second.lowerPathUpperControlPointLength - first.lowerPathUpperControlPointLength) * scale;
         interpolatedValue.lowerPathLowerControlPointLength = first.lowerPathLowerControlPointLength
                 + (second.lowerPathLowerControlPointLength - first.lowerPathLowerControlPointLength) * scale;
+
 
         interpolatedValue.upperPathDistanceFromHandle = first.upperPathDistanceFromHandle
                 + (second.upperPathDistanceFromHandle - first.upperPathDistanceFromHandle) * scale;
