@@ -72,7 +72,7 @@ public class BrushParameterDatabaseHandler {
         bristleParameters.setUpperPathDistanceFromHandle(0.55f);
 
         bristleParameters.setPlanarImprintLength(0.40f);
-        bristleParameters.setBristleHorizontalAngle(22);
+        bristleParameters.setBristleHorizontalAngle(18);
 
         brushParameterDatabase.put(new BrushKey(0, 0.60f), bristleParameters);
 
@@ -318,7 +318,6 @@ public class BrushParameterDatabaseHandler {
                 + (second.lowerPathUpperControlPointLength - first.lowerPathUpperControlPointLength) * scale;
         interpolatedValue.lowerPathLowerControlPointLength = first.lowerPathLowerControlPointLength
                 + (second.lowerPathLowerControlPointLength - first.lowerPathLowerControlPointLength) * scale;
-
 
         interpolatedValue.upperPathDistanceFromHandle = first.upperPathDistanceFromHandle
                 + (second.upperPathDistanceFromHandle - first.upperPathDistanceFromHandle) * scale;

@@ -8,8 +8,8 @@ import co.adrianblan.fastbrush.vector.Vector2;
  */
 public class TouchData {
 
-    private static final float MAX_TILT = 0.5f;
-    private static final float TILT_SCALE = 0.3f;
+    private static final float MAX_TILT = 0.3f;
+    private static final float TILT_SCALE = 0.2f;
 
     public Vector2 position;
     public Vector2 velocity;
