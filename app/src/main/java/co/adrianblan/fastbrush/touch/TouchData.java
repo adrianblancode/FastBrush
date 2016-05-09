@@ -116,8 +116,6 @@ public class TouchData {
     }
 
     public float getTiltX() {
-
-
         return Utils.clamp(getVelocity().getX() * TILT_SCALE, -MAX_TILT, MAX_TILT);
     }
 

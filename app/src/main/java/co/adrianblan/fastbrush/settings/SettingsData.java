@@ -22,7 +22,7 @@ public class SettingsData {
 
     public SettingsData(){
         size = 0.5f;
-        numBristles = 300;
+        numBristles = 500;
         pressureFactor = 1.0f;
         bristleThickness = 0.3f;
 
