@@ -51,7 +51,7 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
-        //numBristles = 1;
+        //numBristles = 10000;
 
         sizePressureFactor = settingsData.getPressureFactor();
 
@@ -90,8 +90,8 @@ public class Brush {
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
         
-        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
-        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
+        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX(), 0.05f), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
+        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY(), 0.05f), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
 
         float tiltLength = (float) Math.sqrt(xTilt * xTilt + yTilt * yTilt);
 

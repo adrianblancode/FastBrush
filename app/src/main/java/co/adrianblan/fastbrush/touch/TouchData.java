@@ -9,7 +9,7 @@ import co.adrianblan.fastbrush.vector.Vector2;
 public class TouchData {
 
     private static final float MAX_TILT = 0.5f;
-    private static final float TILT_SCALE = 0.3f;
+    private static final float TILT_SCALE = 0.5f;
 
     public Vector2 position;
     public Vector2 velocity;
@@ -116,8 +116,6 @@ public class TouchData {
     }
 
     public float getTiltX() {
-
-
         return Utils.clamp(getVelocity().getX() * TILT_SCALE, -MAX_TILT, MAX_TILT);
     }
 
