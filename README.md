@@ -16,3 +16,6 @@ Source: FastBrush, using a thousand bristles at the maximum size
 ![FastBrush Painting](http://i.imgur.com/1tkdxAY.png)
 Source: Jeasmine Ljungström using FastBrush
 
+![FastBrush Calligraphy](http://i.imgur.com/eB4sM7v.jpg)
+Source: Huiting Wang using FastBrush
+
