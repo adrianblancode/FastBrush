@@ -6,7 +6,7 @@ The final result of this system has far higher detail than available consumer pa
 
 This work is part of my master thesis in Computer Science at KTH Royal Institute of Technology, in Stockholm, Sweden. 
 
-## Images
+## Media
 ![Photoshop Brush](http://i.imgur.com/vI5QqZZ.png)
 Source: Adobe Photoshop CC 2015, using the maximum hundred bristles at the maximum size (300px)
 
@@ -19,3 +19,5 @@ Source: Jeasmine Ljungström using FastBrush
 ![FastBrush Calligraphy](http://i.imgur.com/eB4sM7v.jpg)
 Source: Huiting Wang using FastBrush
 
+[FastBrush Demo Video](https://www.youtube.com/watch?v=gaym9G8vCZE)
+Source: Huiting Wang using FastBrush
