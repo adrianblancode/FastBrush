@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 import co.adrianblan.fastbrush.buffer.VertexBufferManager;
 import co.adrianblan.fastbrush.database.BristleParameters;
 import co.adrianblan.fastbrush.database.BrushKey;
-import co.adrianblan.fastbrush.database.BrushParamaterDatabaseHandler;
+import co.adrianblan.fastbrush.database.BrushParameterDatabaseHandler;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.utils.GLhelper;
@@ -21,9 +21,9 @@ public class Brush {
 
     public static final float BRUSH_VIEW_BRISTLE_THICKNESS = Utils.convertPixelsToDp(3f);
     public static final int SEGMENTS_PER_BRISTLE = 4;
-    private static final float MAX_TILT_VERTICAL = 30f;
+    private static final float MAX_TILT_VERTICAL = 15f;
 
-    private int numBristles;
+    public int numBristles;
     private float sizePressureFactor;
 
     private int mProgram;
@@ -33,11 +33,12 @@ public class Brush {
 
     private VertexBufferManager vertexBufferManager;
 
-    private BrushParamaterDatabaseHandler brushParamaterDatabaseHandler;
+    private BrushParameterDatabaseHandler brushParameterDatabaseHandler;
     private BrushKey brushKey;
     private BristleParameters bristleParameters;
+    private BristleParameters defaultBristleParameters;
 
-    private Bristle[] bristles;
+    public Bristle[] bristles;
     private Vector3 position;
     private Vector3 jitter;
 
@@ -50,16 +51,16 @@ public class Brush {
     public Brush(SettingsData settingsData) {
 
         numBristles = settingsData.getNumBristles();
-        //numBristles = 2;
 
         sizePressureFactor = settingsData.getPressureFactor();
 
         position = new Vector3();
         resetPosition();
 
-        brushParamaterDatabaseHandler = new BrushParamaterDatabaseHandler();
+        brushParameterDatabaseHandler = new BrushParameterDatabaseHandler();
         brushKey = new BrushKey();
         bristleParameters = new BristleParameters();
+        defaultBristleParameters = brushParameterDatabaseHandler.getBrushParameterDatabase().bristleParameters[0];
 
         bristles = new Bristle[numBristles];
         jitter = new Vector3();
@@ -84,12 +85,12 @@ public class Brush {
 
         // How far the brush is to dip down from the highest position
         dip = Utils.getThrottledValue(dip,
-                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 1.4f * sizePressureFactor + 0.001f);
+                Bristle.BASE_TIP_LENGTH * touchData.getNormalizedSize() * 2.0f * sizePressureFactor + 0.001f);
 
         position.set(touchData.getPosition(), Bristle.BASE_LENGTH - dip);
         
-        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
-        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY()), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
+        xTilt = Utils.clamp(Utils.getThrottledValue(xTilt, touchData.getTiltX(), 0.05f), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
+        yTilt = Utils.clamp(Utils.getThrottledValue(yTilt, touchData.getTiltY(), 0.05f), -Bristle.BASE_LENGTH, Bristle.BASE_LENGTH);
 
         float tiltLength = (float) Math.sqrt(xTilt * xTilt + yTilt * yTilt);
 
@@ -110,17 +111,21 @@ public class Brush {
             difference = difference - 360f;
         }
 
+        float horizontalAngleDifferenceRatio = 0.5f;
+
         // Angle in degrees
-        horizontalAngle = ((horizontalAngle + (difference / 4f)) + 360) % 360;
+        horizontalAngle = ((horizontalAngle + (difference * horizontalAngleDifferenceRatio)) + 360) % 360;
+
+        float maxVerticalAngleStep = 0.05f;
 
         // Clamp the vertical angle
         verticalAngle = Utils.clamp(
-                Utils.getThrottledValue(verticalAngle, (tiltLength / Bristle.BASE_LENGTH) * 90f, 0.01f),
+                Utils.getThrottledValue(verticalAngle, (tiltLength / Bristle.BASE_LENGTH) * 90f, maxVerticalAngleStep),
                 0, MAX_TILT_VERTICAL);
 
         // Get the bristle parameters associated with the current brush state
         brushKey.set(verticalAngle, position.getZ() / Bristle.BASE_LENGTH);
-        bristleParameters = brushParamaterDatabaseHandler.getBristleParameter(brushKey);
+        bristleParameters = brushParameterDatabaseHandler.getBristleParameter(brushKey);
     }
 
     /**
@@ -136,6 +141,10 @@ public class Brush {
         vertexBuffer.position(0);
     }
 
+    public void resetVertexBufferPosition() {
+        vertexBufferManager.getCurrentBuffer().position(0);
+    }
+
     /**
      * Takes a mvpMatrix and a color, and draws the brush vertexes currently in our vertex buffer.
      */
@@ -146,7 +155,7 @@ public class Brush {
 
         // Get handle to vertex shader's vPosition member
         mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
-        GLhelper.checkGlError("glGetAttribLocation");
+        //GLhelper.checkGlError("glGetAttribLocation");
 
         // Enable a handle to the vertices
         GLES30.glEnableVertexAttribArray(mPositionHandle);
@@ -165,11 +174,11 @@ public class Brush {
 
         // Get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLhelper.checkGlError("glGetUniformLocation");
+        //GLhelper.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation
         GLES30.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        GLhelper.checkGlError("glUniformMatrix4fv");
+        //GLhelper.checkGlError("glUniformMatrix4fv");
 
         GLES30.glDrawArrays(GLES30.GL_LINES, 0, 2 * numBristles * SEGMENTS_PER_BRISTLE);
 
@@ -188,6 +197,8 @@ public class Brush {
         xTilt = 0;
         yTilt = 0;
         dip = 0;
+
+        bristleParameters = defaultBristleParameters;
     }
 
     public Bristle[] getBristles() {

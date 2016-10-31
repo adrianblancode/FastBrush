@@ -33,8 +33,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import co.adrianblan.fastbrush.compute.PhysicsCompute;
+import co.adrianblan.fastbrush.globject.Bristle;
 import co.adrianblan.fastbrush.touch.TouchData;
 import co.adrianblan.fastbrush.touch.TouchDataManager;
 import co.adrianblan.fastbrush.file.ImageSaver;
@@ -44,7 +46,7 @@ import co.adrianblan.fastbrush.globject.Brush;
 import co.adrianblan.fastbrush.globject.Line;
 import co.adrianblan.fastbrush.settings.SettingsData;
 import co.adrianblan.fastbrush.settings.SettingsManager;
-import co.adrianblan.fastbrush.utils.TimeProfilerHelper;
+import co.adrianblan.fastbrush.utils.TimeProfiler;
 import co.adrianblan.fastbrush.utils.Utils;
 import co.adrianblan.fastbrush.vector.Vector2;
 
@@ -66,7 +68,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private static final float BRUSH_VIEW_PADDING_HORIZONTAL = 0.25f;
     private static final float BRUSH_VIEW_PADDING_VERTICAL = 0.15f;
-    private static final float BRUSH_VIEW_SCALE = 0.3f;
+    private static final float BRUSH_VIEW_SCALE = 0.4f;
 
     private static final int NUM_BACK_BUFFERS = 5;
 
@@ -94,7 +96,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private SettingsManager settingsManager;
     private SettingsData settingsData;
     private PhysicsCompute physicsCompute;
-    private TimeProfilerHelper timeProfilerHelper;
+    private TimeProfiler physicsProfiler;
+    private TimeProfiler renderProfiler;
+    private TimeProfiler compositeProfiler;
+
 
     // Buffers
     private BackBufferSquare backBufferSquare;
@@ -143,7 +148,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         touchDataManager = new TouchDataManager(numTouches, averageTouchSize, minTouchSize, maxTouchSize);
 
         physicsCompute = new PhysicsCompute(context, brush);
-        timeProfilerHelper = new TimeProfilerHelper();
+        physicsProfiler = new TimeProfiler();
+        renderProfiler = new TimeProfiler();
+        compositeProfiler = new TimeProfiler();
 
 
         // Set the brush offset matrix for the brush side view
@@ -226,13 +233,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         /** Imprint brush on paper **/
         for(TouchData td : touchDataManager.get()) {
 
-            long startTime = System.nanoTime();
-            brush.updateBrush(td);
-            brush.putVertexData(physicsCompute.computeVertexData());
+            long physicsStartTime = System.nanoTime();
 
-            long endTime = System.nanoTime();
-            float newTime = (endTime - startTime) / 1000000f;
-            timeProfilerHelper.add(newTime);
+            brush.updateBrush(td);
+            float[] vertexData = physicsCompute.computeVertexData();
+
+            physicsProfiler.add((System.nanoTime() - physicsStartTime) / 1000000f);
+
+            long renderStartTime = System.nanoTime();
+            brush.putVertexData(vertexData);
 
             Matrix.setIdentityM(brushModelMatrix, 0);
             Matrix.setIdentityM(translateToOrigin, 0);
@@ -253,22 +262,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             float sinHorizontalAngle = (float) Math.sin(Math.toRadians(horizontalAngle));
 
             Matrix.translateM(translateToBrushTip, 0,
-                    -cosHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle,
-                    -sinHorizontalAngle * brush.getBristleParameters().planarDistanceFromHandle, 0.03f);
-
-            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.30f,
-                    (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
-                    (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
+                    -cosHorizontalAngle * brush.getBristleParameters().middlePathDistanceFromHandle * 1.0f,
+                    -sinHorizontalAngle * brush.getBristleParameters().middlePathDistanceFromHandle * 1.0f, 0f);
 
             Matrix.translateM(translateToImprintCenter, 0,
                     cosHorizontalAngle * brush.getBristleParameters().planarImprintLength,
                     sinHorizontalAngle * brush.getBristleParameters().planarImprintLength, 0f);
 
+            Matrix.setRotateM(verticalRotationMatrix, 0, brush.getVerticalAngle() * 0.2f,
+                    (float) Math.cos(Math.toRadians(horizontalAngle - 90)),
+                    (float) Math.sin(Math.toRadians(horizontalAngle - 90)), 0);
+
             Matrix.translateM(translateFromOrigin, 0, brush.getPosition().getX(), brush.getPosition().getY(), 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToOrigin, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToBrushTip, 0, brushModelMatrix, 0);
-            Matrix.multiplyMM(brushModelMatrix, 0, verticalRotationMatrix, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateToImprintCenter, 0, brushModelMatrix, 0);
+            Matrix.multiplyMM(brushModelMatrix, 0, verticalRotationMatrix, 0, brushModelMatrix, 0);
             Matrix.multiplyMM(brushModelMatrix, 0, translateFromOrigin, 0, brushModelMatrix, 0);
 
             // Add model matrix to camera matrices
@@ -276,7 +285,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(brushMVPMatrix, 0, projectionMatrix, 0, brushMVMatrix, 0);
 
             brush.draw(brushMVPMatrix, color);
+
+            renderProfiler.add((System.nanoTime() - renderStartTime) / 1000000f);
         }
+
+
+        long compositingStartTime = System.nanoTime();
 
         // Bind default buffer
         GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0);
@@ -291,6 +305,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw render texture to default buffer
         backBufferSquare.draw(mvpMatrix, backBufferManager.getTextureBuffer());
+
+        compositeProfiler.add((System.nanoTime() - compositingStartTime) / 1000000f);
 
         /** Draw Brush Head **/
         if(settingsData.isShowBrushView()
@@ -311,7 +327,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Matrix.multiplyMM(brushMVMatrix, 0, brushViewMatrix, 0, brushModelOffsetMatrix, 0);
             Matrix.multiplyMM(brushMVPMatrix, 0, brushProjectionMatrix, 0, brushMVMatrix, 0);
 
-            GLES30.glLineWidth(Utils.convertPixelsToDp(15f));
+            GLES30.glLineWidth(Utils.convertPixelsToDp(12f));
             line.draw(brushMVPMatrix, Utils.BROWN_COLOR);
 
             // Draw brush side view brush
@@ -331,6 +347,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // We are done rendering TouchData, now we clear them
         touchDataManager.clear();
+
+        System.out.println(brush.getPosition().getZ() / Bristle.BASE_LENGTH);
+
+        /**
+        System.out.println(String.format("Physics: %.2f, rendering: %.2f, compositing: %.2f, total: %.2f, count %d",
+                physicsProfiler.getAverage(), renderProfiler.getAverage(), compositeProfiler.getAverage(),
+                physicsProfiler.getAverage() + renderProfiler.getAverage() + compositeProfiler.getAverage(),
+                physicsProfiler.getCount()));
+         */
     }
 
     /** Loads a drawable into the currently bound texture */
@@ -509,6 +534,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         physicsCompute.destroy();
         physicsCompute = new PhysicsCompute(context, brush);
         color = settingsData.getColorWrapper().toFloatArray();
+
+        physicsProfiler.reset();
+        renderProfiler.reset();
+        compositeProfiler.reset();
     }
 
     public void onPause() {
