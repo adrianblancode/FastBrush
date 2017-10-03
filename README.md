@@ -6,7 +6,7 @@ The final result of this system has far higher detail than available consumer pa
 
 This work is part of my master thesis in Computer Science at KTH Royal Institute of Technology, in Stockholm, Sweden.
 
-[Simulating High Detail Brush Painting on Mobile Devices [PDF]](http://adrianblan.co/content/Simulating_High_Detail_Brush_Painting_on_Mobile_Devices.pdf)
+[Simulating High Detail Brush Painting on Mobile Devices [PDF]](http://adrianblan.co/files/Simulating_High_Detail_Brush_Painting_on_Mobile_Devices.pdf)
 
 
 ## Media
