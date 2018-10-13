@@ -6,7 +6,7 @@ The final result of this system has far higher detail than available consumer pa
 
 This work is part of my master thesis in Computer Science at KTH Royal Institute of Technology, in Stockholm, Sweden.
 
-[![Get FastBrush on Google Play!](http://adrianblan.co/images/google-play-badge.png)](https://play.google.com/store/apps/details?id=co.adrianblan.materialist)
+[![Get FastBrush on Google Play!](http://adrianblan.co/images/google-play-badge.png)](https://play.google.com/store/apps/details?id=co.adrianblan.fastbrush)
 
 [Simulating High Detail Brush Painting on Mobile Devices [PDF]](http://adrianblan.co/files/Simulating_High_Detail_Brush_Painting_on_Mobile_Devices.pdf)
 
