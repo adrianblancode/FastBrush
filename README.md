@@ -8,6 +8,8 @@ This work is part of my master thesis in Computer Science at KTH Royal Institute
 
 [![Get FastBrush on Google Play!](http://adrianblan.co/images/google-play-badge.png)](https://play.google.com/store/apps/details?id=co.adrianblan.fastbrush)
 
+
+## Thesis
 [Simulating High Detail Brush Painting on Mobile Devices [PDF]](http://adrianblan.co/files/Simulating_High_Detail_Brush_Painting_on_Mobile_Devices.pdf)
 
 
